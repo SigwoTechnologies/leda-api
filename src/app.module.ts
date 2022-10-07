@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { appConfig } from './config/app.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { dbProvider } from './common/providers/db.provider';
+import { ItemModule } from './items/item.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { dbProvider } from './common/providers/db.provider';
     }),
     TypeOrmModule.forRootAsync({ ...dbProvider }),
     AuthModule,
+    ItemModule,
   ],
   controllers: [],
   providers: [],
