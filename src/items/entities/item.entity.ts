@@ -54,6 +54,9 @@ export class Item {
   image: Image;
 
   @Column()
+  likes: number;
+
+  @Column()
   createdAt: Date;
 
   @Column()

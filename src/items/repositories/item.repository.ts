@@ -10,6 +10,34 @@ export class ItemRepository extends Repository<Item> {
     super(Item, dataSource.createEntityManager());
   }
 
+  address: string;
+  tokenId: number;
+  collectionAddress: string;
+  name: string;
+  description: string;
+  price: number;
+  royalty: number;
+  status: number;
+  imageUrl: string;
+
+  async findAll(): Promise<Item[]> {
+    return this.createQueryBuilder('item')
+      .select([
+        'item.itemId',
+        'item.name',
+        'item.description',
+        'item.price',
+        'item.royalty',
+        'item.likes',
+        'item.status',
+        'image.url',
+        'owner.address',
+      ])
+      .innerJoin('item.image', 'image')
+      .innerJoin('item.owner', 'owner')
+      .getMany();
+  }
+
   async createItem(itemRequestDto: ItemRequestDto, accountId: string): Promise<Item> {
     const { tokenId, name, collectionAddress, description, price, royalty, status, image } =
       itemRequestDto;
@@ -26,6 +54,7 @@ export class ItemRepository extends Repository<Item> {
       owner: new Account(accountId),
       createdAt: new Date(),
       updatedAt: new Date(),
+      likes: 0,
     });
 
     await this.save(item);

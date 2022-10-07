@@ -12,7 +12,7 @@ export class ItemService {
   ) {}
 
   async findAll(): Promise<Item[]> {
-    return this.itemRepository.find();
+    return this.itemRepository.findAll();
   }
 
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
