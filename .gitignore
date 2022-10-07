@@ -19,5 +19,7 @@ yarn-error.log
 /**/npm-debug.log
 /packages/**/.npmignore
 /packages/**/LICENSE
-
+pgdata
 .eslintcache
+.env
+pgadmin-data/
