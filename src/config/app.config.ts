@@ -13,4 +13,8 @@ export const appConfig = () => ({
     synchronize: true, // IMPORTANT: Turn this off on Production
     timezone: 'Z',
   },
+  pinataUrl: process.env.PINATA_URL || '',
+  pinataGatewayUrl: process.env.PINATA_GATEWAY_URL || '',
+  pinataApiKey: process.env.PINATA_API_KEY || '',
+  pinataApiSecret: process.env.PINATA_API_SECRET || '',
 });

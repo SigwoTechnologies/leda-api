@@ -10,7 +10,7 @@ export class Image {
   url: string;
 
   @Column()
-  ipfsUrl: string;
+  cid: string;
 
   @OneToOne(() => Item, (item) => item.image)
   item: Item;

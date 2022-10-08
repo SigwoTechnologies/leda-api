@@ -10,16 +10,6 @@ export class ItemRepository extends Repository<Item> {
     super(Item, dataSource.createEntityManager());
   }
 
-  address: string;
-  tokenId: number;
-  collectionAddress: string;
-  name: string;
-  description: string;
-  price: number;
-  royalty: number;
-  status: number;
-  imageUrl: string;
-
   async findAll(): Promise<Item[]> {
     return this.createQueryBuilder('item')
       .select([
@@ -50,7 +40,7 @@ export class ItemRepository extends Repository<Item> {
       price,
       royalty,
       status,
-      image: { url: image.url, ipfsUrl: image.ipfsUrl },
+      image: { url: image.url, cid: image.cid },
       owner: new Account(accountId),
       createdAt: new Date(),
       updatedAt: new Date(),

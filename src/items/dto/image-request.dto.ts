@@ -5,5 +5,5 @@ export class ImageRequestDto {
   url: string;
 
   @IsNotEmpty()
-  ipfsUrl: string;
+  cid: string;
 }
