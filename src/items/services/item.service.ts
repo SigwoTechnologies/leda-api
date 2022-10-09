@@ -15,10 +15,6 @@ export class ItemService {
     return this.itemRepository.findAll();
   }
 
-  async findNewest(): Promise<Item[]> {
-    return this.itemRepository.findNewest();
-  }
-
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
     // TODO: Validate that the JWT address and the given address corresponds
     // TODO: Validate that the given collection address (nft collection address) corresponds to the given nft's collection address
