@@ -12,6 +12,11 @@ export class ItemsController {
     return this.itemService.findAll();
   }
 
+  @Get('/newest')
+  findNewestItems(): Promise<Item[]> {
+    return this.itemService.findNewest();
+  }
+
   @Post()
   create(@Body() itemRequestDto: ItemRequestDto): Promise<Item> {
     return this.itemService.create(itemRequestDto);

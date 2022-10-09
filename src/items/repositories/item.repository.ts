@@ -28,6 +28,27 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
+  async findNewest(): Promise<Item[]> {
+    return this.createQueryBuilder('item')
+      .select([
+        'item.itemId',
+        'item.name',
+        'item.description',
+        'item.price',
+        'item.royalty',
+        'item.likes',
+        'item.status',
+        'item.createdAt',
+        'image.url',
+        'owner.address',
+      ])
+      .innerJoin('item.image', 'image')
+      .innerJoin('item.owner', 'owner')
+      .orderBy('item.createdAt', 'DESC')
+      .take(5)
+      .getMany();
+  }
+
   async createItem(itemRequestDto: ItemRequestDto, accountId: string): Promise<Item> {
     const { tokenId, name, collectionAddress, description, price, royalty, status, image } =
       itemRequestDto;
