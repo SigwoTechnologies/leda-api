@@ -31,11 +31,6 @@ export class ItemRequestDto {
   description: string;
 
   @Min(0)
-  @IsNumber()
-  @IsPositive()
-  price: number;
-
-  @Min(0)
   @Max(10)
   @IsPositive()
   royalty: number;
@@ -46,4 +41,6 @@ export class ItemRequestDto {
 
   @IsNotEmpty()
   image: ImageRequestDto;
+
+  wei: string;
 }

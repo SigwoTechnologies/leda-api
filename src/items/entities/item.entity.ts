@@ -22,9 +22,8 @@ export class Item {
   @Column()
   description: string;
 
-  @Column()
-  @Min(0)
-  price: number;
+  @Column({ nullable: true })
+  price: string;
 
   @Column()
   @Min(0)

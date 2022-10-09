@@ -3,6 +3,7 @@ import { Item } from '../entities/item.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from 'src/config/entities.config';
+import { ItemStatus } from '../enums/item-status.enum';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -14,6 +15,7 @@ export class ItemRepository extends Repository<Item> {
     return this.createQueryBuilder('item')
       .select([
         'item.itemId',
+        'item.tokenId',
         'item.name',
         'item.description',
         'item.price',
@@ -26,12 +28,13 @@ export class ItemRepository extends Repository<Item> {
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
+      .where('item.status=:status', { status: ItemStatus.Listed })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
 
   async createItem(itemRequestDto: ItemRequestDto, accountId: string): Promise<Item> {
-    const { tokenId, name, collectionAddress, description, price, royalty, status, image } =
+    const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
       itemRequestDto;
 
     const item = this.create({
@@ -39,7 +42,7 @@ export class ItemRepository extends Repository<Item> {
       collectionAddress,
       name,
       description,
-      price,
+      price: wei,
       royalty,
       status,
       image: { url: image.url, cid: image.cid },
