@@ -46,6 +46,7 @@ export class ItemRepository extends Repository<Item> {
       royalty,
       status,
       image: { url: image.url, cid: image.cid },
+      author: new Account(accountId),
       owner: new Account(accountId),
       createdAt: new Date(),
       updatedAt: new Date(),

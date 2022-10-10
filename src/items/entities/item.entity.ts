@@ -41,6 +41,13 @@ export class Item {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete',
   })
+  @JoinColumn({ name: 'authorId' })
+  author: Account;
+
+  @ManyToOne(() => Account, (account) => account.items, {
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
+  })
   @JoinColumn({ name: 'ownerId' })
   owner: Account;
 
