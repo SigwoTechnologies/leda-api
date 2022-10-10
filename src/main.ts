@@ -1,6 +1,7 @@
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { HttpExceptionFilter } from './common/exceptions/filters/http-exception.filter';
 import { ValidationPipe } from './common/pipes/validation.pipe';
 
 async function bootstrap() {
@@ -10,6 +11,7 @@ async function bootstrap() {
   app.enableCors();
   app.setGlobalPrefix(version);
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   const port = process.env.PORT || 3333;
 

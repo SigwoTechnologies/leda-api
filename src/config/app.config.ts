@@ -2,7 +2,7 @@ import { constants } from 'src/common/constants';
 import { getMetadataArgsStorage } from 'typeorm';
 
 export const appConfig = () => ({
-  [constants.DATABASE]: {
+  [constants.database]: {
     type: process.env.DB_TYPE,
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,

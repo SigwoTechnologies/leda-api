@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AccountRepository } from 'src/account/repositories/account.repository';
+import { constants } from 'src/common/constants';
+import { BusinessException } from 'src/common/exceptions/exception-types';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
@@ -18,7 +20,9 @@ export class ItemService {
   async findByAccount(address: string): Promise<Item[]> {
     const accountId = await this.accountRepository.findByAddress(address);
 
-    if (!accountId) throw new Error('The given address does not have an associated account.');
+    if (!accountId)
+      throw new BusinessException(constants.errors.business_exception.address_not_associated);
+
     return this.itemRepository.findByAccount(accountId);
   }
 
@@ -28,7 +32,8 @@ export class ItemService {
 
     const accountId = await this.accountRepository.findByAddress(itemRequestDto.address);
 
-    if (!accountId) throw new Error('The given address does not have an associated account.');
+    if (accountId)
+      throw new BusinessException(constants.errors.business_exception.address_not_associated);
 
     return this.itemRepository.createItem(itemRequestDto, accountId);
   }
