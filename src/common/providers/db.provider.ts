@@ -6,6 +6,6 @@ export const dbProvider = {
   imports: [ConfigModule],
   inject: [ConfigService],
   useFactory: async (configService: ConfigService) => ({
-    ...configService.get<TypeOrmModuleAsyncOptions>(constants.DATABASE),
+    ...configService.get<TypeOrmModuleAsyncOptions>(constants.database),
   }),
 };

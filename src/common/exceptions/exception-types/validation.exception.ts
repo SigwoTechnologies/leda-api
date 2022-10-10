@@ -18,11 +18,11 @@ export class ValidationException extends BaseException {
   }
 
   getResponse(): ValidationResponse {
-    const { NAME, MESSAGE, CODE } = constants.ERRORS.SCHEMA_VALIDATION;
+    const { name, message, code } = constants.errors.schema_validation;
     return {
-      name: NAME,
-      message: this.message || MESSAGE,
-      code: CODE,
+      name: name,
+      message: this.message || message,
+      code: code,
       details: this.errors,
     };
   }
