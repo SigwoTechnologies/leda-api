@@ -9,7 +9,11 @@ export class Item {
   @PrimaryGeneratedColumn('uuid')
   itemId: string;
 
-  @Column({ unique: true })
+  // TODO: !IMPORTANT: MAKE THIS FIELD UNIQUE ONCE IN PROD
+  // @Column({ unique: true })
+  // tokenId: number;
+
+  @Column({ unique: false })
   tokenId: number;
 
   @Column()
