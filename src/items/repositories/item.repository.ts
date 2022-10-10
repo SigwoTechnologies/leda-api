@@ -33,6 +33,32 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
+  async findByAccount(accountId: string): Promise<Item[]> {
+    return this.createQueryBuilder('item')
+      .select([
+        'item.itemId',
+        'item.tokenId',
+        'item.name',
+        'item.description',
+        'item.price',
+        'item.royalty',
+        'item.likes',
+        'item.status',
+        'image.url',
+        'item.createdAt',
+        'owner.accountId',
+        'owner.address',
+        'author.accountId',
+        'author.address',
+      ])
+      .innerJoin('item.image', 'image')
+      .innerJoin('item.owner', 'owner')
+      .innerJoin('item.author', 'author')
+      .where('item.ownerId = :accountId OR item.authorId = :accountId', { accountId })
+      .orderBy('item.createdAt', 'DESC')
+      .getMany();
+  }
+
   async createItem(itemRequestDto: ItemRequestDto, accountId: string): Promise<Item> {
     const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
       itemRequestDto;
@@ -46,6 +72,7 @@ export class ItemRepository extends Repository<Item> {
       royalty,
       status,
       image: { url: image.url, cid: image.cid },
+      author: new Account(accountId),
       owner: new Account(accountId),
       createdAt: new Date(),
       updatedAt: new Date(),

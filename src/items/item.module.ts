@@ -12,5 +12,6 @@ import { PinataRepository } from './repositories/pinata.repository';
   imports: [HttpModule],
   controllers: [ItemsController, ImagesController],
   providers: [ItemService, PinataService, AccountRepository, PinataRepository, ItemRepository],
+  exports: [ItemService],
 })
 export class ItemModule {}

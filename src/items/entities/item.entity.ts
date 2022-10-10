@@ -9,7 +9,11 @@ export class Item {
   @PrimaryGeneratedColumn('uuid')
   itemId: string;
 
-  @Column({ unique: true })
+  // TODO: !IMPORTANT: MAKE THIS FIELD UNIQUE ONCE IN PROD
+  // @Column({ unique: true })
+  // tokenId: number;
+
+  @Column({ unique: false })
   tokenId: number;
 
   @Column()
@@ -36,6 +40,13 @@ export class Item {
     default: ItemStatus.NotListed,
   })
   status: ItemStatus;
+
+  @ManyToOne(() => Account, (account) => account.items, {
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
+  })
+  @JoinColumn({ name: 'authorId' })
+  author: Account;
 
   @ManyToOne(() => Account, (account) => account.items, {
     onDelete: 'CASCADE',
