@@ -7,6 +7,7 @@ import {
   Max,
   IsEthereumAddress,
   IsOptional,
+  MinLength,
 } from 'class-validator';
 import { ImageRequestDto } from './image-request.dto';
 
@@ -23,8 +24,9 @@ export class ItemRequestDto {
   @IsNotEmpty()
   collectionAddress: string;
 
-  @MaxLength(100)
   @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(100)
   name: string;
 
   @IsNotEmpty()
