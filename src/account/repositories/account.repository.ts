@@ -11,7 +11,7 @@ export class AccountRepository extends Repository<Account> {
   async findByAddress(address: string): Promise<string | undefined> {
     const response = await this.createQueryBuilder('account')
       .select('account.accountId')
-      .where('account.address = :address', { address: address.toLowerCase() })
+      .where('account.address = :address', { address: address.toLocaleLowerCase() })
       .getOne();
 
     if (!response) return;

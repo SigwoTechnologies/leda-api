@@ -32,7 +32,7 @@ export class ItemService {
 
     const accountId = await this.accountRepository.findByAddress(itemRequestDto.address);
 
-    if (accountId)
+    if (!accountId)
       throw new BusinessException(constants.errors.business_exception.address_not_associated);
 
     return this.itemRepository.createItem(itemRequestDto, accountId);
