@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { Item } from '../entities/item.entity';
 import { ItemService } from '../services/item.service';
@@ -10,6 +10,11 @@ export class ItemsController {
   @Get()
   findAll(): Promise<Item[]> {
     return this.itemService.findAll();
+  }
+
+  @Get('/:itemId')
+  findById(@Param('itemId') itemId: string): Promise<Item> {
+    return this.itemService.findById(itemId);
   }
 
   @Post()

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AccountRepository } from 'src/account/repositories/account.repository';
 import { constants } from 'src/common/constants';
-import { BusinessException } from 'src/common/exceptions/exception-types';
+import { BusinessException, NotFoundException } from 'src/common/exceptions/exception-types';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
@@ -15,6 +15,14 @@ export class ItemService {
 
   async findAll(): Promise<Item[]> {
     return this.itemRepository.findAll();
+  }
+
+  async findById(itemId: string): Promise<Item> {
+    const item = await this.itemRepository.findById(itemId);
+
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    return item;
   }
 
   async findByAccount(address: string): Promise<Item[]> {

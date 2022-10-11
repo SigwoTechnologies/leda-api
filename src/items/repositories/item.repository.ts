@@ -59,6 +59,32 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
+  async findById(itemId: string): Promise<Item> {
+    return this.createQueryBuilder('item')
+      .select([
+        'item.itemId',
+        'item.tokenId',
+        'item.name',
+        'item.description',
+        'item.price',
+        'item.royalty',
+        'item.likes',
+        'item.status',
+        'image.url',
+        'item.createdAt',
+        'owner.accountId',
+        'owner.address',
+        'author.accountId',
+        'author.address',
+      ])
+      .innerJoin('item.image', 'image')
+      .innerJoin('item.owner', 'owner')
+      .innerJoin('item.author', 'author')
+      .where('item.itemId = :itemId', { itemId })
+      .orderBy('item.createdAt', 'DESC')
+      .getOne();
+  }
+
   async createItem(itemRequestDto: ItemRequestDto, accountId: string): Promise<Item> {
     const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
       itemRequestDto;
