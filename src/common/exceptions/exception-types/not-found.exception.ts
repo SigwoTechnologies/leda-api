@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { BaseException } from './base.exception';
-import { constants } from '../../constants';
+import { NotFoundErrors } from '../../constants';
 import { ExceptionResponse } from '../interfaces/exceptions.interface';
 
 /**
@@ -17,7 +17,7 @@ export class NotFoundException extends BaseException {
   }
 
   getResponse(): ExceptionResponse {
-    const { name, message, code } = constants.errors.not_found.default;
+    const { name, message, code } = NotFoundErrors.default;
     return {
       name: name,
       message: this.message || message,

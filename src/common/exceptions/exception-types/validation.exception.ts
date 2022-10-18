@@ -1,5 +1,5 @@
 import { HttpStatus, ValidationError } from '@nestjs/common';
-import { constants } from '../../constants';
+import { SchemaValidationErrors } from '../../constants';
 import { ExceptionResponse, ValidationResponse } from '../interfaces/exceptions.interface';
 import { BaseException } from './base.exception';
 
@@ -18,7 +18,7 @@ export class ValidationException extends BaseException {
   }
 
   getResponse(): ValidationResponse {
-    const { name, message, code } = constants.errors.schema_validation;
+    const { name, message, code } = SchemaValidationErrors.default;
     return {
       name: name,
       message: this.message || message,

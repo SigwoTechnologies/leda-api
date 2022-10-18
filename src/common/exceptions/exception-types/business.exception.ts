@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { BaseException } from './base.exception';
-import { constants } from '../../constants';
+import { BusinessErrors } from '../../constants';
 import { ExceptionResponse } from '../interfaces/exceptions.interface';
 import { ExceptionSchema } from '../types/exception-schema';
 
@@ -22,7 +22,7 @@ export class BusinessException extends BaseException {
   }
 
   getResponse(): ExceptionResponse {
-    const { name, message, code } = constants.errors.business_exception.default;
+    const { name, message, code } = BusinessErrors.default;
     const some = {
       name: this.error?.name || name,
       message: this.message || this.error?.message || message,
