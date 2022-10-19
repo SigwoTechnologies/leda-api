@@ -1,6 +1,6 @@
 import { HttpStatus } from '@nestjs/common';
 import { BaseException } from './base.exception';
-import { UnauthorizedErrors } from '../../constants';
+import { HttpErrors } from '../../constants';
 import { ExceptionResponse } from '../interfaces/exceptions.interface';
 import { ExceptionSchema } from '../types/exception-schema';
 
@@ -21,7 +21,7 @@ export class UnauthorizedException extends BaseException {
   }
 
   getResponse(): ExceptionResponse {
-    const { name, message, code } = UnauthorizedErrors.default;
+    const { name, message, code } = HttpErrors.unauthorized;
     return {
       name: this.error?.name || name,
       message: this.message || this.error?.message || message,
