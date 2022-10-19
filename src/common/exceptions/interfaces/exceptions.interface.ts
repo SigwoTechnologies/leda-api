@@ -30,6 +30,10 @@ export interface ExceptionResponse extends ExceptionResponseBase {
    * The timemstamp when the exception happened.
    */
   timestamp?: string;
+  /**
+   * The correlationId that was sent from the client.
+   */
+  correlationId?: string;
 }
 
 /**

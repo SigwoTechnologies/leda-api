@@ -4,13 +4,21 @@ import { Injectable } from '@nestjs/common';
 import { PinataRepository } from '../repositories/pinata.repository';
 import { appConfig } from 'src/config/app.config';
 import { IpfsAttribute } from 'src/common/types/ipfs-attribute';
-import PinataResponse from 'src/common/types/pinata-response';
+import { BusinessException } from 'src/common/exceptions/exception-types';
+import { isValidExtension, isValidSize } from 'src/common/utils/image-utils';
+import { BusinessErrors } from 'src/common/constants';
+import { PinataResponse } from 'src/common/types/pinata-response';
 
 @Injectable()
 export class PinataService {
   constructor(private pinataRepository: PinataRepository) {}
   async upload(image: Express.Multer.File, attributes: IpfsAttribute): Promise<PinataResponse> {
-    const { buffer, originalname, mimetype } = image;
+    const { buffer, originalname, mimetype, size } = image;
+    if (!isValidExtension(image))
+      throw new BusinessException(BusinessErrors.file_extension_not_supported);
+
+    if (!isValidSize(size)) throw new BusinessException(BusinessErrors.file_size_exceeded);
+
     const formData = new FormData();
     const filename = originalname.replace(/\.[^/.]+$/, '');
 

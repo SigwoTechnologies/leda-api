@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, map } from 'rxjs';
 import { appConfig } from 'src/config/app.config';
-import PinataResponse from 'src/common/types/pinata-response';
+import { PinataResponse } from 'src/common/types/pinata-response';
 
 @Injectable()
 export class PinataRepository {
