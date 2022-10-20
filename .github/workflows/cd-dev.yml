@@ -19,9 +19,13 @@ jobs:
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
       - name: Log in to DO Container Registry
+        run: doctl auth init --context Stackit
+      - name: Log in to DO Container Registry
+        run: doctl auth switch --context stackit
+      - name: Log in to DO Container Registry
         run: doctl registry login --expiry-seconds 600
       - name: Tag image
-        run: docker tag ledaapi registry.digitalocean.com/metis/ledaapi${{ secrets.DIGITALOCEAN_APP_TAG }}
+        run: docker tag ledaapi registry.digitalocean.com/metis/ledaapi:${{ secrets.DIGITALOCEAN_APP_TAG }}
       - name: Push image to DO Container Registry
         run: docker push registry.digitalocean.com/metis/ledaapi:${{ secrets.DIGITALOCEAN_APP_TAG }}
       - name: Launch image
