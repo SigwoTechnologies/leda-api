@@ -23,21 +23,21 @@ jobs:
         run: yarn lint
 
   # TODO we need to create some tests
-  # test:
-  #   name: 🧪 Test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v1
-  #     - uses: actions/setup-node@v3
-  #       with:
-  #         node-version: lts/*
-  #         cache: yarn
+  test:
+    name: 🧪 Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: yarn
 
-  #     - name: Install Dependencies
-  #       run: yarn
+      - name: Install Dependencies
+        run: yarn
 
-  #     - name: Test
-  #       run: yarn test --watchAll=false
+      - name: Test
+        run: yarn test --watchAll=false
 
   build:
     name: 👷🏼‍♂️ Build
