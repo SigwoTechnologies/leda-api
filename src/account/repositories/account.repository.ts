@@ -1,6 +1,6 @@
+import { Account } from '../entities/account.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { Account } from '../entities/account.entity';
 
 @Injectable()
 export class AccountRepository extends Repository<Account> {
@@ -8,14 +8,14 @@ export class AccountRepository extends Repository<Account> {
     super(Account, dataSource.createEntityManager());
   }
 
-  async findByAddress(address: string): Promise<string | undefined> {
-    const response = await this.createQueryBuilder('account')
+  async findByAddress(address: string): Promise<Account | undefined> {
+    const account = await this.createQueryBuilder('account')
       .select('account.accountId')
       .where('account.address = :address', { address: address.toLocaleLowerCase() })
       .getOne();
 
-    if (!response) return;
+    if (!account) return;
 
-    return response.accountId;
+    return account;
   }
 }

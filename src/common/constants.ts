@@ -1,7 +1,4 @@
 export const constants = {
-  auth: {
-    strategy: 'jwt',
-  },
   database: 'database',
 };
 
@@ -16,12 +13,12 @@ export const SchemaValidationErrors = {
 export const HttpErrors = {
   unauthorized: {
     name: 'UNAUTHORIZED',
-    message: 'Unauthorized. You do not have permission to complete your request.',
+    message: 'You do not have permission to complete this request.',
     code: 2000,
   },
   not_found: {
     name: 'NOT_FOUND',
-    message: 'Not found. The resource that you are looking for does not exist.',
+    message: 'The resource that you are looking for does not exist.',
     code: 3000,
   },
   default: {

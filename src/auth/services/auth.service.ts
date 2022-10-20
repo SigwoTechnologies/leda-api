@@ -1,12 +1,28 @@
+import { AccountRepository } from 'src/account/repositories/account.repository';
+import { CredentialsRequestDto } from '../dto/credentials-request.dto';
+import { CredentialsResponseDto } from '../dto/credentials-response.dto';
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { SignUpCredentialsDto } from '../dto/signup-credentials';
-
+import { UnauthorizedException } from 'src/common/exceptions/exception-types';
 @Injectable()
 export class AuthService {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService, private accountRepository: AccountRepository) {}
 
-  signup(credentials: SignUpCredentialsDto) {
-    const response = this.jwtService.sign(credentials);
+  async signin(credentials: CredentialsRequestDto): Promise<CredentialsResponseDto> {
+    const { address } = credentials;
+    const account = await this.accountRepository.findByAddress(address);
+
+    if (account) {
+      const access_token: string = this.jwtService.sign({
+        address: account.address,
+      });
+
+      return {
+        access_token,
+        address: account.address,
+      };
+    }
+
+    throw new UnauthorizedException();
   }
 }
