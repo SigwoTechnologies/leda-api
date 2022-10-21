@@ -25,7 +25,7 @@ export class ItemService {
     return item;
   }
 
-  async findByAccount(address: string): Promise<Item[]> {
+  async findByAddress(address: string): Promise<Item[]> {
     const account = await this.accountRepository.findByAddress(address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
@@ -34,9 +34,6 @@ export class ItemService {
   }
 
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
-    // TODO: Validate that the JWT address and the given address corresponds
-    // TODO: Validate that the given collection address (nft collection address) corresponds to the given nft's collection address
-
     const account = await this.accountRepository.findByAddress(itemRequestDto.address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);

@@ -17,10 +17,7 @@ export class AuthService {
         address: account.address,
       });
 
-      return {
-        access_token,
-        address: account.address,
-      };
+      return { access_token };
     }
 
     throw new UnauthorizedException();

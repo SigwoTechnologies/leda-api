@@ -1,5 +1,12 @@
 import { HttpAdapterHost } from '@nestjs/core';
-import { ExceptionFilter, Catch, ArgumentsHost, Logger, HttpStatus } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  Logger,
+  HttpStatus,
+  HttpException,
+} from '@nestjs/common';
 import { HttpErrors } from '../../constants';
 import { ExceptionResponse } from '../interfaces/exceptions.interface';
 import { BaseException } from '../exception-types';
@@ -19,6 +26,11 @@ export class GlobalExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof BaseException) {
       exceptionResponse = exception.getResponse();
+      status = exception.getStatus();
+    } else if (exception instanceof HttpException) {
+      exceptionResponse.name = exception.name;
+      exceptionResponse.message = exception.message;
+      exceptionResponse.code = exception.getStatus();
       status = exception.getStatus();
     } else {
       const { name, message, code } = HttpErrors.default;

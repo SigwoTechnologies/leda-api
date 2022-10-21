@@ -1,4 +1,5 @@
 import { AccountModule } from 'src/account/account.module';
+import { AddressGuard } from './guards/address.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthController } from './controllers/auth.controller';
 import { AuthService } from './services/auth.service';
@@ -26,11 +27,15 @@ import { PassportModule } from '@nestjs/passport';
     }),
   ],
   providers: [
-    AuthService,
     JwtStrategy,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
+    },
+    AuthService,
+    {
+      provide: APP_GUARD,
+      useClass: AddressGuard,
     },
   ],
   exports: [AuthService],
