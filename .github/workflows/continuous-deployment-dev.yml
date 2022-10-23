@@ -16,10 +16,10 @@ jobs:
         run: docker build -t ledaapi .
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
-      - name: Log in to DO Container Registry
-        run: doctl registry login --expiry-seconds 600
         with:
           token: dop_v1_f5a3f8615efac621370f9b62d2bc92e05cdbdd4b6e03fb50617e2e7eb6f05e87
+      - name: Log in to DO Container Registry
+        run: doctl registry login --expiry-seconds 600
       - name: Tag image
         run: docker tag ledaapi registry.digitalocean.com/metis/ledaapi:${{ secrets.DIGITALOCEAN_APP_TAG }}
       - name: Push image to DO Container Registry
