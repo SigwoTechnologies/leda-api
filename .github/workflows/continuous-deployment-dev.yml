@@ -3,9 +3,11 @@ name: Build and publish Leda Api Dev
 on:
   push:
     branches: [root/continuos-deployment]
+  workflow_dispatch:
 
 jobs:
   build_and_push:
+    environment: dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo
@@ -14,11 +16,10 @@ jobs:
         run: docker build -t ledaapi .
       - name: Install doctl
         uses: digitalocean/action-doctl@v2
-
-      - name: Log in to DO Container Registry
-        run: doctl registry login --expiry-seconds 600
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+      - name: Log in to DO Container Registry
+        run: doctl registry login --expiry-seconds 600
       - name: Tag image
         run: docker tag ledaapi registry.digitalocean.com/metis/ledaapi:${{ secrets.DIGITALOCEAN_APP_TAG }}
       - name: Push image to DO Container Registry
