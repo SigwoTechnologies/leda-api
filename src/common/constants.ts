@@ -52,4 +52,19 @@ export const BusinessErrors = {
     message: 'The given file is too large. The maximum supported size for images is: 1000MG',
     code: 4003,
   },
+  address_required: {
+    name: 'ADDRESS_REQUIRED',
+    message: 'The address is required. Please verify your information and try again.',
+    code: 4004,
+  },
+  signature_required: {
+    name: 'SIGNATURE_REQUIRED',
+    message: 'The signature is required. Please verify your information and try again.',
+    code: 4005,
+  },
+  nonce_required: {
+    name: 'NONCE_REQUIRED',
+    message: 'The nonce is required. Please verify your information and try again.',
+    code: 4004,
+  },
 };

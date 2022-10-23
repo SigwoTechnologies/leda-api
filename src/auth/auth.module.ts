@@ -7,7 +7,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 
 @Module({
@@ -15,6 +15,7 @@ import { PassportModule } from '@nestjs/passport';
     AccountModule,
     ConfigModule,
     PassportModule,
+    CacheModule.register(),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
