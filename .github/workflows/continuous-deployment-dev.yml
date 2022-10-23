@@ -3,11 +3,9 @@ name: Build and publish Leda Api Dev
 on:
   push:
     branches: [root/continuos-deployment]
-  workflow_dispatch:
 
 jobs:
   build_and_push:
-    environment: dev
     runs-on: ubuntu-latest
     steps:
       - name: Checkout the repo
@@ -18,10 +16,6 @@ jobs:
         uses: digitalocean/action-doctl@v2
         with:
           token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-      - name: Log in to DO Container Registry
-        run: doctl auth init --context Stackit
-      - name: Log in to DO Container Registry
-        run: doctl auth switch --context stackit
       - name: Log in to DO Container Registry
         run: doctl registry login --expiry-seconds 600
       - name: Tag image
