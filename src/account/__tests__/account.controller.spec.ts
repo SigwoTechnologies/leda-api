@@ -46,7 +46,8 @@ describe('AccountController', () => {
           },
         ];
 
-        itemService.findByAddress.mockResolvedValue({ ...expected });
+        const mockData = expected.map((prop) => ({ ...prop }));
+        itemService.findByAddress.mockResolvedValue(mockData);
 
         const actual = await controller.findItems('123');
 
