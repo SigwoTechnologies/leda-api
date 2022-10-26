@@ -21,4 +21,9 @@ export class ItemsController {
   create(@Body() itemRequestDto: ItemRequestDto): Promise<Item> {
     return this.itemService.create(itemRequestDto);
   }
+
+  @Post('/price/:itemId')
+  listAnItem(@Param('itemId') itemId: string, @Body() { price }: { price: number }): Promise<Item> {
+    return this.itemService.listAnItem(itemId, price);
+  }
 }

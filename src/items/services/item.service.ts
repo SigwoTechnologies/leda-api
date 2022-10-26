@@ -43,4 +43,12 @@ export class ItemService {
 
     return this.itemRepository.createItem(itemRequestDto, accountId);
   }
+
+  async listAnItem(itemId: string, price: number): Promise<Item> {
+    const item = await this.itemRepository.listAnItem(itemId, price);
+
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    return item;
+  }
 }
