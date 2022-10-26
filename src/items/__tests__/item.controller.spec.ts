@@ -1,10 +1,11 @@
-import { Account, Image } from '../../config/entities.config';
+import { Account } from '../../account/entities/account.entity';
+import { Image } from '../entities/image.entity';
+import { ImageRequestDto } from '../dto/image-request.dto';
 import { Item } from '../../items/entities/item.entity';
 import { ItemsController } from '../controllers/item.controller';
 import { ItemService } from '../../items/services/item.service';
 import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Test } from '@nestjs/testing';
-import { ImageRequestDto } from '../dto/image-request.dto';
 
 const itemServiceMock = () => ({
   findAll: jest.fn(),
