@@ -2,7 +2,7 @@ import { ItemRequestDto } from '../dto/item-request.dto';
 import { Item } from '../entities/item.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { Account } from 'src/config/entities.config';
+import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
 
 @Injectable()

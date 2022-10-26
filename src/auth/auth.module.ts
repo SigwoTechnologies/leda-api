@@ -1,4 +1,4 @@
-import { AccountModule } from 'src/account/account.module';
+import { AccountModule } from '../account/account.module';
 import { AddressGuard } from './guards/address.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthController } from './controllers/auth.controller';

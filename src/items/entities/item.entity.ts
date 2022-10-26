@@ -1,5 +1,5 @@
 import { Max, MaxLength, Min } from 'class-validator';
-import { Account } from 'src/account/entities/account.entity';
+import { Account } from '../../account/entities/account.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ItemStatus } from '../enums/item-status.enum';
 import { Image } from './image.entity';

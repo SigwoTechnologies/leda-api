@@ -1,6 +1,6 @@
 import { AccountRepository } from './repositories/account.repository';
 import { AccountsController } from './controllers/account.controller';
-import { ItemModule } from 'src/items/item.module';
+import { ItemModule } from '../items/item.module';
 import { Module } from '@nestjs/common';
 
 @Module({

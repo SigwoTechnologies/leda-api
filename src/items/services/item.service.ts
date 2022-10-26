@@ -1,6 +1,6 @@
-import { AccountRepository } from 'src/account/repositories/account.repository';
-import { BusinessErrors } from 'src/common/constants';
-import { BusinessException, NotFoundException } from 'src/common/exceptions/exception-types';
+import { AccountRepository } from '../../account/repositories/account.repository';
+import { BusinessErrors } from '../../common/constants';
+import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
 import { Injectable } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';

@@ -1,6 +1,6 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { UnauthorizedException } from 'src/common/exceptions/exception-types';
+import { UnauthorizedException } from '../../common/exceptions/exception-types';
 
 @Injectable()
 export class AddressGuard implements CanActivate {

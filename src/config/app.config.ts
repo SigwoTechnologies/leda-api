@@ -1,4 +1,4 @@
-import { constants } from 'src/common/constants';
+import { constants } from '../common/constants';
 import { getMetadataArgsStorage } from 'typeorm';
 
 export const appConfig = () => ({

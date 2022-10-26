@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { IsAddressValid } from 'src/auth/decorators/address.decorator';
+import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Item } from '../entities/item.entity';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemService } from '../services/item.service';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { Public } from '../../auth/decorators/public.decorator';
 @Controller('items')
 export class ItemsController {
   constructor(private itemService: ItemService) {}

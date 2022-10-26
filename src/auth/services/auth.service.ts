@@ -1,6 +1,6 @@
-import { AccountRepository } from 'src/account/repositories/account.repository';
-import { BusinessErrors } from 'src/common/constants';
-import { BusinessException, UnauthorizedException } from 'src/common/exceptions/exception-types';
+import { AccountRepository } from '../../account/repositories/account.repository';
+import { BusinessErrors } from '../../common/constants';
+import { BusinessException, UnauthorizedException } from '../../common/exceptions/exception-types';
 import { Cache } from 'cache-manager';
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { createHmac } from 'crypto';
@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { recoverPersonalSignature } from '@metamask/eth-sig-util';
 import { SigninRequestDto } from '../dto/signin-request.dto';
 import { v4 as uuidv4 } from 'uuid';
-import { appConfig } from 'src/config/app.config';
+import { appConfig } from '../../config/app.config';
 
 @Injectable()
 export class AuthService {

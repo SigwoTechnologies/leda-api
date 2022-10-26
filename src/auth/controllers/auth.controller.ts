@@ -2,7 +2,7 @@ import { AuthService } from '../services/auth.service';
 import { Body, Controller, Post } from '@nestjs/common';
 import { CredentialsRequestDto } from '../dto/credentials-request.dto';
 import { CredentialsResponseDto } from '../dto/credentials-response.dto';
-import { Public } from 'src/auth/decorators/public.decorator';
+import { Public } from '../../auth/decorators/public.decorator';
 import { SigninRequestDto } from '../dto/signin-request.dto';
 import { IsAddressValid } from '../decorators/address.decorator';
 
