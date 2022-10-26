@@ -2,7 +2,7 @@ name: Build and publish Leda Api Dev
 
 on:
   push:
-    branches: [root/continuos-deployment]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
