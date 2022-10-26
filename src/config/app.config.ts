@@ -10,9 +10,13 @@ export const appConfig = () => ({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     entities: getMetadataArgsStorage().tables.map((tbl) => tbl.target),
-    synchronize: true, // IMPORTANT: Turn this off on Production
+    synchronize: false, // IMPORTANT: Turn this off on Production
     timezone: 'Z',
-    extra: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    extra: {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    },
   },
   pinataUrl: process.env.PINATA_URL || '',
   pinataGatewayUrl: process.env.PINATA_GATEWAY_URL || '',
