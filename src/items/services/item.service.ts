@@ -41,6 +41,18 @@ export class ItemService {
     return this.itemRepository.createItem(itemRequestDto, account.accountId);
   }
 
+  async buyItem(itemId: string, newOwnerAddress: string): Promise<Item> {
+    const item = await this.itemRepository.findById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    const accountId = await this.accountRepository.findByAddress(newOwnerAddress);
+    if (!accountId)
+      throw new NotFoundException(`The account with address ${newOwnerAddress} does not exist`);
+
+    await this.itemRepository.buyItem(itemId, accountId.accountId);
+
+    return item;
+  }
   async listAnItem(itemId: string, price: number): Promise<Item> {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
