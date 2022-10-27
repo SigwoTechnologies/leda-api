@@ -22,7 +22,7 @@ export class ItemsController {
     return this.itemService.create(itemRequestDto);
   }
 
-  @Post('/price/:itemId')
+  @Post('/:itemId/price')
   listAnItem(@Param('itemId') itemId: string, @Body() { price }: { price: number }): Promise<Item> {
     return this.itemService.listAnItem(itemId, price);
   }

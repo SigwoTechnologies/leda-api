@@ -45,9 +45,10 @@ export class ItemService {
   }
 
   async listAnItem(itemId: string, price: number): Promise<Item> {
-    const item = await this.itemRepository.listAnItem(itemId, price);
-
+    const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    await this.itemRepository.listAnItem(itemId, price);
 
     return item;
   }

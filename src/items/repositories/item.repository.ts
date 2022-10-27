@@ -89,10 +89,10 @@ export class ItemRepository extends Repository<Item> {
       {
         itemId,
       },
-      { price: String(price), status: 1 }
+      { price: String(price), status: ItemStatus.Listed }
     );
 
-    return await this.findOne({
+    return this.findOne({
       where: { itemId },
     });
   }

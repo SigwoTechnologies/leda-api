@@ -44,5 +44,7 @@ export class ItemRequestDto {
   @IsNotEmpty()
   image: ImageRequestDto;
 
+  @IsNumber()
+  @IsNotEmpty()
   wei: string;
 }
