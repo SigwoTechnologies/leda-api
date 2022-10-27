@@ -14,6 +14,7 @@ export class ItemsController {
     return this.itemService.findAll();
   }
 
+  @Public()
   @Get('/:itemId')
   findById(@Param('itemId') itemId: string): Promise<Item> {
     return this.itemService.findById(itemId);
