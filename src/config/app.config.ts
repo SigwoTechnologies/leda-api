@@ -17,5 +17,5 @@ export const appConfig = () => ({
   pinataGatewayUrl: process.env.PINATA_GATEWAY_URL || '',
   pinataApiKey: process.env.PINATA_API_KEY || '',
   pinataApiSecret: process.env.PINATA_API_SECRET || '',
-  nonceTimeExpirationInSeconds: 18000,
+  nonceTimeExpirationInMiliseconds: 120000,
 });

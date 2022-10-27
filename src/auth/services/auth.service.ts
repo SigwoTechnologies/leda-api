@@ -55,10 +55,10 @@ export class AuthService {
   async getNonce({ address }: CredentialsRequestDto): Promise<string> {
     if (!address) throw new BusinessException(BusinessErrors.address_required);
 
-    const { nonceTimeExpirationInSeconds } = appConfig();
+    const { nonceTimeExpirationInMiliseconds } = appConfig();
     const nonce = createHmac('sha256', uuidv4()).digest('hex');
 
-    await this.cacheManager.set(address, nonce, nonceTimeExpirationInSeconds);
+    await this.cacheManager.set(address, nonce, nonceTimeExpirationInMiliseconds);
 
     return nonce;
   }
