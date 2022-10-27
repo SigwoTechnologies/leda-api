@@ -7,6 +7,6 @@ export class AuthService {
   constructor(private jwtService: JwtService) {}
 
   signup(credentials: SignUpCredentialsDto) {
-    const response = this.jwtService.sign(credentials);
+    this.jwtService.sign(credentials);
   }
 }
