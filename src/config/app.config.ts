@@ -12,11 +12,11 @@ export const appConfig = () => ({
     entities: getMetadataArgsStorage().tables.map((tbl) => tbl.target),
     synchronize: process.env.POSTGRES_SYNC, // IMPORTANT: Turn this off on Production
     timezone: 'Z',
-    extra: {
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    },
+    // extra: {
+    //   ssl: {
+    //     rejectUnauthorized: false, // IMPORTANT: Turn this on on Production
+    //   },
+    // },
   },
   pinataUrl: process.env.PINATA_URL || '',
   pinataGatewayUrl: process.env.PINATA_GATEWAY_URL || '',
