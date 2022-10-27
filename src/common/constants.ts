@@ -1,7 +1,4 @@
 export const constants = {
-  auth: {
-    strategy: 'jwt',
-  },
   database: 'database',
 };
 
@@ -16,12 +13,12 @@ export const SchemaValidationErrors = {
 export const HttpErrors = {
   unauthorized: {
     name: 'UNAUTHORIZED',
-    message: 'Unauthorized. You do not have permission to complete your request.',
+    message: 'You do not have permission to complete this request.',
     code: 2000,
   },
   not_found: {
     name: 'NOT_FOUND',
-    message: 'Not found. The resource that you are looking for does not exist.',
+    message: 'The resource that you are looking for does not exist.',
     code: 3000,
   },
   default: {
@@ -54,5 +51,20 @@ export const BusinessErrors = {
     name: 'FILE_SIZE_EXCEEDED',
     message: 'The given file is too large. The maximum supported size for images is: 1000MG',
     code: 4003,
+  },
+  address_required: {
+    name: 'ADDRESS_REQUIRED',
+    message: 'The address is required. Please verify your information and try again.',
+    code: 4004,
+  },
+  signature_required: {
+    name: 'SIGNATURE_REQUIRED',
+    message: 'The signature is required. Please verify your information and try again.',
+    code: 4005,
+  },
+  nonce_required: {
+    name: 'NONCE_REQUIRED',
+    message: 'The nonce is required. Please verify your information and try again.',
+    code: 4004,
   },
 };

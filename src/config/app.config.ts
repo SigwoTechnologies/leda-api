@@ -1,4 +1,4 @@
-import { constants } from 'src/common/constants';
+import { constants } from '../common/constants';
 import { getMetadataArgsStorage } from 'typeorm';
 
 export const appConfig = () => ({
@@ -22,4 +22,5 @@ export const appConfig = () => ({
   pinataGatewayUrl: process.env.PINATA_GATEWAY_URL || '',
   pinataApiKey: process.env.PINATA_API_KEY || '',
   pinataApiSecret: process.env.PINATA_API_SECRET || '',
+  nonceTimeExpirationInMiliseconds: 120000,
 });

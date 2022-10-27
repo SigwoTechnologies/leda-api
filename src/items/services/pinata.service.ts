@@ -2,12 +2,12 @@ import * as FormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { PinataRepository } from '../repositories/pinata.repository';
-import { appConfig } from 'src/config/app.config';
-import { IpfsAttribute } from 'src/common/types/ipfs-attribute';
-import { BusinessException } from 'src/common/exceptions/exception-types';
-import { isValidExtension, isValidSize } from 'src/common/utils/image-utils';
-import { BusinessErrors } from 'src/common/constants';
-import { PinataResponse } from 'src/common/types/pinata-response';
+import { appConfig } from '../../config/app.config';
+import { IpfsAttribute } from '../../common/types/ipfs-attribute';
+import { BusinessException } from '../../common/exceptions/exception-types';
+import { isValidExtension, isValidSize } from '../../common/utils/image-utils';
+import { BusinessErrors } from '../../common/constants';
+import { PinataResponse } from '../../common/types/pinata-response';
 
 @Injectable()
 export class PinataService {

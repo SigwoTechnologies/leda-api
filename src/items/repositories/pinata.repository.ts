@@ -2,8 +2,8 @@ import * as FormData from 'form-data';
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, map } from 'rxjs';
-import { appConfig } from 'src/config/app.config';
-import { PinataResponse } from 'src/common/types/pinata-response';
+import { appConfig } from '../../config/app.config';
+import { PinataResponse } from '../../common/types/pinata-response';
 
 @Injectable()
 export class PinataRepository {
