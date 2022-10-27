@@ -84,6 +84,14 @@ export class ItemRepository extends Repository<Item> {
       .orderBy('item.createdAt', 'DESC')
       .getOne();
   }
+  async listAnItem(itemId: string, price: number): Promise<void> {
+    await this.update(
+      {
+        itemId,
+      },
+      { price: String(price), status: ItemStatus.Listed }
+    );
+  }
 
   async createItem(itemRequestDto: ItemRequestDto, accountId: string): Promise<Item> {
     const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
