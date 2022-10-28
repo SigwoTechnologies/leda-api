@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ItemRequestDto } from '../dto/item-request.dto';
-import { ItemService } from '../services/item.service';
-import { Public } from '../../auth/decorators/public.decorator';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
+import { Public } from '../../auth/decorators/public.decorator';
+import { BuyRequestDto } from '../dto/buy-request.dto';
+import { ItemRequestDto } from '../dto/item-request.dto';
 import { Item } from '../entities/item.entity';
+import { ItemService } from '../services/item.service';
 @Controller('items')
 export class ItemsController {
   constructor(private itemService: ItemService) {}
@@ -26,11 +27,8 @@ export class ItemsController {
     return this.itemService.create(itemRequestDto);
   }
 
-  @Patch('/:itemId/buy')
-  buyItem(
-    @Param('itemId') itemId: string,
-    @Body() { address }: { address: string }
-  ): Promise<Item> {
+  @Post('/:itemId/buy')
+  buyItem(@Param('itemId') itemId: string, @Body() { address }: BuyRequestDto): Promise<Item> {
     return this.itemService.buyItem(itemId, address);
   }
 
