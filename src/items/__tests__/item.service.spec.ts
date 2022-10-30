@@ -15,6 +15,7 @@ const itemRepositoryMock = () => ({
   findById: jest.fn(),
   findByAccount: jest.fn(),
   createItem: jest.fn(),
+  listAnItem: jest.fn(),
 });
 
 const accountRepositoryMock = () => ({
@@ -47,7 +48,7 @@ describe('ItemService', () => {
         description: 'test',
         price: '1',
         royalty: 1,
-        status: ItemStatus.Listed,
+        status: ItemStatus.NotListed,
         tokenId: 1,
         collectionAddress: 'test',
         author: {} as Account,
@@ -166,6 +167,44 @@ describe('ItemService', () => {
         );
 
         expect(itemRepository.createItem).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('When listAnItem function is called', () => {
+    describe('and the item exist', () => {
+      it('should list the item and return it', async () => {
+        const itemId = '123';
+        const listId = 456;
+        const price = '0.001';
+
+        const expected = items[0];
+        expected.price = price;
+        expected.listId = listId;
+        expected.status = ItemStatus.Listed;
+
+        itemRepository.findById.mockResolvedValue({ ...items[0] });
+
+        const actual = await service.listAnItem(itemId, listId, price);
+
+        expect(actual).toEqual(expected);
+        expect(itemRepository.listAnItem).toHaveBeenCalled();
+      });
+    });
+
+    describe('and the item does not exist', () => {
+      it('should throw a BusinessException with expected message', async () => {
+        const unexistingId = '123';
+        const errorMessage = `The item with id ${unexistingId} does not exist`;
+
+        itemRepository.findById.mockResolvedValue(null);
+
+        const exception = () => service.listAnItem(unexistingId, 1, '1');
+
+        await expect(exception).rejects.toThrow(NotFoundException);
+        await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
+
+        expect(itemRepository.listAnItem).not.toHaveBeenCalled();
       });
     });
   });

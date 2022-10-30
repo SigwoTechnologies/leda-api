@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { ItemStatus } from '../enums/item-status.enum';
 
 @Injectable()
 export class ItemService {
@@ -53,11 +54,16 @@ export class ItemService {
 
     return item;
   }
+
   async listAnItem(itemId: string, listId: number, price: string): Promise<Item> {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     await this.itemRepository.listAnItem(itemId, listId, price);
+
+    item.price = price;
+    item.listId = listId;
+    item.status = ItemStatus.Listed;
 
     return item;
   }
