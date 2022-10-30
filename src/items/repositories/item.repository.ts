@@ -16,6 +16,7 @@ export class ItemRepository extends Repository<Item> {
       .select([
         'item.itemId',
         'item.tokenId',
+        'item.listId',
         'item.name',
         'item.description',
         'item.price',
@@ -38,6 +39,7 @@ export class ItemRepository extends Repository<Item> {
       .select([
         'item.itemId',
         'item.tokenId',
+        'item.listId',
         'item.name',
         'item.description',
         'item.price',
@@ -64,6 +66,7 @@ export class ItemRepository extends Repository<Item> {
       .select([
         'item.itemId',
         'item.tokenId',
+        'item.listId',
         'item.name',
         'item.description',
         'item.price',
@@ -85,12 +88,12 @@ export class ItemRepository extends Repository<Item> {
       .getOne();
   }
 
-  async listAnItem(itemId: string, price: number): Promise<void> {
+  async listAnItem(itemId: string, listId: number, price: string): Promise<void> {
     await this.update(
       {
         itemId,
       },
-      { price: String(price), status: ItemStatus.Listed }
+      { price, listId, status: ItemStatus.Listed }
     );
   }
 

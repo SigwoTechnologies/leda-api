@@ -16,6 +16,9 @@ export class Item {
   @Column({ unique: false })
   tokenId: number;
 
+  @Column({ unique: false, nullable: true })
+  listId: number;
+
   @Column()
   collectionAddress: string;
 

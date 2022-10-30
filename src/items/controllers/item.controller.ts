@@ -3,6 +3,7 @@ import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { Item } from '../entities/item.entity';
 import { ItemService } from '../services/item.service';
 @Controller('items')
@@ -33,7 +34,10 @@ export class ItemsController {
   }
 
   @Post('/:itemId/price')
-  listAnItem(@Param('itemId') itemId: string, @Body() { price }: { price: number }): Promise<Item> {
-    return this.itemService.listAnItem(itemId, price);
+  listAnItem(
+    @Param('itemId') itemId: string,
+    @Body() { price, listId }: ListItemRequestDto
+  ): Promise<Item> {
+    return this.itemService.listAnItem(itemId, listId, price);
   }
 }

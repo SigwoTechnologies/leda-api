@@ -53,6 +53,7 @@ describe('ItemService', () => {
         author: {} as Account,
         owner: {} as Account,
         image: {} as Image,
+        listId: 1,
         likes: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -61,7 +62,7 @@ describe('ItemService', () => {
   });
 
   describe('When findAll function is called', () => {
-    it('should return an array of items', async () => {
+    it('should return an array of items ', async () => {
       const expected = items;
 
       const mockedData = expected.map((prop) => ({ ...prop }));

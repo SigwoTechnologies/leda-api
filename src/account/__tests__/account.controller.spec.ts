@@ -36,6 +36,7 @@ describe('AccountController', () => {
             royalty: 1,
             status: ItemStatus.Listed,
             tokenId: 1,
+            listId: 1,
             collectionAddress: 'test',
             author: {} as Account,
             owner: {} as Account,
