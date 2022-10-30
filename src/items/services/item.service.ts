@@ -39,7 +39,7 @@ export class ItemService {
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.createItem(itemRequestDto, account.accountId);
+    return this.itemRepository.createItem(itemRequestDto, account);
   }
 
   async buyItem(itemId: string, newOwnerAddress: string): Promise<Item> {
