@@ -53,6 +53,7 @@ describe('ItemService', () => {
         author: {} as Account,
         owner: {} as Account,
         image: {} as Image,
+        listId: 1,
         likes: 1,
         createdAt: new Date(),
         updatedAt: new Date(),

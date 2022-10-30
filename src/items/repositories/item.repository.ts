@@ -88,12 +88,12 @@ export class ItemRepository extends Repository<Item> {
       .getOne();
   }
 
-  async listAnItem(itemId: string, listId: number, price: number): Promise<void> {
+  async listAnItem(itemId: string, listId: number, price: string): Promise<void> {
     await this.update(
       {
         itemId,
       },
-      { price: String(price), listId, status: ItemStatus.Listed }
+      { price, listId, status: ItemStatus.Listed }
     );
   }
 

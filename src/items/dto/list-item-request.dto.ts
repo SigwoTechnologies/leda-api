@@ -2,7 +2,7 @@ import { IsNotEmpty } from 'class-validator';
 
 export class ListItemRequestDto {
   @IsNotEmpty()
-  price: number;
+  price: string;
 
   @IsNotEmpty()
   listId: number;

@@ -53,7 +53,7 @@ export class ItemService {
 
     return item;
   }
-  async listAnItem(itemId: string, listId: number, price: number): Promise<Item> {
+  async listAnItem(itemId: string, listId: number, price: string): Promise<Item> {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
