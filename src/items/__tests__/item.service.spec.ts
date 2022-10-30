@@ -62,7 +62,7 @@ describe('ItemService', () => {
   });
 
   describe('When findAll function is called', () => {
-    it('should return an array of items', async () => {
+    it('should return an array of items ', async () => {
       const expected = items;
 
       const mockedData = expected.map((prop) => ({ ...prop }));
