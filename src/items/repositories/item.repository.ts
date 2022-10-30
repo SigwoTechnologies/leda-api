@@ -106,9 +106,11 @@ export class ItemRepository extends Repository<Item> {
     );
   }
 
-  async createItem(itemRequestDto: ItemRequestDto, accountId: string): Promise<Item> {
+  async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {
     const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
       itemRequestDto;
+
+    const { accountId, address } = account;
 
     const item = this.create({
       tokenId,
@@ -127,6 +129,10 @@ export class ItemRepository extends Repository<Item> {
     });
 
     await this.save(item);
+
+    item.owner.address = address;
+    item.author.address = address;
+
     return item;
   }
 }
