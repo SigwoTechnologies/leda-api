@@ -46,11 +46,14 @@ export class ItemService {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
-    const accountId = await this.accountRepository.findByAddress(newOwnerAddress);
-    if (!accountId)
+    const account = await this.accountRepository.findByAddress(newOwnerAddress);
+    if (!account)
       throw new NotFoundException(`The account with address ${newOwnerAddress} does not exist`);
 
-    await this.itemRepository.buyItem(itemId, accountId.accountId);
+    await this.itemRepository.buyItem(itemId, account.accountId);
+
+    item.owner.address = account.address;
+    item.status = ItemStatus.NotListed;
 
     return item;
   }
