@@ -93,7 +93,7 @@ export class ItemRepository extends Repository<Item> {
       {
         itemId,
       },
-      { price, listId, status: ItemStatus.Listed }
+      { price, listId, status: ItemStatus.Listed, updatedAt: new Date() }
     );
   }
 
@@ -102,7 +102,7 @@ export class ItemRepository extends Repository<Item> {
       {
         itemId,
       },
-      { owner: new Account(accountId), status: ItemStatus.NotListed }
+      { owner: new Account(accountId), status: ItemStatus.NotListed, updatedAt: new Date() }
     );
   }
 
