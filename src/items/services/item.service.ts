@@ -18,6 +18,16 @@ export class ItemService {
     return this.itemRepository.findAll();
   }
 
+  async findPagination(
+    limit: number,
+    page: number,
+    likesOrder: 'asc' | 'desc',
+    priceFrom,
+    priceTo
+  ): Promise<Item[]> {
+    return this.itemRepository.pagination(limit, page, likesOrder, priceFrom, priceTo);
+  }
+
   async findById(itemId: string): Promise<Item> {
     const item = await this.itemRepository.findById(itemId);
 

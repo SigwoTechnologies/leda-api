@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { BuyRequestDto } from '../dto/buy-request.dto';
@@ -12,7 +12,24 @@ export class ItemsController {
 
   @Public()
   @Get()
-  findAll(): Promise<Item[]> {
+  findAll(
+    @Query()
+    {
+      limit,
+      page,
+      likesOrder,
+      priceFrom,
+      priceTo,
+    }: {
+      limit: number;
+      page: number;
+      likesOrder: 'asc' | 'desc';
+      priceFrom: number;
+      priceTo: number;
+    }
+  ): Promise<Item[]> {
+    if (limit || page)
+      return this.itemService.findPagination(limit, page, likesOrder, priceFrom, priceTo);
     return this.itemService.findAll();
   }
 
