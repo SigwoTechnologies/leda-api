@@ -16,21 +16,17 @@ export class ItemsController {
     @Query()
     {
       limit,
-      page,
       likesOrder,
       priceFrom,
       priceTo,
     }: {
       limit: number;
-      page: number;
       likesOrder: 'asc' | 'desc';
       priceFrom: number;
       priceTo: number;
     }
-  ): Promise<Item[]> {
-    if (limit || page)
-      return this.itemService.findPagination(limit, page, likesOrder, priceFrom, priceTo);
-    return this.itemService.findAll();
+  ) {
+    if (limit) return this.itemService.findPagination(limit, likesOrder, priceFrom, priceTo);
   }
 
   @Public()

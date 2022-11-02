@@ -115,16 +115,9 @@ export class ItemRepository extends Repository<Item> {
     });
   }
 
-  async pagination(
-    limit: number,
-    page = 0,
-    likesOrder: 'asc' | 'desc',
-    priceFrom: number,
-    priceTo: number
-  ): Promise<Item[]> {
-    return await this.find({
+  async pagination(limit: number, likesOrder: 'asc' | 'desc', priceFrom: number, priceTo: number) {
+    const [items, itemsCount] = await this.findAndCount({
       take: limit,
-      skip: limit * page,
       order: {
         likes: likesOrder,
       },
@@ -132,6 +125,7 @@ export class ItemRepository extends Repository<Item> {
         price: Between(String(priceFrom), String(priceTo)),
       },
     });
+    return { items, itemsCount };
   }
 
   async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {

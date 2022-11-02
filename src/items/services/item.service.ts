@@ -20,12 +20,11 @@ export class ItemService {
 
   async findPagination(
     limit: number,
-    page: number,
     likesOrder: 'asc' | 'desc',
     priceFrom: number,
     priceTo: number
-  ): Promise<Item[]> {
-    return this.itemRepository.pagination(limit, page, likesOrder, priceFrom, priceTo);
+  ) {
+    return this.itemRepository.pagination(limit, likesOrder, priceFrom, priceTo);
   }
 
   async search(title: string, description: string): Promise<Item[]> {
