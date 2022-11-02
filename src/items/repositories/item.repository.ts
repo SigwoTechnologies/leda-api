@@ -109,18 +109,18 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async search(topicValue: SearchRequestDto) {
-    const items = await this.find({
+    const [items, databaseLength] = await this.findAndCount({
       where: {
         name: Like(`%${topicValue.topic.toLowerCase()}%`),
         description: Like(`%${topicValue.topic.toLowerCase()}%`),
       },
     });
     const itemsLength = items.length;
-    return { items, itemsLength };
+    return { items, databaseLength, itemsLength };
   }
 
   async pagination(PaginationRequestDto: PaginationRequestDto) {
-    const items = await this.find({
+    const [items, databaseLength] = await this.findAndCount({
       relations: {
         image: true,
         owner: true,
@@ -140,7 +140,7 @@ export class ItemRepository extends Repository<Item> {
       }, */
     });
     const itemsLength = items.length;
-    return { items, itemsLength };
+    return { items, databaseLength, itemsLength };
   }
 
   async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {
