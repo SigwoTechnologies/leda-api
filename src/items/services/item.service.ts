@@ -22,10 +22,14 @@ export class ItemService {
     limit: number,
     page: number,
     likesOrder: 'asc' | 'desc',
-    priceFrom,
-    priceTo
+    priceFrom: number,
+    priceTo: number
   ): Promise<Item[]> {
     return this.itemRepository.pagination(limit, page, likesOrder, priceFrom, priceTo);
+  }
+
+  async search(title: string, description: string): Promise<Item[]> {
+    return this.itemRepository.search(title, description);
   }
 
   async findById(itemId: string): Promise<Item> {

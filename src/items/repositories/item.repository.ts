@@ -1,6 +1,6 @@
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { Item } from '../entities/item.entity';
-import { Between, DataSource, LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
+import { Between, DataSource, Like, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
@@ -104,6 +104,15 @@ export class ItemRepository extends Repository<Item> {
       },
       { owner: new Account(accountId), status: ItemStatus.NotListed, updatedAt: new Date() }
     );
+  }
+
+  async search(title: string, description: string): Promise<Item[]> {
+    return await this.find({
+      where: {
+        name: Like(`%${title.toLowerCase()}%`),
+        description: Like(`%${description.toLowerCase()}%`),
+      },
+    });
   }
 
   async pagination(

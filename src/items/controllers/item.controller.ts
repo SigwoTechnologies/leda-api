@@ -34,6 +34,13 @@ export class ItemsController {
   }
 
   @Public()
+  @Get('/search')
+  search(@Query() { title, description }: { title: string; description: string }): Promise<Item[]> {
+    if (title || description) return this.itemService.search(title, description);
+    return;
+  }
+
+  @Public()
   @Get('/:itemId')
   findById(@Param('itemId') itemId: string): Promise<Item> {
     return this.itemService.findById(itemId);
