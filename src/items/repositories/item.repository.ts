@@ -1,9 +1,11 @@
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { PaginationRequestDto } from '../dto/pagination-request.dto';
 import { Item } from '../entities/item.entity';
 import { Between, DataSource, Like, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
+import { SearchRequestDto } from '../dto/search-request.dto';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -106,26 +108,39 @@ export class ItemRepository extends Repository<Item> {
     );
   }
 
-  async search(title: string, description: string): Promise<Item[]> {
-    return await this.find({
+  async search(topicValue: SearchRequestDto) {
+    const items = await this.find({
       where: {
-        name: Like(`%${title.toLowerCase()}%`),
-        description: Like(`%${description.toLowerCase()}%`),
+        name: Like(`%${topicValue.topic.toLowerCase()}%`),
+        description: Like(`%${topicValue.topic.toLowerCase()}%`),
       },
     });
+    const itemsLength = items.length;
+    return { items, itemsLength };
   }
 
-  async pagination(limit: number, likesOrder: 'asc' | 'desc', priceFrom: number, priceTo: number) {
-    const [items, itemsCount] = await this.findAndCount({
-      take: limit,
+  async pagination(PaginationRequestDto: PaginationRequestDto) {
+    const items = await this.find({
+      relations: {
+        image: true,
+        owner: true,
+        author: true,
+      },
+      select: {
+        image: { url: true },
+        owner: { accountId: true },
+        author: { accountId: true, address: true },
+      },
+      take: PaginationRequestDto.limit,
       order: {
-        likes: likesOrder,
+        likes: PaginationRequestDto.likesOrder,
       },
-      where: {
+      /* where: {
         price: Between(String(priceFrom), String(priceTo)),
-      },
+      }, */
     });
-    return { items, itemsCount };
+    const itemsLength = items.length;
+    return { items, itemsLength };
   }
 
   async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {

@@ -3,7 +3,9 @@ import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { PaginationRequestDto } from '../dto/pagination-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
+import { SearchRequestDto } from '../dto/search-request.dto';
 import { Item } from '../entities/item.entity';
 import { ItemService } from '../services/item.service';
 @Controller('items')
@@ -14,26 +16,25 @@ export class ItemsController {
   @Get()
   findAll(
     @Query()
-    {
+    { limit, likesOrder, priceFrom, priceTo }: PaginationRequestDto
+  ) {
+    const paginationValues: PaginationRequestDto = {
       limit,
       likesOrder,
       priceFrom,
       priceTo,
-    }: {
-      limit: number;
-      likesOrder: 'asc' | 'desc';
-      priceFrom: number;
-      priceTo: number;
-    }
-  ) {
-    if (limit) return this.itemService.findPagination(limit, likesOrder, priceFrom, priceTo);
+    };
+    if (limit) return this.itemService.findPagination(paginationValues);
   }
 
   @Public()
   @Get('/search')
-  search(@Query() { title, description }: { title: string; description: string }): Promise<Item[]> {
-    if (title || description) return this.itemService.search(title, description);
-    return;
+  search(@Query() { topic }: SearchRequestDto) {
+    if (!topic) return;
+    const topicValue: SearchRequestDto = {
+      topic,
+    };
+    return this.itemService.search(topicValue);
   }
 
   @Public()

@@ -5,6 +5,8 @@ import { Injectable } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { SearchRequestDto } from '../dto/search-request.dto';
+import { PaginationRequestDto } from '../dto/pagination-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
 
 @Injectable()
@@ -18,17 +20,12 @@ export class ItemService {
     return this.itemRepository.findAll();
   }
 
-  async findPagination(
-    limit: number,
-    likesOrder: 'asc' | 'desc',
-    priceFrom: number,
-    priceTo: number
-  ) {
-    return this.itemRepository.pagination(limit, likesOrder, priceFrom, priceTo);
+  async findPagination(paginationValues: PaginationRequestDto) {
+    return this.itemRepository.pagination(paginationValues);
   }
 
-  async search(title: string, description: string): Promise<Item[]> {
-    return this.itemRepository.search(title, description);
+  async search(topicValue: SearchRequestDto) {
+    return this.itemRepository.search(topicValue);
   }
 
   async findById(itemId: string): Promise<Item> {
