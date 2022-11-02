@@ -8,6 +8,7 @@ import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { SearchRequestDto } from '../dto/search-request.dto';
 import { Item } from '../entities/item.entity';
 import { ItemService } from '../services/item.service';
+import { NotFoundException } from '../../common/exceptions/exception-types';
 @Controller('items')
 export class ItemsController {
   constructor(private itemService: ItemService) {}
@@ -18,19 +19,22 @@ export class ItemsController {
     @Query()
     { limit, likesOrder, priceFrom, priceTo }: PaginationRequestDto
   ) {
+    const notLimitMessage = 'Please provide a limit';
+    if (!limit) throw new NotFoundException(notLimitMessage);
     const paginationValues: PaginationRequestDto = {
       limit,
       likesOrder,
       priceFrom,
       priceTo,
     };
-    if (limit) return this.itemService.findPagination(paginationValues);
+    return this.itemService.findPagination(paginationValues);
   }
 
   @Public()
   @Get('/search')
   search(@Query() { topic }: SearchRequestDto) {
-    if (!topic) return;
+    const notTopicMessage = 'Please provide a topic to search';
+    if (!topic) throw new NotFoundException(notTopicMessage);
     const topicValue: SearchRequestDto = {
       topic,
     };

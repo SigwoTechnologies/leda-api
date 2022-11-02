@@ -1,7 +1,7 @@
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { PaginationRequestDto } from '../dto/pagination-request.dto';
 import { Item } from '../entities/item.entity';
-import { Between, DataSource, Like, Repository } from 'typeorm';
+import { DataSource, Like, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
