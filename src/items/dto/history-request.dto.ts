@@ -3,18 +3,18 @@ import { TransactionType } from '../enums/transaction-type.enum';
 
 export class HistoryRequestDto {
   @IsNotEmpty()
-  accountId: string;
+  accountAddress: string;
 
   @IsNotEmpty()
   itemId: string;
 
-  @IsNotEmpty()
   price: string;
 
-  @IsNotEmpty()
   listId: number;
 
   @IsEnum(TransactionType)
   @IsNotEmpty()
   transactionType: TransactionType;
+
+  accountId: string;
 }

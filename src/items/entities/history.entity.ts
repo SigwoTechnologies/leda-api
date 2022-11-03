@@ -1,5 +1,13 @@
 import { Account } from '../../account/entities/account.entity';
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Item } from './item.entity';
 
 @Entity()
@@ -13,7 +21,7 @@ export class History {
   @Column()
   transactionType: string;
 
-  @Column()
+  @Column({ nullable: true })
   listId: number;
 
   @ManyToOne(() => Account, (table) => table.history, {
@@ -29,4 +37,12 @@ export class History {
   })
   @JoinColumn({ name: 'itemId' })
   item: Item;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp',
+  })
+  updatedAt: Date;
 }
