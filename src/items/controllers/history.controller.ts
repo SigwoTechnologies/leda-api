@@ -9,8 +9,14 @@ export class HistoryController {
   constructor(private historyService: HistoryService) {}
 
   @Public()
+  @Get('items')
+  findAll(): Promise<History[]> {
+    return this.historyService.findAll();
+  }
+
+  @Public()
   @Get('items/:itemId')
-  findAll(@Param('itemId') itemId: string): Promise<History[]> {
+  findAllByItemId(@Param('itemId') itemId: string): Promise<History[]> {
     return this.historyService.findAllByItemId(itemId);
   }
 

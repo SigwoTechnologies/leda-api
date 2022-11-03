@@ -14,6 +14,10 @@ export class HistoryService {
     private accountRepository: AccountRepository
   ) {}
 
+  async findAll(): Promise<History[]> {
+    return this.historyRepository.findAll();
+  }
+
   async findAllByItemId(itemId: string): Promise<History[]> {
     return this.historyRepository.findAllByItemId(itemId);
   }

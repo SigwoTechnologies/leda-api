@@ -4,12 +4,17 @@ import { Account } from '../../config/entities.config';
 import { HistoryRequestDto } from '../dto/history-request.dto';
 import { History } from '../entities/history.entity';
 import { Item } from '../entities/item.entity';
-import { TransactionType } from '../enums/transaction-type.enum';
 
 @Injectable()
 export class HistoryRepository extends Repository<History> {
   constructor(private dataSource: DataSource) {
     super(History, dataSource.createEntityManager());
+  }
+
+  async findAll(): Promise<History[]> {
+    return this.find({
+      relations: ['item', 'owner', 'item.image'],
+    });
   }
 
   async findAllByItemId(itemId: string): Promise<History[]> {
