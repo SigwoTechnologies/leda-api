@@ -23,6 +23,6 @@ import { HistoryController } from './controllers/history.controller';
     ItemRepository,
     HistoryRepository,
   ],
-  exports: [ItemService],
+  exports: [ItemService, HistoryService],
 })
 export class ItemModule {}
