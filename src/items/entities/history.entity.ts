@@ -1,4 +1,4 @@
-import { Account } from 'src/config/entities.config';
+import { Account } from '../../account/entities/account.entity';
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Item } from './item.entity';
 

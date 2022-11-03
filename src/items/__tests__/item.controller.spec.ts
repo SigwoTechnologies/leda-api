@@ -44,6 +44,7 @@ describe('ItemsController', () => {
         likes: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
+        history: [],
       },
     ];
   });
