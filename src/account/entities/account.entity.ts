@@ -1,5 +1,6 @@
 import { Item } from '../../items/entities/item.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { History } from 'src/items/entities/history.entity';
 
 @Entity()
 export class Account {
@@ -11,6 +12,9 @@ export class Account {
 
   @OneToMany(() => Item, (item) => item.owner, { cascade: true })
   items: Item[];
+
+  @OneToMany(() => History, (table) => table.owner, { cascade: true })
+  history: History[];
 
   @Column()
   createdAt: Date;

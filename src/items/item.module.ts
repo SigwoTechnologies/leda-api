@@ -7,11 +7,22 @@ import { PinataService } from './services/pinata.service';
 import { ImagesController } from './controllers/image.controller';
 import { HttpModule } from '@nestjs/axios';
 import { PinataRepository } from './repositories/pinata.repository';
+import { HistoryService } from './services/history.service';
+import { HistoryRepository } from './repositories/history.repository';
+import { HistoryController } from './controllers/history.controller';
 
 @Module({
   imports: [HttpModule],
-  controllers: [ItemsController, ImagesController],
-  providers: [ItemService, PinataService, AccountRepository, PinataRepository, ItemRepository],
+  controllers: [ItemsController, ImagesController, HistoryController],
+  providers: [
+    ItemService,
+    PinataService,
+    HistoryService,
+    AccountRepository,
+    PinataRepository,
+    ItemRepository,
+    HistoryRepository,
+  ],
   exports: [ItemService],
 })
 export class ItemModule {}
