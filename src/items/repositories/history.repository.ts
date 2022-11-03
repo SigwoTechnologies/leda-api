@@ -16,7 +16,7 @@ export class HistoryRepository extends Repository<History> {
       where: {
         item: new Item(itemId),
       },
-      relations: ['item', 'owner'],
+      relations: ['item', 'owner', 'item.image'],
     });
   }
 
