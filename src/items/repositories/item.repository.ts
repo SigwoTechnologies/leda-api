@@ -116,6 +116,7 @@ export class ItemRepository extends Repository<Item> {
       tokenId,
       collectionAddress,
       name,
+      /* tags, */
       description,
       price: wei,
       royalty,

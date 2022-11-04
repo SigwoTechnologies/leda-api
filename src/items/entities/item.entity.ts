@@ -1,4 +1,12 @@
-import { Max, MaxLength, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  ArrayNotEmpty,
+  IsArray,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { Account } from '../../account/entities/account.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ItemStatus } from '../enums/item-status.enum';
@@ -18,6 +26,15 @@ export class Item {
 
   @Column({ unique: false, nullable: true })
   listId: number;
+
+  /* 
+  @Column()
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(8)
+  tags: string[]; 
+  */
 
   @Column()
   collectionAddress: string;
