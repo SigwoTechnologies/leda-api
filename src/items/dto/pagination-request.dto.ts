@@ -1,8 +1,11 @@
 import { IsNotEmpty, IsNumber, IsPositive, Min, IsOptional, IsString } from 'class-validator';
 
 export class PaginationRequestDto {
-  @IsNotEmpty()
+  @IsOptional()
   limit: number;
+
+  @IsOptional()
+  page: number;
 
   @IsString()
   @IsOptional()

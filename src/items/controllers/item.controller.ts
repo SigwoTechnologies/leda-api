@@ -1,3 +1,4 @@
+import { BusinessErrors } from './../../common/constants';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
@@ -8,7 +9,7 @@ import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { SearchRequestDto } from '../dto/search-request.dto';
 import { Item } from '../entities/item.entity';
 import { ItemService } from '../services/item.service';
-import { NotFoundException } from '../../common/exceptions/exception-types';
+import { NotFoundException, BusinessException } from '../../common/exceptions/exception-types';
 @Controller('items')
 export class ItemsController {
   constructor(private itemService: ItemService) {}
@@ -17,16 +18,30 @@ export class ItemsController {
   @Get()
   findAll(
     @Query()
-    { limit, likesOrder, priceFrom, priceTo }: PaginationRequestDto
+    { limit, likesOrder, priceFrom, priceTo, page }: PaginationRequestDto
   ) {
-    const notLimitMessage = 'Please provide a limit';
-    if (!limit) throw new NotFoundException(notLimitMessage);
-    const paginationValues: PaginationRequestDto = {
+    let paginationValues: PaginationRequestDto;
+    if (+limit === 0) console.log('0');
+    if (+limit === 0 || +limit >= 100) throw new BusinessException(BusinessErrors.pagination_error);
+    if (!limit) {
+      paginationValues = {
+        limit: 30,
+        likesOrder: 'desc',
+        page: 1,
+        priceFrom,
+        priceTo,
+      };
+      return this.itemService.findPagination(paginationValues);
+    }
+
+    paginationValues = {
       limit,
       likesOrder,
+      page,
       priceFrom,
       priceTo,
     };
+
     return this.itemService.findPagination(paginationValues);
   }
 

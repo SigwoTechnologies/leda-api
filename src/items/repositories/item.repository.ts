@@ -131,16 +131,21 @@ export class ItemRepository extends Repository<Item> {
         owner: { accountId: true },
         author: { accountId: true, address: true },
       },
-      take: PaginationRequestDto.limit,
+      take: PaginationRequestDto.limit, // size of my page
+      skip: PaginationRequestDto.limit * (PaginationRequestDto.page - 1), // taken items or skipped
       order: {
+        // order criteria
+        // order from outside to inside
         likes: PaginationRequestDto.likesOrder,
+        createdAt: 'desc',
+        name: 'desc',
+        tokenId: 'desc',
       },
       /* where: {
         price: Between(String(priceFrom), String(priceTo)),
       }, */
     });
-    const itemsLength = items.length;
-    return { items, databaseLength, itemsLength };
+    return { items, databaseLength };
   }
 
   async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {

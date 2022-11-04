@@ -65,6 +65,11 @@ export const BusinessErrors = {
   nonce_required: {
     name: 'NONCE_REQUIRED',
     message: 'The nonce is required. Please verify your information and try again.',
-    code: 4004,
+    code: 4006,
+  },
+  pagination_error: {
+    name: 'PAGE_ERROR',
+    message: 'Something went wrong with the pagination',
+    code: 4007,
   },
 };
