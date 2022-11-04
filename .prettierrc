@@ -15,6 +15,5 @@
   "semi": true,
   "tabWidth": 2,
   "trailingComma": "es5",
-  "vueIndentScriptAndStyle": false,
-  "endOfLine": "auto"
+  "vueIndentScriptAndStyle": false
 }
