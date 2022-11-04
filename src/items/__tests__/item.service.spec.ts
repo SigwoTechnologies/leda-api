@@ -1,14 +1,15 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
+import { ItemRequestDto } from '../dto/item-request.dto';
 import { Image } from '../entities/image.entity';
 import { Item } from '../entities/item.entity';
+import { ItemStatus } from '../enums/item-status.enum';
+import { HistoryRepository } from '../repositories/history.repository';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemService } from '../services/item.service';
-import { ItemStatus } from '../enums/item-status.enum';
-import { Test, TestingModule } from '@nestjs/testing';
-import { ItemRequestDto } from '../dto/item-request.dto';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
@@ -20,6 +21,12 @@ const itemRepositoryMock = () => ({
 
 const accountRepositoryMock = () => ({
   findByAddress: jest.fn(),
+});
+
+const historyRepositoryMock = () => ({
+  findAll: jest.fn(),
+  findAllByItemId: jest.fn(),
+  createHistory: jest.fn(),
 });
 
 describe('ItemService', () => {
@@ -34,6 +41,7 @@ describe('ItemService', () => {
         ItemService,
         { provide: ItemRepository, useFactory: itemRepositoryMock },
         { provide: AccountRepository, useFactory: accountRepositoryMock },
+        { provide: HistoryRepository, useFactory: historyRepositoryMock },
       ],
     }).compile();
 
@@ -185,8 +193,14 @@ describe('ItemService', () => {
         expected.status = ItemStatus.Listed;
 
         itemRepository.findById.mockResolvedValue({ ...items[0] });
+        accountRepository.findByAddress.mockResolvedValue({ account: { accountId: '1' } });
 
-        const actual = await service.listAnItem(itemId, listId, price);
+        const actual = await service.listAnItem({
+          itemId,
+          listId,
+          price,
+          address: '',
+        });
 
         expect(actual).toEqual(expected);
         expect(itemRepository.listAnItem).toHaveBeenCalled();
@@ -200,7 +214,8 @@ describe('ItemService', () => {
 
         itemRepository.findById.mockResolvedValue(null);
 
-        const exception = () => service.listAnItem(unexistingId, 1, '1');
+        const exception = () =>
+          service.listAnItem({ address: '', itemId: unexistingId, listId: 1, price: '1' });
 
         await expect(exception).rejects.toThrow(NotFoundException);
         await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));

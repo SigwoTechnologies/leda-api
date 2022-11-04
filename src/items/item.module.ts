@@ -17,10 +17,10 @@ import { PinataService } from './services/pinata.service';
     ItemService,
     PinataService,
     HistoryService,
+    HistoryRepository,
     AccountRepository,
     PinataRepository,
     ItemRepository,
-    HistoryRepository,
   ],
   exports: [ItemService, HistoryService],
 })
