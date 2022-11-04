@@ -4,4 +4,6 @@ export class BuyRequestDto {
   @IsEthereumAddress()
   @IsNotEmpty()
   address: string;
+
+  itemId: string;
 }

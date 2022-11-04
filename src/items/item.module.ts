@@ -1,19 +1,18 @@
-import { Module } from '@nestjs/common';
-import { ItemsController } from './controllers/item.controller';
-import { ItemService } from './services/item.service';
-import { ItemRepository } from './repositories/item.repository';
-import { AccountRepository } from '../account/repositories/account.repository';
-import { PinataService } from './services/pinata.service';
-import { ImagesController } from './controllers/image.controller';
 import { HttpModule } from '@nestjs/axios';
+import { Module } from '@nestjs/common';
+import { AccountRepository } from '../account/repositories/account.repository';
+import { ImagesController } from './controllers/image.controller';
+import { ItemsController } from './controllers/item.controller';
+import { HistoryRepository } from './repositories/history.repository';
+import { ItemRepository } from './repositories/item.repository';
 import { PinataRepository } from './repositories/pinata.repository';
 import { HistoryService } from './services/history.service';
-import { HistoryRepository } from './repositories/history.repository';
-import { HistoryController } from './controllers/history.controller';
+import { ItemService } from './services/item.service';
+import { PinataService } from './services/pinata.service';
 
 @Module({
   imports: [HttpModule],
-  controllers: [ItemsController, ImagesController, HistoryController],
+  controllers: [ItemsController, ImagesController],
   providers: [
     ItemService,
     PinataService,

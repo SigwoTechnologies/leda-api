@@ -6,12 +6,17 @@ import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
+import { HistoryRepository } from '../repositories/history.repository';
+import { TransactionType } from '../enums/transaction-type.enum';
+import { ListItemRequestDto } from '../dto/list-item-request.dto';
+import { BuyRequestDto } from '../dto/buy-request.dto';
 
 @Injectable()
 export class ItemService {
   constructor(
     private itemRepository: ItemRepository,
-    private accountRepository: AccountRepository
+    private accountRepository: AccountRepository,
+    private historyRepository: HistoryRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -39,10 +44,18 @@ export class ItemService {
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.createItem(itemRequestDto, account);
+    const item = await this.itemRepository.createItem(itemRequestDto, account);
+
+    await this.historyRepository.createHistory({
+      itemId: item.itemId,
+      accountId: account.accountId,
+      transactionType: TransactionType.Minted,
+    });
+
+    return item;
   }
 
-  async buyItem(itemId: string, newOwnerAddress: string): Promise<Item> {
+  async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
@@ -55,18 +68,36 @@ export class ItemService {
     item.owner.address = account.address;
     item.status = ItemStatus.NotListed;
 
+    await this.historyRepository.createHistory({
+      itemId,
+      price: item.price,
+      accountId: account.accountId,
+      transactionType: TransactionType.Bought,
+      listId: item.listId,
+    });
+
     return item;
   }
 
-  async listAnItem(itemId: string, listId: number, price: string): Promise<Item> {
+  async listAnItem({ address, itemId, listId, price }: ListItemRequestDto): Promise<Item> {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    const account = await this.accountRepository.findByAddress(address);
 
     await this.itemRepository.listAnItem(itemId, listId, price);
 
     item.price = price;
     item.listId = listId;
     item.status = ItemStatus.Listed;
+
+    await this.historyRepository.createHistory({
+      itemId,
+      price,
+      accountId: account.accountId,
+      transactionType: TransactionType.Listed,
+      listId,
+    });
 
     return item;
   }

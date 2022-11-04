@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
-import { HistoryRequestDto } from '../dto/history-request.dto';
 import { History } from '../entities/history.entity';
 import { Item } from '../entities/item.entity';
+import { TransactionType } from '../enums/transaction-type.enum';
 
 @Injectable()
 export class HistoryRepository extends Repository<History> {
@@ -27,12 +27,18 @@ export class HistoryRepository extends Repository<History> {
   }
 
   async createHistory({
-    itemId,
-    price,
     accountId,
+    itemId,
     transactionType,
+    price,
     listId,
-  }: HistoryRequestDto): Promise<History> {
+  }: {
+    accountId: string;
+    itemId: string;
+    transactionType: TransactionType;
+    price?: string;
+    listId?: number;
+  }): Promise<History> {
     const data = this.create({
       price,
       transactionType,
