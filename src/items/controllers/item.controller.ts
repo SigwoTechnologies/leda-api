@@ -21,7 +21,7 @@ export class ItemsController {
     { limit, likesOrder, priceFrom, priceTo, page }: PaginationRequestDto
   ) {
     let paginationValues: PaginationRequestDto;
-    if (+limit === 0) console.log('0');
+
     if (+limit === 0 || +limit >= 100) throw new BusinessException(BusinessErrors.pagination_error);
     if (!limit) {
       paginationValues = {
