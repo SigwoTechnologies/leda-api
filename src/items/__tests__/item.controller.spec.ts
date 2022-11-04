@@ -91,6 +91,7 @@ describe('ItemsController', () => {
         status: 1,
         image: {} as ImageRequestDto,
         wei: '1',
+        tags: [],
       });
 
       expect(actual).toEqual(expected);

@@ -107,7 +107,7 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {
-    const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
+    const { tokenId, name, collectionAddress, description, royalty, status, image, wei, tags } =
       itemRequestDto;
 
     const { accountId, address } = account;
