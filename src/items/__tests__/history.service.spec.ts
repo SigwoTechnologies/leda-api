@@ -15,7 +15,7 @@ const historyRepositoryMock = () => ({
 describe('HistoryService', () => {
   let service: HistoryService;
   let historyRepository;
-  let items: History[] = [];
+  let history: History[] = [];
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -28,7 +28,7 @@ describe('HistoryService', () => {
     service = await module.get(HistoryService);
     historyRepository = await module.get(HistoryRepository);
 
-    items = [
+    history = [
       {
         id: '1',
         price: '1',
@@ -44,7 +44,7 @@ describe('HistoryService', () => {
 
   describe('When findAll function is called', () => {
     it('should return an array of history ', async () => {
-      const expected = items;
+      const expected = history;
 
       const mockedData = expected.map((prop) => ({ ...prop }));
       historyRepository.findAll.mockResolvedValue(mockedData);
@@ -58,7 +58,7 @@ describe('HistoryService', () => {
   describe('When findById function is called', () => {
     describe('and the itemId exist', () => {
       it('should return the expected item', async () => {
-        const expected = items[0];
+        const expected = history[0];
 
         historyRepository.findAllByItemId.mockResolvedValue(expected);
 
