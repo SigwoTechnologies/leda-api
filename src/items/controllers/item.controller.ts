@@ -4,16 +4,30 @@ import { Public } from '../../auth/decorators/public.decorator';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
+import { History } from '../entities/history.entity';
 import { Item } from '../entities/item.entity';
+import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
 @Controller('items')
 export class ItemsController {
-  constructor(private itemService: ItemService) {}
+  constructor(private itemService: ItemService, private historyService: HistoryService) {}
 
   @Public()
   @Get()
   findAll(): Promise<Item[]> {
     return this.itemService.findAll();
+  }
+
+  @Public()
+  @Get('/history')
+  findAllHistory(): Promise<History[]> {
+    return this.historyService.findAll();
+  }
+
+  @Public()
+  @Get(':itemId/history')
+  findAllByItemId(@Param('itemId') itemId: string): Promise<History[]> {
+    return this.historyService.findAllByItemId(itemId);
   }
 
   @Public()
@@ -29,15 +43,17 @@ export class ItemsController {
   }
 
   @Post('/:itemId/buy')
-  buyItem(@Param('itemId') itemId: string, @Body() { address }: BuyRequestDto): Promise<Item> {
-    return this.itemService.buyItem(itemId, address);
+  buyItem(@Param('itemId') itemId: string, @Body() buyRequestDto: BuyRequestDto): Promise<Item> {
+    buyRequestDto.itemId = itemId;
+    return this.itemService.buyItem(buyRequestDto);
   }
 
   @Post('/:itemId/price')
   listAnItem(
     @Param('itemId') itemId: string,
-    @Body() { price, listId }: ListItemRequestDto
+    @Body() listItemRequestDto: ListItemRequestDto
   ): Promise<Item> {
-    return this.itemService.listAnItem(itemId, listId, price);
+    listItemRequestDto.itemId = itemId;
+    return this.itemService.listAnItem(listItemRequestDto);
   }
 }

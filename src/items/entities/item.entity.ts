@@ -1,8 +1,17 @@
 import { Max, MaxLength, Min } from 'class-validator';
 import { Account } from '../../account/entities/account.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ItemStatus } from '../enums/item-status.enum';
 import { Image } from './image.entity';
+import { History } from './history.entity';
 
 @Entity()
 export class Item {
@@ -69,9 +78,16 @@ export class Item {
   @Column()
   likes: number;
 
+  @OneToMany(() => History, (table) => table.item, { cascade: true })
+  history: History[];
+
   @Column()
   createdAt: Date;
 
   @Column()
   updatedAt: Date;
+
+  constructor(id: string) {
+    this.itemId = id;
+  }
 }
