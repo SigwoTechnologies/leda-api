@@ -85,6 +85,7 @@ export class ItemService {
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     const account = await this.accountRepository.findByAddress(address);
+    if (!account) throw new NotFoundException(`The account with address ${address} does not exist`);
 
     await this.itemRepository.listAnItem(itemId, listId, price);
 
@@ -107,9 +108,10 @@ export class ItemService {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
-    await this.itemRepository.delistAnItem(itemId);
-
     const account = await this.accountRepository.findByAddress(address);
+    if (!account) throw new NotFoundException(`The account with address ${address} does not exist`);
+
+    await this.itemRepository.delistAnItem(itemId);
 
     await this.historyRepository.createHistory({
       itemId,

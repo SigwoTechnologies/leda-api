@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { BuyRequestDto } from '../dto/buy-request.dto';
@@ -61,7 +61,7 @@ export class ItemsController {
   }
 
   @IsAddressValid()
-  @Post('/:itemId/delist')
+  @Patch('/:itemId/delist')
   delistAnItem(
     @Param('itemId') itemId: string,
     @Body() delistItemRequestDto: DelistItemRequestDto

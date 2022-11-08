@@ -1,6 +1,7 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsEthereumAddress, IsNotEmpty } from 'class-validator';
 
 export class DelistItemRequestDto {
+  @IsEthereumAddress()
   @IsNotEmpty()
   address: string;
 
