@@ -1,11 +1,12 @@
 import { ItemRequestDto } from '../dto/item-request.dto';
-import { PaginationRequestDto } from '../dto/pagination-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { Item } from '../entities/item.entity';
-import { DataSource, Like, Repository, SelectQueryBuilder } from 'typeorm';
+import { DataSource, FindManyOptions, Like, Repository, SelectQueryBuilder } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
 import { SearchRequestDto } from '../dto/search-request.dto';
+import { Between } from 'typeorm';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -87,8 +88,10 @@ export class ItemRepository extends Repository<Item> {
     return { items, databaseLength, itemsLength };
   }
 
-  async pagination(PaginationRequestDto: PaginationRequestDto) {
-    const [items, databaseLength] = await this.findAndCount({
+  async pagination(paginationDto: ItemPaginationDto) {
+    const { limit, skip, priceFrom, priceTo } = paginationDto;
+
+    const queryOptions = {
       relations: {
         image: true,
         owner: true,
@@ -99,21 +102,30 @@ export class ItemRepository extends Repository<Item> {
         owner: { accountId: true },
         author: { accountId: true, address: true },
       },
-      take: PaginationRequestDto.limit, // size of my page
-      skip: PaginationRequestDto.limit * (PaginationRequestDto.page - 1), // taken items or skipped
+      take: limit,
+      skip: skip,
       order: {
-        // order criteria
-        // order from outside to inside
-        likes: PaginationRequestDto.likesOrder,
+        likes: paginationDto.likesOrder,
         createdAt: 'desc',
         name: 'desc',
         tokenId: 'desc',
       },
-      /* where: {
+    } as FindManyOptions<Item>;
+
+    if (priceFrom && priceTo) {
+      queryOptions.where = {
         price: Between(String(priceFrom), String(priceTo)),
-      }, */
-    });
-    return { items, databaseLength };
+      };
+    }
+
+    const [result, totalCount] = await this.findAndCount(queryOptions);
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      limit: paginationDto.limit,
+      items: result,
+    };
   }
 
   async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {

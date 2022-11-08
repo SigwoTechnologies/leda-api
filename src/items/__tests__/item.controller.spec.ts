@@ -7,7 +7,6 @@ import { ItemService } from '../../items/services/item.service';
 import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Test } from '@nestjs/testing';
 import { HistoryService } from '../services/history.service';
-import { PaginationRequestDto } from '../dto/pagination-request.dto';
 
 const itemServiceMock = () => ({
   findAll: jest.fn(),

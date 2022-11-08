@@ -1,25 +1,21 @@
-import { IsNotEmpty, IsNumber, IsPositive, Min, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNumber, IsPositive, IsOptional, IsString, IsNotEmpty } from 'class-validator';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 
-export class PaginationRequestDto {
-  @IsOptional()
-  limit: number;
-
-  @IsOptional()
-  page: number;
-
+export class ItemPaginationDto extends PaginationDto {
   @IsString()
-  @IsOptional()
+  @IsNotEmpty()
   likesOrder: 'asc' | 'desc';
 
+  @IsOptional()
   @IsNumber()
   @IsPositive()
-  @Min(0)
-  @IsOptional()
-  priceFrom: number;
+  @Type(() => Number)
+  priceFrom?: number;
 
+  @IsOptional()
   @IsNumber()
   @IsPositive()
-  @Min(0)
-  @IsOptional()
-  priceTo: number;
+  @Type(() => Number)
+  priceTo?: number;
 }

@@ -1,5 +1,10 @@
 export const constants = {
   database: 'database',
+  pagination: {
+    defaultLimit: 5,
+    defaultPage: 1,
+    defaultMaxLimit: 20,
+  },
 };
 
 export const SchemaValidationErrors = {

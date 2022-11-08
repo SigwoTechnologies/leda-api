@@ -6,7 +6,7 @@ import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { SearchRequestDto } from '../dto/search-request.dto';
-import { PaginationRequestDto } from '../dto/pagination-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
 import { HistoryRepository } from '../repositories/history.repository';
 import { TransactionType } from '../enums/transaction-type.enum';
@@ -25,7 +25,7 @@ export class ItemService {
     return this.itemRepository.findAll();
   }
 
-  async findPagination(paginationValues: PaginationRequestDto) {
+  async findPagination(paginationValues: ItemPaginationDto) {
     return this.itemRepository.pagination(paginationValues);
   }
 
