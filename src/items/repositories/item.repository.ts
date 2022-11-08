@@ -1,7 +1,7 @@
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { PaginationRequestDto } from '../dto/pagination-request.dto';
 import { Item } from '../entities/item.entity';
-import { DataSource, Like, Repository } from 'typeorm';
+import { DataSource, Like, Repository, SelectQueryBuilder } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
@@ -13,7 +13,7 @@ export class ItemRepository extends Repository<Item> {
     super(Item, dataSource.createEntityManager());
   }
 
-  async findAll(): Promise<Item[]> {
+  private getItemQueryBuilder(): SelectQueryBuilder<Item> {
     return this.createQueryBuilder('item')
       .select([
         'item.itemId',
@@ -27,64 +27,32 @@ export class ItemRepository extends Repository<Item> {
         'item.status',
         'image.url',
         'item.createdAt',
+        'owner.accountId',
         'owner.address',
+        'author.accountId',
+        'author.address',
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
+      .innerJoin('item.author', 'author');
+  }
+
+  async findAll(): Promise<Item[]> {
+    return this.getItemQueryBuilder()
       .where('item.status=:status', { status: ItemStatus.Listed })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
 
   async findByAccount(accountId: string): Promise<Item[]> {
-    return this.createQueryBuilder('item')
-      .select([
-        'item.itemId',
-        'item.tokenId',
-        'item.listId',
-        'item.name',
-        'item.description',
-        'item.price',
-        'item.royalty',
-        'item.likes',
-        'item.status',
-        'image.url',
-        'item.createdAt',
-        'owner.accountId',
-        'owner.address',
-        'author.accountId',
-        'author.address',
-      ])
-      .innerJoin('item.image', 'image')
-      .innerJoin('item.owner', 'owner')
-      .innerJoin('item.author', 'author')
+    return this.getItemQueryBuilder()
       .where('item.ownerId = :accountId OR item.authorId = :accountId', { accountId })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
 
   async findById(itemId: string): Promise<Item> {
-    return this.createQueryBuilder('item')
-      .select([
-        'item.itemId',
-        'item.tokenId',
-        'item.listId',
-        'item.name',
-        'item.description',
-        'item.price',
-        'item.royalty',
-        'item.likes',
-        'item.status',
-        'image.url',
-        'item.createdAt',
-        'owner.accountId',
-        'owner.address',
-        'author.accountId',
-        'author.address',
-      ])
-      .innerJoin('item.image', 'image')
-      .innerJoin('item.owner', 'owner')
-      .innerJoin('item.author', 'author')
+    return this.getItemQueryBuilder()
       .where('item.itemId = :itemId', { itemId })
       .orderBy('item.createdAt', 'DESC')
       .getOne();
