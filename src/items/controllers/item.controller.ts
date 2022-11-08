@@ -7,12 +7,14 @@ import { ItemRequestDto } from '../dto/item-request.dto';
 import { PaginationRequestDto } from '../dto/pagination-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { SearchRequestDto } from '../dto/search-request.dto';
+import { History } from '../entities/history.entity';
 import { Item } from '../entities/item.entity';
+import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
 import { NotFoundException, BusinessException } from '../../common/exceptions/exception-types';
 @Controller('items')
 export class ItemsController {
-  constructor(private itemService: ItemService) {}
+  constructor(private itemService: ItemService, private historyService: HistoryService) {}
 
   @Public()
   @Get()
@@ -57,6 +59,18 @@ export class ItemsController {
   }
 
   @Public()
+  @Get('/history')
+  findAllHistory(): Promise<History[]> {
+    return this.historyService.findAll();
+  }
+
+  @Public()
+  @Get(':itemId/history')
+  findAllByItemId(@Param('itemId') itemId: string): Promise<History[]> {
+    return this.historyService.findAllByItemId(itemId);
+  }
+
+  @Public()
   @Get('/:itemId')
   findById(@Param('itemId') itemId: string): Promise<Item> {
     return this.itemService.findById(itemId);
@@ -69,15 +83,17 @@ export class ItemsController {
   }
 
   @Post('/:itemId/buy')
-  buyItem(@Param('itemId') itemId: string, @Body() { address }: BuyRequestDto): Promise<Item> {
-    return this.itemService.buyItem(itemId, address);
+  buyItem(@Param('itemId') itemId: string, @Body() buyRequestDto: BuyRequestDto): Promise<Item> {
+    buyRequestDto.itemId = itemId;
+    return this.itemService.buyItem(buyRequestDto);
   }
 
   @Post('/:itemId/price')
   listAnItem(
     @Param('itemId') itemId: string,
-    @Body() { price, listId }: ListItemRequestDto
+    @Body() listItemRequestDto: ListItemRequestDto
   ): Promise<Item> {
-    return this.itemService.listAnItem(itemId, listId, price);
+    listItemRequestDto.itemId = itemId;
+    return this.itemService.listAnItem(listItemRequestDto);
   }
 }

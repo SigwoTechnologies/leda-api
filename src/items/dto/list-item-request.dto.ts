@@ -6,4 +6,9 @@ export class ListItemRequestDto {
 
   @IsNotEmpty()
   listId: number;
+
+  @IsNotEmpty()
+  address: string;
+
+  itemId: string;
 }
