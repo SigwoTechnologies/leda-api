@@ -84,7 +84,7 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async pagination(paginationDto: ItemPaginationDto) {
-    const { limit, skip } = paginationDto;
+    const { limit, skip, likesOrder } = paginationDto;
 
     const queryOptions = {
       relations: {
@@ -100,16 +100,23 @@ export class ItemRepository extends Repository<Item> {
       where: [] as FindOptionsWhere<Item>[],
       take: limit,
       skip: skip,
-      order: {
-        likes: paginationDto.likesOrder,
-        createdAt: 'desc',
-        tokenId: 'desc',
-      },
     } as FindManyOptions<Item>;
 
     const conditions = this.getPaginationConditions(paginationDto);
 
     queryOptions.where = conditions;
+
+    if (likesOrder) {
+      queryOptions.order = {
+        likes: likesOrder,
+      };
+    }
+
+    queryOptions.order = {
+      ...queryOptions.order,
+      createdAt: 'desc',
+      tokenId: 'desc',
+    };
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
 

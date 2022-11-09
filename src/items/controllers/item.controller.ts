@@ -23,7 +23,6 @@ export class ItemsController {
   @Public()
   @Get('/paginate')
   paginate(@Query() paginationDto: ItemPaginationDto) {
-    console.log('paginationDto', paginationDto);
     return this.itemService.findPagination(paginationDto);
   }
 

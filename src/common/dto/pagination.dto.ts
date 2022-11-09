@@ -12,7 +12,7 @@ import {
 export class PaginationDto {
   @IsNumber()
   @IsNotEmpty()
-  @Min(2)
+  @Min(5)
   @Max(20)
   @Type(() => Number)
   limit: number;
