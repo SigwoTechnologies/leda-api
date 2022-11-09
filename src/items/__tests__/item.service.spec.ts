@@ -1,14 +1,16 @@
+import { Test, TestingModule } from '@nestjs/testing';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
+import { ItemRequestDto } from '../dto/item-request.dto';
 import { Image } from '../entities/image.entity';
 import { Item } from '../entities/item.entity';
+import { ItemStatus } from '../enums/item-status.enum';
+import { TransactionType } from '../enums/transaction-type.enum';
+import { HistoryRepository } from '../repositories/history.repository';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemService } from '../services/item.service';
-import { ItemStatus } from '../enums/item-status.enum';
-import { Test, TestingModule } from '@nestjs/testing';
-import { ItemRequestDto } from '../dto/item-request.dto';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
@@ -16,16 +18,24 @@ const itemRepositoryMock = () => ({
   findByAccount: jest.fn(),
   createItem: jest.fn(),
   listAnItem: jest.fn(),
+  delistAnItem: jest.fn(),
 });
 
 const accountRepositoryMock = () => ({
   findByAddress: jest.fn(),
 });
 
+const historyRepositoryMock = () => ({
+  findAll: jest.fn(),
+  findAllByItemId: jest.fn(),
+  createHistory: jest.fn(),
+});
+
 describe('ItemService', () => {
   let service: ItemService;
   let itemRepository;
   let accountRepository;
+  let historyRepository;
   let items: Item[] = [];
 
   beforeEach(async () => {
@@ -34,12 +44,14 @@ describe('ItemService', () => {
         ItemService,
         { provide: ItemRepository, useFactory: itemRepositoryMock },
         { provide: AccountRepository, useFactory: accountRepositoryMock },
+        { provide: HistoryRepository, useFactory: historyRepositoryMock },
       ],
     }).compile();
 
     service = await module.get(ItemService);
     itemRepository = await module.get(ItemRepository);
     accountRepository = await module.get(AccountRepository);
+    historyRepository = await module.get(HistoryRepository);
 
     items = [
       {
@@ -58,6 +70,7 @@ describe('ItemService', () => {
         likes: 1,
         createdAt: new Date(),
         updatedAt: new Date(),
+        history: [],
       },
     ];
   });
@@ -184,8 +197,14 @@ describe('ItemService', () => {
         expected.status = ItemStatus.Listed;
 
         itemRepository.findById.mockResolvedValue({ ...items[0] });
+        accountRepository.findByAddress.mockResolvedValue({ account: { accountId: '1' } });
 
-        const actual = await service.listAnItem(itemId, listId, price);
+        const actual = await service.listAnItem({
+          itemId,
+          listId,
+          price,
+          address: '',
+        });
 
         expect(actual).toEqual(expected);
         expect(itemRepository.listAnItem).toHaveBeenCalled();
@@ -193,18 +212,48 @@ describe('ItemService', () => {
     });
 
     describe('and the item does not exist', () => {
-      it('should throw a BusinessException with expected message', async () => {
+      it('should throw a NotFoundException with expected message', async () => {
         const unexistingId = '123';
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
         itemRepository.findById.mockResolvedValue(null);
 
-        const exception = () => service.listAnItem(unexistingId, 1, '1');
+        const exception = () =>
+          service.listAnItem({ address: '', itemId: unexistingId, listId: 1, price: '1' });
 
         await expect(exception).rejects.toThrow(NotFoundException);
         await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
 
         expect(itemRepository.listAnItem).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('When delistAnItem function is called ', () => {
+    describe('and the execution is successful', () => {
+      it('should return an item with status NotListed', async () => {
+        const itemId = '123';
+        const address = 'address';
+
+        const item = { listId: 1 } as Item;
+        const account = { accountId: '1' } as Account;
+
+        itemRepository.findById.mockResolvedValue(item);
+
+        accountRepository.findByAddress.mockResolvedValue(account);
+
+        const expected = { ...item, status: ItemStatus.NotListed };
+
+        const actual = await service.delistAnItem({ itemId, address });
+
+        expect(itemRepository.delistAnItem).toHaveBeenCalledWith(itemId);
+        expect(historyRepository.createHistory).toHaveBeenCalledWith({
+          itemId,
+          accountId: account.accountId,
+          transactionType: TransactionType.Delisted,
+          listId: item.listId,
+        });
+        expect(actual).toEqual(expected);
       });
     });
   });
