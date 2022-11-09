@@ -5,31 +5,26 @@ import { BuyRequestDto } from '../dto/buy-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
-import { SearchRequestDto } from '../dto/search-request.dto';
 import { History } from '../entities/history.entity';
 import { Item } from '../entities/item.entity';
 import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
-import { NotFoundException } from '../../common/exceptions/exception-types';
+
 @Controller('items')
 export class ItemsController {
   constructor(private itemService: ItemService, private historyService: HistoryService) {}
 
   @Public()
   @Get()
-  findAll(@Query() paginationDto: ItemPaginationDto) {
-    return this.itemService.findPagination(paginationDto);
+  findAll() {
+    return this.itemService.findAll();
   }
 
   @Public()
-  @Get('/search')
-  search(@Query() { topic }: SearchRequestDto) {
-    const notTopicMessage = 'Please provide a topic to search';
-    if (!topic) throw new NotFoundException(notTopicMessage);
-    const topicValue: SearchRequestDto = {
-      topic,
-    };
-    return this.itemService.search(topicValue);
+  @Get('/paginate')
+  paginate(@Query() paginationDto: ItemPaginationDto) {
+    console.log('paginationDto', paginationDto);
+    return this.itemService.findPagination(paginationDto);
   }
 
   @Public()

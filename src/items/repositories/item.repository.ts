@@ -1,11 +1,17 @@
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { Item } from '../entities/item.entity';
-import { DataSource, FindManyOptions, Like, Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  DataSource,
+  FindManyOptions,
+  FindOptionsWhere,
+  Raw,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
-import { SearchRequestDto } from '../dto/search-request.dto';
 import { Between } from 'typeorm';
 
 @Injectable()
@@ -77,19 +83,8 @@ export class ItemRepository extends Repository<Item> {
     );
   }
 
-  async search(topicValue: SearchRequestDto) {
-    const [items, databaseLength] = await this.findAndCount({
-      where: {
-        name: Like(`%${topicValue.topic.toLowerCase()}%`),
-        description: Like(`%${topicValue.topic.toLowerCase()}%`),
-      },
-    });
-    const itemsLength = items.length;
-    return { items, databaseLength, itemsLength };
-  }
-
   async pagination(paginationDto: ItemPaginationDto) {
-    const { limit, skip, priceFrom, priceTo } = paginationDto;
+    const { limit, skip } = paginationDto;
 
     const queryOptions = {
       relations: {
@@ -102,21 +97,19 @@ export class ItemRepository extends Repository<Item> {
         owner: { accountId: true },
         author: { accountId: true, address: true },
       },
+      where: [] as FindOptionsWhere<Item>[],
       take: limit,
       skip: skip,
       order: {
         likes: paginationDto.likesOrder,
         createdAt: 'desc',
-        name: 'desc',
         tokenId: 'desc',
       },
     } as FindManyOptions<Item>;
 
-    if (priceFrom && priceTo) {
-      queryOptions.where = {
-        price: Between(String(priceFrom), String(priceTo)),
-      };
-    }
+    const conditions = this.getPaginationConditions(paginationDto);
+
+    queryOptions.where = conditions;
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
 
@@ -156,5 +149,33 @@ export class ItemRepository extends Repository<Item> {
     item.author.address = address;
 
     return item;
+  }
+
+  private getPaginationConditions(paginationDto: ItemPaginationDto): FindOptionsWhere<Item>[] {
+    const { priceFrom, priceTo, search } = paginationDto;
+    const conditions = [] as FindOptionsWhere<Item>[];
+    const condition1 = { status: ItemStatus.Listed } as FindOptionsWhere<Item>;
+
+    if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
+
+    const condition2 = { ...condition1 };
+
+    if (search) {
+      condition1.name = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+
+      condition2.description = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+    }
+
+    // This query will result on the following structure:
+    // (status = 1 and price between x and y and name like '%value%') OR
+    // (status = 1 and price between x and y and description like '%value%')
+    conditions.push(condition1);
+    conditions.push(condition2);
+
+    return conditions;
   }
 }
