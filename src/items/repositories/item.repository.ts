@@ -26,9 +26,11 @@ export class ItemRepository extends Repository<Item> {
         'image.url',
         'item.createdAt',
         'owner.address',
+        'tag.name',
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
+      .innerJoin('item.tags', 'tag')
       .where('item.status=:status', { status: ItemStatus.Listed })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
@@ -79,10 +81,12 @@ export class ItemRepository extends Repository<Item> {
         'owner.address',
         'author.accountId',
         'author.address',
+        'tag.name',
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.author', 'author')
+      .innerJoin('item.tags', 'tag')
       .where('item.itemId = :itemId', { itemId })
       .orderBy('item.createdAt', 'DESC')
       .getOne();
@@ -116,7 +120,7 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {
-    const { tokenId, name, collectionAddress, description, royalty, status, image, wei, tags } =
+    const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
       itemRequestDto;
 
     const { accountId, address } = account;
@@ -125,7 +129,6 @@ export class ItemRepository extends Repository<Item> {
       tokenId,
       collectionAddress,
       name,
-      /* tags, */
       description,
       price: wei,
       royalty,

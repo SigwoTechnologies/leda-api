@@ -40,7 +40,6 @@ export class ItemsController {
   @IsAddressValid()
   @Post()
   create(@Body() itemRequestDto: ItemRequestDto) {
-    console.log(itemRequestDto);
     return this.itemService.create(itemRequestDto);
   }
 

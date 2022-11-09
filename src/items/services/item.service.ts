@@ -1,7 +1,11 @@
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
-import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
-import { Injectable } from '@nestjs/common';
+import {
+  BusinessException,
+  NotFoundException,
+  ValidationException,
+} from '../../common/exceptions/exception-types';
+import { Injectable, MethodNotAllowedException } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
@@ -11,13 +15,15 @@ import { TransactionType } from '../enums/transaction-type.enum';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
+import { TagsRepository } from '../repositories/tags.repository';
 
 @Injectable()
 export class ItemService {
   constructor(
     private itemRepository: ItemRepository,
     private accountRepository: AccountRepository,
-    private historyRepository: HistoryRepository
+    private historyRepository: HistoryRepository,
+    private tagsRepository: TagsRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -46,6 +52,13 @@ export class ItemService {
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
     const item = await this.itemRepository.createItem(itemRequestDto, account);
+
+    if (itemRequestDto.tags.length > 0 && itemRequestDto.tags.length <= 8) {
+      await this.tagsRepository.createTag({
+        tags: itemRequestDto.tags,
+        itemId: item.itemId,
+      });
+    } else throw new BusinessException(BusinessErrors.incorrect_tags_size);
 
     await this.historyRepository.createHistory({
       itemId: item.itemId,

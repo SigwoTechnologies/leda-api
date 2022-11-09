@@ -65,6 +65,11 @@ export const BusinessErrors = {
   nonce_required: {
     name: 'NONCE_REQUIRED',
     message: 'The nonce is required. Please verify your information and try again.',
-    code: 4004,
+    code: 4006,
+  },
+  incorrect_tags_size: {
+    name: 'INCORRECT_TAGS_SIZE',
+    message: 'The tags amount must be between 1 and 8',
+    code: 4007,
   },
 };

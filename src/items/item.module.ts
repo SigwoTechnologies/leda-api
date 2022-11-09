@@ -9,6 +9,7 @@ import { PinataRepository } from './repositories/pinata.repository';
 import { HistoryService } from './services/history.service';
 import { ItemService } from './services/item.service';
 import { PinataService } from './services/pinata.service';
+import { TagsRepository } from './repositories/tags.repository';
 
 @Module({
   imports: [HttpModule],
@@ -21,6 +22,7 @@ import { PinataService } from './services/pinata.service';
     AccountRepository,
     PinataRepository,
     ItemRepository,
+    TagsRepository,
   ],
   exports: [ItemService, HistoryService],
 })

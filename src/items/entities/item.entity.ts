@@ -20,6 +20,7 @@ import {
 import { ItemStatus } from '../enums/item-status.enum';
 import { Image } from './image.entity';
 import { History } from './history.entity';
+import { Tag } from './tag.entity';
 
 @Entity()
 export class Item {
@@ -36,14 +37,8 @@ export class Item {
   @Column({ unique: false, nullable: true })
   listId: number;
 
-  /* 
-  @Column()
-  @IsArray()
-  @ArrayNotEmpty()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(8)
-  tags: string[]; 
-  */
+  @OneToMany(() => Tag, (table) => table.item, { cascade: true })
+  tags: Tag[];
 
   @Column()
   collectionAddress: string;
