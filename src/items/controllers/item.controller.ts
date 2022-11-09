@@ -16,7 +16,7 @@ export class ItemsController {
 
   @Public()
   @Get()
-  findAll() {
+  findAll(): Promise<Item[]> {
     return this.itemService.findAll();
   }
 
