@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { BuyRequestDto } from '../dto/buy-request.dto';
+import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { History } from '../entities/history.entity';
@@ -42,18 +43,30 @@ export class ItemsController {
     return this.itemService.create(itemRequestDto);
   }
 
+  @IsAddressValid()
   @Post('/:itemId/buy')
   buyItem(@Param('itemId') itemId: string, @Body() buyRequestDto: BuyRequestDto): Promise<Item> {
     buyRequestDto.itemId = itemId;
     return this.itemService.buyItem(buyRequestDto);
   }
 
-  @Post('/:itemId/price')
+  @IsAddressValid()
+  @Post('/:itemId/list')
   listAnItem(
     @Param('itemId') itemId: string,
     @Body() listItemRequestDto: ListItemRequestDto
   ): Promise<Item> {
     listItemRequestDto.itemId = itemId;
     return this.itemService.listAnItem(listItemRequestDto);
+  }
+
+  @IsAddressValid()
+  @Patch('/:itemId/delist')
+  delistAnItem(
+    @Param('itemId') itemId: string,
+    @Body() delistItemRequestDto: DelistItemRequestDto
+  ): Promise<Item> {
+    delistItemRequestDto.itemId = itemId;
+    return this.itemService.delistAnItem(delistItemRequestDto);
   }
 }

@@ -97,6 +97,15 @@ export class ItemRepository extends Repository<Item> {
     );
   }
 
+  async delistAnItem(itemId: string): Promise<void> {
+    await this.update(
+      {
+        itemId,
+      },
+      { status: ItemStatus.NotListed, updatedAt: new Date() }
+    );
+  }
+
   async buyItem(itemId: string, accountId: string): Promise<void> {
     await this.update(
       {
