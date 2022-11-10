@@ -1,7 +1,11 @@
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
-import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
-import { Injectable } from '@nestjs/common';
+import {
+  BusinessException,
+  NotFoundException,
+  ValidationException,
+} from '../../common/exceptions/exception-types';
+import { Injectable, MethodNotAllowedException } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';

@@ -1,4 +1,12 @@
-import { Max, MaxLength, Min } from 'class-validator';
+import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  ArrayNotEmpty,
+  IsArray,
+  Max,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { Account } from '../../account/entities/account.entity';
 import {
   Column,
@@ -12,6 +20,7 @@ import {
 import { ItemStatus } from '../enums/item-status.enum';
 import { Image } from './image.entity';
 import { History } from './history.entity';
+import { Tag } from './tag.entity';
 
 @Entity()
 export class Item {
@@ -27,6 +36,9 @@ export class Item {
 
   @Column({ unique: false, nullable: true })
   listId: number;
+
+  @OneToMany(() => Tag, (table) => table.item, { cascade: true })
+  tags: Tag[];
 
   @Column()
   collectionAddress: string;

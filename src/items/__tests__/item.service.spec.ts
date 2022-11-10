@@ -64,6 +64,7 @@ describe('ItemService', () => {
         description: 'test',
         price: '1',
         royalty: 1,
+        tags: [],
         status: ItemStatus.NotListed,
         tokenId: 1,
         collectionAddress: 'test',

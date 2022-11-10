@@ -54,7 +54,7 @@ export class ItemsController {
 
   @IsAddressValid()
   @Post()
-  create(@Body() itemRequestDto: ItemRequestDto): Promise<Item> {
+  create(@Body() itemRequestDto: ItemRequestDto) {
     return this.itemService.create(itemRequestDto);
   }
 

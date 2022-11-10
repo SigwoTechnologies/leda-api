@@ -8,6 +8,11 @@ import {
   IsEthereumAddress,
   IsOptional,
   MinLength,
+  IsArray,
+  ArrayMinSize,
+  ArrayMaxSize,
+  ArrayNotEmpty,
+  ValidateNested,
 } from 'class-validator';
 import { ImageRequestDto } from './image-request.dto';
 
@@ -19,6 +24,15 @@ export class ItemRequestDto {
   @IsNotEmpty()
   @IsNumber()
   tokenId: number;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(8)
+  @MaxLength(8, {
+    each: true,
+  })
+  tags: string[];
 
   @IsEthereumAddress()
   @IsNotEmpty()

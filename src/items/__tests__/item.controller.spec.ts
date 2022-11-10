@@ -55,6 +55,7 @@ describe('ItemsController', () => {
         status: ItemStatus.Listed,
         tokenId: 1,
         listId: 1,
+        tags: [],
         collectionAddress: 'test',
         author: {} as Account,
         owner: {} as Account,
@@ -142,6 +143,7 @@ describe('ItemsController', () => {
         status: 1,
         image: {} as ImageRequestDto,
         wei: '1',
+        tags: [],
       });
 
       expect(actual).toEqual(expected);

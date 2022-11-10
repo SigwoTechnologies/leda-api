@@ -14,6 +14,7 @@ import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
 import { Between } from 'typeorm';
 import { PriceRangeDto } from '../dto/price-range.dto';
+import { Tag } from '../entities/tag.entity';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -37,11 +38,14 @@ export class ItemRepository extends Repository<Item> {
         'item.createdAt',
         'owner.accountId',
         'owner.address',
+        'tag.name',
+        'tag.id',
         'author.accountId',
         'author.address',
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
+      .innerJoin('item.tags', 'tag')
       .innerJoin('item.author', 'author');
   }
 
@@ -117,11 +121,13 @@ export class ItemRepository extends Repository<Item> {
         image: true,
         owner: true,
         author: true,
+        tags: true,
       },
       select: {
         image: { url: true },
         owner: { accountId: true },
         author: { accountId: true, address: true },
+        tags: { name: true, id: true },
       },
       where: [] as FindOptionsWhere<Item>[],
       take: limit,
@@ -160,12 +166,19 @@ export class ItemRepository extends Repository<Item> {
 
     const { accountId, address } = account;
 
+    const tags = itemRequestDto.tags.map((tag) => {
+      const newTag = new Tag();
+      newTag.name = tag;
+      return newTag;
+    });
+
     const item = this.create({
       tokenId,
       collectionAddress,
       name,
       description,
       price: wei,
+      tags,
       royalty,
       status,
       image: { url: image.url, cid: image.cid },
