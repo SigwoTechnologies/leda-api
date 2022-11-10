@@ -1,5 +1,10 @@
 export const constants = {
   database: 'database',
+  pagination: {
+    defaultLimit: 5,
+    defaultPage: 1,
+    defaultMaxLimit: 20,
+  },
 };
 
 export const SchemaValidationErrors = {
@@ -65,6 +70,6 @@ export const BusinessErrors = {
   nonce_required: {
     name: 'NONCE_REQUIRED',
     message: 'The nonce is required. Please verify your information and try again.',
-    code: 4004,
+    code: 4006,
   },
 };
