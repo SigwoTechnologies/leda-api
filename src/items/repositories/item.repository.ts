@@ -57,60 +57,14 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async findByAccount(accountId: string): Promise<Item[]> {
-    return this.createQueryBuilder('item')
-      .select([
-        'item.itemId',
-        'item.tokenId',
-        'item.listId',
-        'item.name',
-        'item.description',
-        'item.price',
-        'item.royalty',
-        'item.likes',
-        'item.status',
-        'image.url',
-        'item.createdAt',
-        'owner.accountId',
-        'owner.address',
-        'author.accountId',
-        'tag.name',
-        'tag.id',
-        'author.address',
-      ])
-      .innerJoin('item.image', 'image')
-      .innerJoin('item.owner', 'owner')
-      .innerJoin('item.author', 'author')
-      .innerJoin('item.tags', 'tag')
+    return this.getItemQueryBuilder()
       .where('item.ownerId = :accountId OR item.authorId = :accountId', { accountId })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
 
   async findById(itemId: string): Promise<Item> {
-    return this.createQueryBuilder('item')
-      .select([
-        'item.itemId',
-        'item.tokenId',
-        'item.listId',
-        'item.name',
-        'item.description',
-        'item.price',
-        'item.royalty',
-        'item.likes',
-        'item.status',
-        'image.url',
-        'item.createdAt',
-        'owner.accountId',
-        'owner.address',
-        'tag.name',
-        'tag.id',
-        'author.accountId',
-        'author.address',
-      ])
-      .innerJoin('item.image', 'image')
-      .innerJoin('item.owner', 'owner')
-      .innerJoin('item.author', 'author')
-      .innerJoin('item.tags', 'tag')
+    return this.getItemQueryBuilder()
       .where('item.itemId = :itemId', { itemId })
       .orderBy('item.createdAt', 'DESC')
       .getOne();
