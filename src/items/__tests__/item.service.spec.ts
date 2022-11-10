@@ -7,6 +7,7 @@ import { ItemRequestDto } from '../dto/item-request.dto';
 import { Image } from '../entities/image.entity';
 import { Item } from '../entities/item.entity';
 import { ItemStatus } from '../enums/item-status.enum';
+import { TransactionType } from '../enums/transaction-type.enum';
 import { HistoryRepository } from '../repositories/history.repository';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemService } from '../services/item.service';
@@ -17,6 +18,7 @@ const itemRepositoryMock = () => ({
   findByAccount: jest.fn(),
   createItem: jest.fn(),
   listAnItem: jest.fn(),
+  delistAnItem: jest.fn(),
 });
 
 const accountRepositoryMock = () => ({
@@ -33,6 +35,7 @@ describe('ItemService', () => {
   let service: ItemService;
   let itemRepository;
   let accountRepository;
+  let historyRepository;
   let items: Item[] = [];
 
   beforeEach(async () => {
@@ -48,6 +51,7 @@ describe('ItemService', () => {
     service = await module.get(ItemService);
     itemRepository = await module.get(ItemRepository);
     accountRepository = await module.get(AccountRepository);
+    historyRepository = await module.get(HistoryRepository);
 
     items = [
       {
@@ -208,7 +212,7 @@ describe('ItemService', () => {
     });
 
     describe('and the item does not exist', () => {
-      it('should throw a BusinessException with expected message', async () => {
+      it('should throw a NotFoundException with expected message', async () => {
         const unexistingId = '123';
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
@@ -221,6 +225,35 @@ describe('ItemService', () => {
         await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
 
         expect(itemRepository.listAnItem).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('When delistAnItem function is called ', () => {
+    describe('and the execution is successful', () => {
+      it('should return an item with status NotListed', async () => {
+        const itemId = '123';
+        const address = 'address';
+
+        const item = { listId: 1 } as Item;
+        const account = { accountId: '1' } as Account;
+
+        itemRepository.findById.mockResolvedValue(item);
+
+        accountRepository.findByAddress.mockResolvedValue(account);
+
+        const expected = { ...item, status: ItemStatus.NotListed };
+
+        const actual = await service.delistAnItem({ itemId, address });
+
+        expect(itemRepository.delistAnItem).toHaveBeenCalledWith(itemId);
+        expect(historyRepository.createHistory).toHaveBeenCalledWith({
+          itemId,
+          accountId: account.accountId,
+          transactionType: TransactionType.Delisted,
+          listId: item.listId,
+        });
+        expect(actual).toEqual(expected);
       });
     });
   });

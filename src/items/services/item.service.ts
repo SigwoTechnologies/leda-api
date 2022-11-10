@@ -12,6 +12,7 @@ import { TransactionType } from '../enums/transaction-type.enum';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { PriceRangeDto } from '../dto/price-range.dto';
+import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
 
 @Injectable()
 export class ItemService {
@@ -94,6 +95,7 @@ export class ItemService {
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     const account = await this.accountRepository.findByAddress(address);
+    if (!account) throw new NotFoundException(`The account with address ${address} does not exist`);
 
     await this.itemRepository.listAnItem(itemId, listId, price);
 
@@ -108,6 +110,27 @@ export class ItemService {
       transactionType: TransactionType.Listed,
       listId,
     });
+
+    return item;
+  }
+
+  async delistAnItem({ itemId, address }: DelistItemRequestDto): Promise<Item> {
+    const item = await this.itemRepository.findById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    const account = await this.accountRepository.findByAddress(address);
+    if (!account) throw new NotFoundException(`The account with address ${address} does not exist`);
+
+    await this.itemRepository.delistAnItem(itemId);
+
+    await this.historyRepository.createHistory({
+      itemId,
+      accountId: account.accountId,
+      transactionType: TransactionType.Delisted,
+      listId: item.listId,
+    });
+
+    item.status = ItemStatus.NotListed;
 
     return item;
   }
