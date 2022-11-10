@@ -4,6 +4,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
+import { Tag } from '../entities/tag.entity';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -97,6 +98,15 @@ export class ItemRepository extends Repository<Item> {
       .getOne();
   }
 
+  async random() {
+    const tags = [
+      {
+        id: '1',
+        name: 'first tag',
+      },
+    ];
+  }
+
   async listAnItem(itemId: string, listId: number, price: string): Promise<void> {
     await this.update(
       {
@@ -130,12 +140,19 @@ export class ItemRepository extends Repository<Item> {
 
     const { accountId, address } = account;
 
+    const tags = itemRequestDto.tags.map((tag) => {
+      const newTag = new Tag();
+      newTag.name = tag;
+      return newTag;
+    });
+
     const item = this.create({
       tokenId,
       collectionAddress,
       name,
       description,
       price: wei,
+      tags,
       royalty,
       status,
       image: { url: image.url, cid: image.cid },

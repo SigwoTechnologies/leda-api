@@ -15,15 +15,13 @@ import { TransactionType } from '../enums/transaction-type.enum';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
-import { TagsRepository } from '../repositories/tags.repository';
 
 @Injectable()
 export class ItemService {
   constructor(
     private itemRepository: ItemRepository,
     private accountRepository: AccountRepository,
-    private historyRepository: HistoryRepository,
-    private tagsRepository: TagsRepository
+    private historyRepository: HistoryRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -52,11 +50,6 @@ export class ItemService {
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
     const item = await this.itemRepository.createItem(itemRequestDto, account);
-
-    await this.tagsRepository.createTag({
-      tags: itemRequestDto.tags,
-      itemId: item.itemId,
-    });
 
     await this.historyRepository.createHistory({
       itemId: item.itemId,
