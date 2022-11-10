@@ -46,6 +46,10 @@ export class ItemService {
     return this.itemRepository.findByAccount(account.accountId);
   }
 
+  async findPriceRange(): Promise<PriceRangeDto> {
+    return this.itemRepository.findPriceRange();
+  }
+
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequestDto.address);
 
@@ -60,10 +64,6 @@ export class ItemService {
     });
 
     return item;
-  }
-
-  async findPriceRange(): Promise<PriceRangeDto> {
-    return this.itemRepository.findPriceRange();
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {

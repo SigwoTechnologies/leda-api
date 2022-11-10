@@ -4,6 +4,8 @@ import { AccountRepository } from '../../account/repositories/account.repository
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
 import { Image } from '../entities/image.entity';
 import { Item } from '../entities/item.entity';
 import { ItemStatus } from '../enums/item-status.enum';
@@ -16,6 +18,8 @@ const itemRepositoryMock = () => ({
   findAll: jest.fn(),
   findById: jest.fn(),
   findByAccount: jest.fn(),
+  findPriceRange: jest.fn(),
+  pagination: jest.fn(),
   createItem: jest.fn(),
   listAnItem: jest.fn(),
   delistAnItem: jest.fn(),
@@ -148,6 +152,48 @@ describe('ItemService', () => {
 
         expect(itemRepository.findByAccount).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('When findPagination function is called', () => {
+    it('should return a pagination object ', async () => {
+      const expected = {
+        page: 1,
+        limit: 10,
+        items: items,
+        totalCount: 1,
+      };
+
+      const paginationDto = {
+        likesOrder: 'desc',
+        priceFrom: 0.001,
+        priceTo: 1,
+      } as ItemPaginationDto;
+
+      const mockedData = { ...expected };
+      itemRepository.pagination.mockResolvedValue(mockedData);
+
+      const actual = await service.findPagination(paginationDto);
+
+      expect(itemRepository.pagination).toHaveBeenCalledWith(paginationDto);
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('When findPriceRange function is called', () => {
+    it('should return the cheapest and most expensive prices', async () => {
+      const expected = {
+        from: 0.001,
+        to: 100,
+      } as PriceRangeDto;
+
+      const mockedData = { ...expected };
+      itemRepository.findPriceRange.mockResolvedValue(mockedData);
+
+      const actual = await service.findPriceRange();
+
+      expect(itemRepository.findPriceRange).toHaveBeenCalled();
+      expect(actual).toEqual(expected);
     });
   });
 

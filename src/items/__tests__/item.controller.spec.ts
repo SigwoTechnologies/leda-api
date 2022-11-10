@@ -1,17 +1,20 @@
 import { Account } from '../../account/entities/account.entity';
+import { HistoryService } from '../services/history.service';
 import { Image } from '../entities/image.entity';
 import { ImageRequestDto } from '../dto/image-request.dto';
 import { Item } from '../../items/entities/item.entity';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemsController } from '../controllers/item.controller';
 import { ItemService } from '../../items/services/item.service';
 import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Test } from '@nestjs/testing';
-import { HistoryService } from '../services/history.service';
+import { PriceRangeDto } from '../dto/price-range.dto';
 
 const itemServiceMock = () => ({
   findAll: jest.fn(),
   findById: jest.fn(),
   findPagination: jest.fn(),
+  findPriceRange: jest.fn(),
   create: jest.fn(),
 });
 
@@ -64,19 +67,18 @@ describe('ItemsController', () => {
     ];
   });
 
-  // TODO: Fix this
-  // describe('When calling findAll function', () => {
-  //   it('should return an array of items', async () => {
-  //     const expected = items;
+  describe('When calling findAll function', () => {
+    it('should return an array of items', async () => {
+      const expected = items;
 
-  //     const mockData = expected.map((prop) => ({ ...prop }));
-  //     itemService.findAll.mockResolvedValue(mockData);
+      const mockData = expected.map((prop) => ({ ...prop }));
+      itemService.findAll.mockResolvedValue(mockData);
 
-  //     const actual = await controller.findAll({} as PaginationRequestDto);
+      const actual = await controller.findAll();
 
-  //     expect(actual[0]).toEqual(expected[0]);
-  //   });
-  // });
+      expect(actual[0]).toEqual(expected[0]);
+    });
+  });
 
   describe('When calling findById function', () => {
     describe('and the itemId is valid', () => {
@@ -89,6 +91,38 @@ describe('ItemsController', () => {
 
         expect(actual).toEqual(expected);
       });
+    });
+  });
+
+  describe('When calling paginate function', () => {
+    it('should return the pagination object', async () => {
+      const expected = {
+        page: 1,
+        limit: 10,
+        items: items[0],
+        totalCount: 1,
+      };
+
+      itemService.findPagination.mockResolvedValue({ ...expected });
+
+      const actual = await controller.paginate({} as ItemPaginationDto);
+
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('When calling findPriceRange function', () => {
+    it('should return the cheapest and most expensive prices', async () => {
+      const expected: PriceRangeDto = {
+        from: 0.001,
+        to: 100,
+      };
+
+      itemService.findPriceRange.mockResolvedValue({ ...expected });
+
+      const actual = await controller.findPriceRange();
+
+      expect(actual).toEqual(expected);
     });
   });
 
