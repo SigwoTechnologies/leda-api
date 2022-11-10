@@ -4,6 +4,8 @@ import { AccountRepository } from '../../account/repositories/account.repository
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
 import { Image } from '../entities/image.entity';
 import { Item } from '../entities/item.entity';
 import { ItemStatus } from '../enums/item-status.enum';
@@ -16,6 +18,8 @@ const itemRepositoryMock = () => ({
   findAll: jest.fn(),
   findById: jest.fn(),
   findByAccount: jest.fn(),
+  findPriceRange: jest.fn(),
+  pagination: jest.fn(),
   createItem: jest.fn(),
   listAnItem: jest.fn(),
   delistAnItem: jest.fn(),
@@ -152,6 +156,48 @@ describe('ItemService', () => {
     });
   });
 
+  describe('When findPagination function is called', () => {
+    it('should return a pagination object ', async () => {
+      const expected = {
+        page: 1,
+        limit: 10,
+        items: items,
+        totalCount: 1,
+      };
+
+      const paginationDto = {
+        likesOrder: 'desc',
+        priceFrom: 0.001,
+        priceTo: 1,
+      } as ItemPaginationDto;
+
+      const mockedData = { ...expected };
+      itemRepository.pagination.mockResolvedValue(mockedData);
+
+      const actual = await service.findPagination(paginationDto);
+
+      expect(itemRepository.pagination).toHaveBeenCalledWith(paginationDto);
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  describe('When findPriceRange function is called', () => {
+    it('should return the cheapest and most expensive prices', async () => {
+      const expected = {
+        from: 0.001,
+        to: 100,
+      } as PriceRangeDto;
+
+      const mockedData = { ...expected };
+      itemRepository.findPriceRange.mockResolvedValue(mockedData);
+
+      const actual = await service.findPriceRange();
+
+      expect(itemRepository.findPriceRange).toHaveBeenCalled();
+      expect(actual).toEqual(expected);
+    });
+  });
+
   describe('When create function is called', () => {
     describe('and the account exist', () => {
       it('should return the expected item', async () => {
@@ -255,6 +301,38 @@ describe('ItemService', () => {
           listId: item.listId,
         });
         expect(actual).toEqual(expected);
+      });
+    });
+    describe('and the execution is unsuccessful', () => {
+      it('throw a NotFoundException when item is not found', async () => {
+        const unexistingItemId = '123';
+        const unexistingAddress = 'address';
+        const errorMessage = `The item with id ${unexistingItemId} does not exist`;
+
+        itemRepository.findById.mockResolvedValue(null);
+
+        const exception = () =>
+          service.delistAnItem({ itemId: unexistingItemId, address: unexistingAddress });
+
+        await expect(exception).rejects.toThrow(NotFoundException);
+        await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
+
+        expect(itemRepository.delistAnItem).not.toHaveBeenCalled();
+      });
+      it('throw a NotFoundException when account is not found', async () => {
+        const itemId = '123';
+        const unexistingAddress = 'address';
+        const errorMessage = `The account with address ${unexistingAddress} does not exist`;
+
+        itemRepository.findById.mockResolvedValue({} as Item);
+        accountRepository.findByAddress.mockResolvedValue(null);
+
+        const exception = () => service.delistAnItem({ itemId, address: unexistingAddress });
+
+        await expect(exception).rejects.toThrow(NotFoundException);
+        await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
+
+        expect(itemRepository.delistAnItem).not.toHaveBeenCalled();
       });
     });
   });

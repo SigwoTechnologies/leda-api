@@ -9,11 +9,13 @@ import { Injectable, MethodNotAllowedException } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
 import { HistoryRepository } from '../repositories/history.repository';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { BuyRequestDto } from '../dto/buy-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
 
 @Injectable()
@@ -26,6 +28,10 @@ export class ItemService {
 
   async findAll(): Promise<Item[]> {
     return this.itemRepository.findAll();
+  }
+
+  async findPagination(paginationValues: ItemPaginationDto) {
+    return this.itemRepository.pagination(paginationValues);
   }
 
   async findById(itemId: string): Promise<Item> {
@@ -42,6 +48,10 @@ export class ItemService {
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
     return this.itemRepository.findByAccount(account.accountId);
+  }
+
+  async findPriceRange(): Promise<PriceRangeDto> {
+    return this.itemRepository.findPriceRange();
   }
 
   async create(itemRequestDto: ItemRequestDto): Promise<Item> {
@@ -71,13 +81,13 @@ export class ItemService {
     await this.itemRepository.buyItem(itemId, account.accountId);
 
     item.owner.address = account.address;
-    item.status = ItemStatus.NotListed;
+    item.status = ItemStatus.Sold;
 
     await this.historyRepository.createHistory({
       itemId,
       price: item.price,
       accountId: account.accountId,
-      transactionType: TransactionType.Bought,
+      transactionType: TransactionType.Sold,
       listId: item.listId,
     });
 

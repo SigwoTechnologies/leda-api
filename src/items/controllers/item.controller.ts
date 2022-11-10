@@ -1,14 +1,17 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Public } from '../../auth/decorators/public.decorator';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { History } from '../entities/history.entity';
 import { Item } from '../entities/item.entity';
 import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
+import { PriceRangeDto } from '../dto/price-range.dto';
+
 @Controller('items')
 export class ItemsController {
   constructor(private itemService: ItemService, private historyService: HistoryService) {}
@@ -20,9 +23,21 @@ export class ItemsController {
   }
 
   @Public()
+  @Get('/paginate')
+  paginate(@Query() paginationDto: ItemPaginationDto) {
+    return this.itemService.findPagination(paginationDto);
+  }
+
+  @Public()
   @Get('/history')
   findAllHistory(): Promise<History[]> {
     return this.historyService.findAll();
+  }
+
+  @Public()
+  @Get('/price-range')
+  findPriceRange(): Promise<PriceRangeDto> {
+    return this.itemService.findPriceRange();
   }
 
   @Public()

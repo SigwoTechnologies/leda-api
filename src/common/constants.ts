@@ -1,5 +1,10 @@
 export const constants = {
   database: 'database',
+  pagination: {
+    defaultLimit: 5,
+    defaultPage: 1,
+    defaultMaxLimit: 20,
+  },
 };
 
 export const SchemaValidationErrors = {
@@ -70,6 +75,6 @@ export const BusinessErrors = {
   incorrect_tags_size: {
     name: 'INCORRECT_TAGS_SIZE',
     message: 'The tags amount must be between 1 and 8',
-    code: 4007,
+    code: 6007,
   },
 };
