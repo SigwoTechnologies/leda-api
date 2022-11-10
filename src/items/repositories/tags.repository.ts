@@ -25,15 +25,20 @@ export class TagsRepository extends Repository<Tag> {
   }
 
   async createTag({ tags, itemId }: { tags: string[]; itemId: string }): Promise<void> {
-    await Promise.all(
-      tags.map(async (tag) => {
-        const data = this.create({
-          name: tag,
-          item: new Item(itemId),
-        });
+    if (tags.length > 0 && tags.length <= 8) {
+      const uniqueTags = [...new Set(tags)];
+      await Promise.all(
+        uniqueTags.map(async (tag) => {
+          if (tag.length <= 8) {
+            const data = this.create({
+              name: tag,
+              item: new Item(itemId),
+            });
 
-        await this.save(data);
-      })
-    );
+            await this.save(data);
+          }
+        })
+      );
+    }
   }
 }

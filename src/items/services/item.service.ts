@@ -53,12 +53,10 @@ export class ItemService {
 
     const item = await this.itemRepository.createItem(itemRequestDto, account);
 
-    if (itemRequestDto.tags.length > 0 && itemRequestDto.tags.length <= 8) {
-      await this.tagsRepository.createTag({
-        tags: itemRequestDto.tags,
-        itemId: item.itemId,
-      });
-    } else throw new BusinessException(BusinessErrors.incorrect_tags_size);
+    await this.tagsRepository.createTag({
+      tags: itemRequestDto.tags,
+      itemId: item.itemId,
+    });
 
     await this.historyRepository.createHistory({
       itemId: item.itemId,
