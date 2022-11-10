@@ -9,6 +9,7 @@ import { History } from '../entities/history.entity';
 import { Item } from '../entities/item.entity';
 import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
+import { PriceRangeDto } from '../dto/price-range.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -30,6 +31,12 @@ export class ItemsController {
   @Get('/history')
   findAllHistory(): Promise<History[]> {
     return this.historyService.findAll();
+  }
+
+  @Public()
+  @Get('/price-range')
+  findPriceRange(): Promise<PriceRangeDto> {
+    return this.itemService.findPriceRange();
   }
 
   @Public()

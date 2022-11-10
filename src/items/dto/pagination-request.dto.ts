@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsNumber, IsPositive, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString, ValidateIf } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class ItemPaginationDto extends PaginationDto {
@@ -9,13 +9,13 @@ export class ItemPaginationDto extends PaginationDto {
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
   @Type(() => Number)
-  priceFrom?: number;
+  @ValidateIf((val) => !!val)
+  priceFrom?: number | undefined;
 
   @IsOptional()
   @IsNumber()
-  @IsPositive()
   @Type(() => Number)
-  priceTo?: number;
+  @ValidateIf((val) => !!val)
+  priceTo?: number | undefined;
 }

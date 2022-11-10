@@ -13,6 +13,7 @@ import { Injectable } from '@nestjs/common';
 import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
 import { Between } from 'typeorm';
+import { PriceRangeDto } from '../dto/price-range.dto';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -63,6 +64,22 @@ export class ItemRepository extends Repository<Item> {
       .where('item.itemId = :itemId', { itemId })
       .orderBy('item.createdAt', 'DESC')
       .getOne();
+  }
+
+  async findPriceRange(): Promise<PriceRangeDto> {
+    const query = this.createQueryBuilder('item')
+      .where('item.status = :status', {
+        status: ItemStatus.Listed,
+      })
+      .andWhere('item.price IS NOT NULL');
+
+    const cheapestQuery = query.clone().orderBy('item.price', 'ASC');
+    const expensiveQuery = query.clone().orderBy('item.price', 'DESC');
+
+    const { price: from } = await cheapestQuery.limit(1).getOneOrFail();
+    const { price: to } = await expensiveQuery.limit(1).getOneOrFail();
+
+    return { from: +from, to: +to };
   }
 
   async listAnItem(itemId: string, listId: number, price: string): Promise<void> {

@@ -11,6 +11,7 @@ import { HistoryRepository } from '../repositories/history.repository';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { BuyRequestDto } from '../dto/buy-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
 
 @Injectable()
 export class ItemService {
@@ -58,6 +59,10 @@ export class ItemService {
     });
 
     return item;
+  }
+
+  async findPriceRange(): Promise<PriceRangeDto> {
+    return this.itemRepository.findPriceRange();
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
