@@ -27,6 +27,7 @@ export class ItemRepository extends Repository<Item> {
         'item.createdAt',
         'owner.address',
         'tag.name',
+        'tag.id',
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
@@ -54,10 +55,13 @@ export class ItemRepository extends Repository<Item> {
         'owner.address',
         'author.accountId',
         'author.address',
+        'tag.name',
+        'tag.id',
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.author', 'author')
+      .innerJoin('item.tags', 'tag')
       .where('item.ownerId = :accountId OR item.authorId = :accountId', { accountId })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
@@ -82,6 +86,7 @@ export class ItemRepository extends Repository<Item> {
         'author.accountId',
         'author.address',
         'tag.name',
+        'tag.id',
       ])
       .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
