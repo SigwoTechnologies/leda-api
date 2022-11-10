@@ -256,5 +256,37 @@ describe('ItemService', () => {
         expect(actual).toEqual(expected);
       });
     });
+    describe('and the execution is unsuccessful', () => {
+      it('throw a NotFoundException when item is not found', async () => {
+        const unexistingItemId = '123';
+        const unexistingAddress = 'address';
+        const errorMessage = `The item with id ${unexistingItemId} does not exist`;
+
+        itemRepository.findById.mockResolvedValue(null);
+
+        const exception = () =>
+          service.delistAnItem({ itemId: unexistingItemId, address: unexistingAddress });
+
+        await expect(exception).rejects.toThrow(NotFoundException);
+        await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
+
+        expect(itemRepository.delistAnItem).not.toHaveBeenCalled();
+      });
+      it('throw a NotFoundException when account is not found', async () => {
+        const itemId = '123';
+        const unexistingAddress = 'address';
+        const errorMessage = `The account with address ${unexistingAddress} does not exist`;
+
+        itemRepository.findById.mockResolvedValue({} as Item);
+        accountRepository.findByAddress.mockResolvedValue(null);
+
+        const exception = () => service.delistAnItem({ itemId, address: unexistingAddress });
+
+        await expect(exception).rejects.toThrow(NotFoundException);
+        await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
+
+        expect(itemRepository.delistAnItem).not.toHaveBeenCalled();
+      });
+    });
   });
 });
