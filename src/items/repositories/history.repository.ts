@@ -14,6 +14,9 @@ export class HistoryRepository extends Repository<History> {
   async findAll(): Promise<History[]> {
     return this.find({
       relations: ['item', 'owner', 'item.image'],
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 
@@ -23,6 +26,9 @@ export class HistoryRepository extends Repository<History> {
         item: new Item(itemId),
       },
       relations: ['item', 'owner', 'item.image'],
+      order: {
+        createdAt: 'DESC',
+      },
     });
   }
 

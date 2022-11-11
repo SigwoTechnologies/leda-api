@@ -67,6 +67,8 @@ export class ItemService {
       transactionType: TransactionType.Minted,
     });
 
+    item.history = await this.historyRepository.findAllByItemId(item.itemId);
+
     return item;
   }
 
@@ -90,6 +92,8 @@ export class ItemService {
       transactionType: TransactionType.Sold,
       listId: item.listId,
     });
+
+    item.history = await this.historyRepository.findAllByItemId(item.itemId);
 
     return item;
   }
@@ -115,6 +119,8 @@ export class ItemService {
       listId,
     });
 
+    item.history = await this.historyRepository.findAllByItemId(item.itemId);
+
     return item;
   }
 
@@ -135,6 +141,8 @@ export class ItemService {
     });
 
     item.status = ItemStatus.NotListed;
+
+    item.history = await this.historyRepository.findAllByItemId(item.itemId);
 
     return item;
   }
