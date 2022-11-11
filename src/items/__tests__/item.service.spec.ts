@@ -1,18 +1,19 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
-import { ItemRequestDto } from '../dto/item-request.dto';
-import { ItemPaginationDto } from '../dto/pagination-request.dto';
-import { PriceRangeDto } from '../dto/price-range.dto';
+import { History } from '../entities/history.entity';
+import { HistoryRepository } from '../repositories/history.repository';
 import { Image } from '../entities/image.entity';
 import { Item } from '../entities/item.entity';
-import { ItemStatus } from '../enums/item-status.enum';
-import { TransactionType } from '../enums/transaction-type.enum';
-import { HistoryRepository } from '../repositories/history.repository';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemRepository } from '../repositories/item.repository';
+import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemService } from '../services/item.service';
+import { ItemStatus } from '../enums/item-status.enum';
+import { PriceRangeDto } from '../dto/price-range.dto';
+import { Test, TestingModule } from '@nestjs/testing';
+import { TransactionType } from '../enums/transaction-type.enum';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
@@ -203,9 +204,12 @@ describe('ItemService', () => {
       it('should return the expected item', async () => {
         const account = { accountId: '456' } as Account;
         const expected = items[0];
+        const history = [{ id: '123' }] as History[];
+        expected.history = history;
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
         itemRepository.createItem.mockResolvedValue({ ...expected });
+        historyRepository.findAllByItemId.mockResolvedValue(history);
 
         const actual = await service.create({ address: '123' } as ItemRequestDto);
 
@@ -239,12 +243,15 @@ describe('ItemService', () => {
         const price = '0.001';
 
         const expected = items[0];
+        const history = [{ id: '123' }] as History[];
+        expected.history = history;
         expected.price = price;
         expected.listId = listId;
         expected.status = ItemStatus.Listed;
 
         itemRepository.findById.mockResolvedValue({ ...items[0] });
         accountRepository.findByAddress.mockResolvedValue({ account: { accountId: '1' } });
+        historyRepository.findAllByItemId.mockResolvedValue(history);
 
         const actual = await service.listAnItem({
           itemId,
