@@ -14,6 +14,7 @@ import { ItemStatus } from '../enums/item-status.enum';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionType } from '../enums/transaction-type.enum';
+import { ItemLikeRepository } from '../repositories/item-like.repository';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
@@ -36,6 +37,11 @@ const historyRepositoryMock = () => ({
   createHistory: jest.fn(),
 });
 
+const itemLikeRepository = () => ({
+  getTotalOfLikesFromItem: jest.fn(),
+  createItemLike: jest.fn(),
+});
+
 describe('ItemService', () => {
   let service: ItemService;
   let itemRepository;
@@ -50,6 +56,7 @@ describe('ItemService', () => {
         { provide: ItemRepository, useFactory: itemRepositoryMock },
         { provide: AccountRepository, useFactory: accountRepositoryMock },
         { provide: HistoryRepository, useFactory: historyRepositoryMock },
+        { provide: ItemLikeRepository, useFactory: itemLikeRepository },
       ],
     }).compile();
 
@@ -77,6 +84,7 @@ describe('ItemService', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         history: [],
+        itemLikes: [],
       },
     ];
   });

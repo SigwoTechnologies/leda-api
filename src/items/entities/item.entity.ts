@@ -21,6 +21,7 @@ import { ItemStatus } from '../enums/item-status.enum';
 import { Image } from './image.entity';
 import { History } from './history.entity';
 import { Tag } from './tag.entity';
+import { ItemLike } from './item-like.entity';
 
 @Entity()
 export class Item {
@@ -92,6 +93,9 @@ export class Item {
 
   @OneToMany(() => History, (table) => table.item, { cascade: true })
   history: History[];
+
+  @OneToMany(() => ItemLike, (table) => table.item, { cascade: true })
+  itemLikes: ItemLike[];
 
   @Column()
   createdAt: Date;

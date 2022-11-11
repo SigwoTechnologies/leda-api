@@ -1,29 +1,28 @@
+import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
-import {
-  BusinessException,
-  NotFoundException,
-  ValidationException,
-} from '../../common/exceptions/exception-types';
-import { Injectable, MethodNotAllowedException } from '@nestjs/common';
+import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
+import { BuyRequestDto } from '../dto/buy-request.dto';
+import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
+import { HistoryRepository } from '../repositories/history.repository';
+import { Injectable } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
+import { ItemLikeRepository } from '../repositories/item-like.repository';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
-import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
-import { HistoryRepository } from '../repositories/history.repository';
-import { TransactionType } from '../enums/transaction-type.enum';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
-import { BuyRequestDto } from '../dto/buy-request.dto';
 import { PriceRangeDto } from '../dto/price-range.dto';
-import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
+import { TransactionType } from '../enums/transaction-type.enum';
 
 @Injectable()
 export class ItemService {
   constructor(
     private itemRepository: ItemRepository,
     private accountRepository: AccountRepository,
-    private historyRepository: HistoryRepository
+    private historyRepository: HistoryRepository,
+    private itemLikeRepository: ItemLikeRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -48,6 +47,14 @@ export class ItemService {
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
     return this.itemRepository.findByAccount(account.accountId);
+  }
+
+  async findLikedByAddress(address: string): Promise<Item[]> {
+    const account = await this.accountRepository.findByAddress(address);
+
+    if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
+
+    return this.itemRepository.findLikedByAccount(account.accountId);
   }
 
   async findPriceRange(): Promise<PriceRangeDto> {
@@ -143,6 +150,38 @@ export class ItemService {
     item.status = ItemStatus.NotListed;
 
     item.history = await this.historyRepository.findAllByItemId(item.itemId);
+
+    return item;
+  }
+
+  async like(itemId: string, address: string): Promise<Item> {
+    const item = await this.itemRepository.findById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    const account = await this.accountRepository.findByAddress(address);
+    if (!account) throw new NotFoundException(`The account with address ${address} does not exist`);
+
+    const currentLikes = await this.itemLikeRepository.getTotalOfLikesFromItem(itemId);
+
+    const hasAccountLiked = await this.itemRepository.hasAccountLikedAnItem(
+      account.accountId,
+      itemId
+    );
+
+    if (hasAccountLiked) {
+      await this.itemLikeRepository.delete({
+        item: new Item(itemId),
+        account: new Account(account.accountId),
+      });
+
+      item.likes = currentLikes - 1;
+    } else {
+      await this.itemLikeRepository.createItemLike(itemId, account.accountId);
+
+      item.likes = currentLikes + 1;
+    }
+
+    await this.itemRepository.updateLikesOnItem(itemId, item.likes);
 
     return item;
   }

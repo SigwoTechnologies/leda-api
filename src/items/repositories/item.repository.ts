@@ -63,6 +63,14 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
+  async findLikedByAccount(accountId: string): Promise<Item[]> {
+    return this.getItemQueryBuilder()
+      .innerJoin('item.itemLikes', 'itemLikes')
+      .where('itemLikes.accountId = :accountId', { accountId })
+      .orderBy('item.createdAt', 'DESC')
+      .getMany();
+  }
+
   async findById(itemId: string): Promise<Item> {
     return this.getItemQueryBuilder()
       .where('item.itemId = :itemId', { itemId })
@@ -111,6 +119,10 @@ export class ItemRepository extends Repository<Item> {
       },
       { owner: new Account(accountId), status: ItemStatus.NotListed, updatedAt: new Date() }
     );
+  }
+
+  async updateLikesOnItem(itemId: string, likes: number) {
+    await this.update({ itemId }, { likes });
   }
 
   async pagination(paginationDto: ItemPaginationDto) {
@@ -195,6 +207,17 @@ export class ItemRepository extends Repository<Item> {
     item.author.address = address;
 
     return item;
+  }
+
+  async hasAccountLikedAnItem(accountId: string, itemId: string): Promise<boolean> {
+    const number = await this.createQueryBuilder('item')
+      .innerJoin('item.itemLikes', 'itemLike')
+      .where('itemLike.accountId = :accountId', { accountId })
+      .andWhere('item.itemId = :itemId', { itemId })
+      .andWhere('item.status = :status', { status: ItemStatus.Listed })
+      .getCount();
+
+    return number > 0;
   }
 
   private getPaginationConditions(paginationDto: ItemPaginationDto): FindOptionsWhere<Item>[] {

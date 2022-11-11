@@ -46,6 +46,7 @@ describe('AccountController', () => {
             createdAt: new Date(),
             updatedAt: new Date(),
             history: [],
+            itemLikes: [],
           },
         ];
 
