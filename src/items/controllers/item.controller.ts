@@ -53,6 +53,12 @@ export class ItemsController {
   }
 
   @IsAddressValid()
+  @Patch(':itemId/like')
+  like(@Param('itemId') itemId: string, @Body('address') address: string): Promise<Item> {
+    return this.itemService.like(itemId, address);
+  }
+
+  @IsAddressValid()
   @Post()
   create(@Body() itemRequestDto: ItemRequestDto) {
     return this.itemService.create(itemRequestDto);

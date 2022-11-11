@@ -4,6 +4,7 @@ import { AccountRepository } from '../account/repositories/account.repository';
 import { ImagesController } from './controllers/image.controller';
 import { ItemsController } from './controllers/item.controller';
 import { HistoryRepository } from './repositories/history.repository';
+import { ItemLikeRepository } from './repositories/item-like.repository';
 import { ItemRepository } from './repositories/item.repository';
 import { PinataRepository } from './repositories/pinata.repository';
 import { HistoryService } from './services/history.service';
@@ -21,6 +22,7 @@ import { PinataService } from './services/pinata.service';
     AccountRepository,
     PinataRepository,
     ItemRepository,
+    ItemLikeRepository,
   ],
   exports: [ItemService, HistoryService],
 })

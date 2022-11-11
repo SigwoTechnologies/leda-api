@@ -11,4 +11,10 @@ export class AccountsController {
   findItems(@Param('address') address: string): Promise<Item[]> {
     return this.itemService.findByAddress(address);
   }
+
+  @IsAddressValid()
+  @Get('/:address/liked-items')
+  findLikedItems(@Param('address') address: string): Promise<Item[]> {
+    return this.itemService.findLikedByAddress(address);
+  }
 }
