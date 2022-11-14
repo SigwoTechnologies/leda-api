@@ -3,16 +3,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { PinataRepository } from '../repositories/pinata.repository';
 import { appConfig } from '../../config/app.config';
-import { IpfsAttribute } from '../../common/types/ipfs-attribute';
 import { BusinessException } from '../../common/exceptions/exception-types';
 import { isValidExtension, isValidSize } from '../../common/utils/image-utils';
 import { BusinessErrors } from '../../common/constants';
 import { PinataResponse } from '../../common/types/pinata-response';
+import { IpfsObject } from 'src/common/types/ipfs-object';
 
 @Injectable()
 export class PinataService {
   constructor(private pinataRepository: PinataRepository) {}
-  async upload(image: Express.Multer.File, attributes: IpfsAttribute): Promise<PinataResponse> {
+  async upload(image: Express.Multer.File, ipfsObject: IpfsObject): Promise<PinataResponse> {
     const { buffer, originalname, mimetype, size } = image;
     if (!isValidExtension(image))
       throw new BusinessException(BusinessErrors.file_extension_not_supported);
@@ -28,18 +28,23 @@ export class PinataService {
     });
 
     const response = await this.pinataRepository.uploadImage(formData);
-    return this.uploadMetadata(response.IpfsHash, attributes);
+    return this.uploadMetadata(response.IpfsHash, ipfsObject);
   }
 
-  async uploadMetadata(imageHash: string, attributes: IpfsAttribute): Promise<PinataResponse> {
+  async uploadMetadata(imageHash: string, ipfsObject: IpfsObject): Promise<PinataResponse> {
+    const { name, description, external_url, attributes } = ipfsObject;
+
+    // TODO: Parse attributes to the OpenSea form
+    // TODO: Parse external_url
+
     const data = JSON.stringify({
       pinataOptions: {
         cidVersion: 1,
       },
       pinataContent: {
-        description: 'Example', // TODO: Define this description once front end is implemented
-        external_url: 'Example', // TODO: Define this description once front end is implemented
-        name: 'Example', // TODO: Define this description once front end is implemented
+        description,
+        external_url,
+        name,
         attributes,
         image: `${appConfig().pinataGatewayUrl}/${imageHash}`,
       },
