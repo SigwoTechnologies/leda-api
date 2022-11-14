@@ -137,7 +137,7 @@ export class ItemRepository extends Repository<Item> {
       },
       select: {
         image: { url: true },
-        owner: { accountId: true },
+        owner: { accountId: true, address: true },
         author: { accountId: true, address: true },
         tags: { name: true, id: true },
       },
