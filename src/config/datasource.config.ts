@@ -13,5 +13,10 @@ export function getConfig() {
     database: process.env.DB_NAME,
     migrations: ['src/migrations/*{.ts,.js}'],
     entities: [__dirname + '/entities.config.ts'],
+    extra: {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    },
   } as DataSourceOptions;
 }
