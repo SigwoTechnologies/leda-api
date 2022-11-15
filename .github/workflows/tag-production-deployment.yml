@@ -30,6 +30,6 @@ jobs:
       - name: Push image to DO Container Registry
         run: docker push registry.digitalocean.com/metis/ledaapi:${{ steps.tag.outputs.tag }}
       - name: Install dependencies
-        run: yarn global add ts-node
+        run: yarn install
       - name: Run database migrations
         run: yarn run migration:run
