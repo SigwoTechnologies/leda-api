@@ -4,4 +4,3 @@ export { Image } from '../items/entities/image.entity';
 export { Item } from '../items/entities/item.entity';
 export { ItemLike } from '../items/entities/item-like.entity';
 export { Tag } from '../items/entities/tag.entity';
-export { User } from '../auth/entities/user.entity';
