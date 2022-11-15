@@ -3,7 +3,7 @@ name: Build and publish Leda Prod
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 jobs:
   build_and_push:
@@ -28,3 +28,5 @@ jobs:
         run: docker tag ledaapi registry.digitalocean.com/metis/ledaapi:${{ steps.tag.outputs.tag }}
       - name: Push image to DO Container Registry
         run: docker push registry.digitalocean.com/metis/ledaapi:${{ steps.tag.outputs.tag }}
+      - name: Run database migrations
+        run: yarn run migration:run
