@@ -10,11 +10,12 @@ import { Item } from '../entities/item.entity';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
 import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemRepository } from '../repositories/item.repository';
-import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { TransactionType } from '../enums/transaction-type.enum';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
+import { ItemRequestDto } from '../dto/item-request.dto';
 
 @Injectable()
 export class ItemService {
@@ -61,22 +62,12 @@ export class ItemService {
     return this.itemRepository.findPriceRange();
   }
 
-  async create(itemRequestDto: ItemRequestDto): Promise<Item> {
-    const account = await this.accountRepository.findByAddress(itemRequestDto.address);
+  async create(itemRequest: DraftItemRequestDto): Promise<Item> {
+    const account = await this.accountRepository.findByAddress(itemRequest.address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    const item = await this.itemRepository.createItem(itemRequestDto, account);
-
-    await this.historyRepository.createHistory({
-      itemId: item.itemId,
-      accountId: account.accountId,
-      transactionType: TransactionType.Minted,
-    });
-
-    item.history = await this.historyRepository.findAllByItemId(item.itemId);
-
-    return item;
+    return this.itemRepository.createItem(itemRequest, account);
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
@@ -184,5 +175,16 @@ export class ItemService {
     await this.itemRepository.updateLikesOnItem(itemId, item.likes);
 
     return item;
+  }
+
+  async activate(itemId: string, itemRequest: ItemRequestDto): Promise<Item> {
+    const account = await this.accountRepository.findByAddress(itemRequest.address);
+
+    if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
+
+    const item = await this.itemRepository.findDraftById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    return this.itemRepository.activate(item, itemRequest);
   }
 }

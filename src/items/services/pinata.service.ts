@@ -7,12 +7,16 @@ import { BusinessException } from '../../common/exceptions/exception-types';
 import { isValidExtension, isValidSize } from '../../common/utils/image-utils';
 import { BusinessErrors } from '../../common/constants';
 import { PinataResponse } from '../../common/types/pinata-response';
-import { IpfsObject } from 'src/common/types/ipfs-object';
+import { IpfsAttribute } from 'src/common/types/ipfs-attribute';
 
 @Injectable()
 export class PinataService {
   constructor(private pinataRepository: PinataRepository) {}
-  async upload(image: Express.Multer.File, ipfsObject: IpfsObject): Promise<PinataResponse> {
+  async upload(
+    image: Express.Multer.File,
+    attributes: IpfsAttribute,
+    itemId: string
+  ): Promise<PinataResponse> {
     const { buffer, originalname, mimetype, size } = image;
     if (!isValidExtension(image))
       throw new BusinessException(BusinessErrors.file_extension_not_supported);
@@ -28,23 +32,22 @@ export class PinataService {
     });
 
     const response = await this.pinataRepository.uploadImage(formData);
-    return this.uploadMetadata(response.IpfsHash, ipfsObject);
+    return this.uploadMetadata(response.IpfsHash, attributes, itemId);
   }
 
-  async uploadMetadata(imageHash: string, ipfsObject: IpfsObject): Promise<PinataResponse> {
-    const { name, description, external_url, attributes } = ipfsObject;
-
-    // TODO: Parse attributes to the OpenSea form
-    // TODO: Parse external_url
-
+  async uploadMetadata(
+    imageHash: string,
+    attributes: IpfsAttribute,
+    itemId: string
+  ): Promise<PinataResponse> {
     const data = JSON.stringify({
       pinataOptions: {
         cidVersion: 1,
       },
       pinataContent: {
-        description,
-        external_url,
-        name,
+        description: 'Example', // TODO: Define this description once front end is implemented
+        external_url: itemId, // TODO: Define this url once front end is implemented
+        name: 'Example', // TODO: Define this description once front end is implemented
         attributes,
         image: `${appConfig().pinataGatewayUrl}/${imageHash}`,
       },

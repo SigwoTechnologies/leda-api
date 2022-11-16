@@ -9,6 +9,7 @@ import { ItemService } from '../../items/services/item.service';
 import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Test } from '@nestjs/testing';
 import { PriceRangeDto } from '../dto/price-range.dto';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 
 const itemServiceMock = () => ({
   findAll: jest.fn(),
@@ -136,14 +137,10 @@ describe('ItemsController', () => {
 
       const actual = await controller.create({
         address: '',
-        tokenId: 1,
         collectionAddress: '',
         name: '',
         description: '',
         royalty: 1,
-        status: 1,
-        image: {} as ImageRequestDto,
-        wei: '1',
         tags: [],
       });
 

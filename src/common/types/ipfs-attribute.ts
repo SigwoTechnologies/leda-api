@@ -1,4 +1,3 @@
 export type IpfsAttribute = {
-  key: string;
-  value: string;
+  [key: string]: any;
 };

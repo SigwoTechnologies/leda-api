@@ -8,23 +8,26 @@ import { Image } from '../entities/image.entity';
 import { Item } from '../entities/item.entity';
 import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemRepository } from '../repositories/item.repository';
-import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemService } from '../services/item.service';
 import { ItemStatus } from '../enums/item-status.enum';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
+import { ItemRequestDto } from '../dto/item-request.dto';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
   findById: jest.fn(),
+  findDraftById: jest.fn(),
   findByAccount: jest.fn(),
   findPriceRange: jest.fn(),
   pagination: jest.fn(),
   createItem: jest.fn(),
   listAnItem: jest.fn(),
   delistAnItem: jest.fn(),
+  activate: jest.fn(),
 });
 
 const accountRepositoryMock = () => ({
@@ -212,14 +215,11 @@ describe('ItemService', () => {
       it('should return the expected item', async () => {
         const account = { accountId: '456' } as Account;
         const expected = items[0];
-        const history = [{ id: '123' }] as History[];
-        expected.history = history;
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
         itemRepository.createItem.mockResolvedValue({ ...expected });
-        historyRepository.findAllByItemId.mockResolvedValue(history);
 
-        const actual = await service.create({ address: '123' } as ItemRequestDto);
+        const actual = await service.create({ address: '123' } as DraftItemRequestDto);
 
         expect(actual).toEqual(expected);
       });
@@ -348,6 +348,63 @@ describe('ItemService', () => {
         await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
 
         expect(itemRepository.delistAnItem).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('When activate function is called', () => {
+    describe('and the account and item exist', () => {
+      it('should activate and return the expected item', async () => {
+        const account = { accountId: '456' } as Account;
+        const itemId = '123';
+        const itemRequest = { address: '123' } as ItemRequestDto;
+        const expected = items[0];
+
+        accountRepository.findByAddress.mockResolvedValue({ ...account });
+        itemRepository.findDraftById.mockResolvedValue({ ...expected });
+        itemRepository.activate.mockResolvedValue({ ...expected });
+
+        const actual = await service.activate(itemId, itemRequest);
+
+        expect(itemRepository.activate).toHaveBeenCalledWith(expected, itemRequest);
+        expect(actual).toEqual(expected);
+      });
+    });
+
+    describe('and the address does not exist', () => {
+      it('should throw a BusinessException with expected message', async () => {
+        const itemRequest = { address: '123' } as ItemRequestDto;
+
+        accountRepository.findByAddress.mockResolvedValue(null);
+
+        const exception = () => service.activate('123', itemRequest);
+
+        await expect(exception).rejects.toThrow(BusinessException);
+        await expect(exception).rejects.toEqual(
+          new BusinessException(BusinessErrors.address_not_associated)
+        );
+
+        expect(itemRepository.findDraftById).not.toHaveBeenCalled();
+        expect(itemRepository.activate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('and the item does not exist', () => {
+      it('should throw a NotFoundException with expected message', async () => {
+        const unexistingId = '123';
+        const itemRequest = { address: '123' } as ItemRequestDto;
+        const account = { accountId: '456' } as Account;
+        const errorMessage = `The item with id ${unexistingId} does not exist`;
+
+        accountRepository.findByAddress.mockResolvedValue({ ...account });
+        itemRepository.findById.mockResolvedValue(null);
+
+        const exception = () => service.activate(unexistingId, itemRequest);
+
+        await expect(exception).rejects.toThrow(NotFoundException);
+        await expect(exception).rejects.toEqual(new NotFoundException(errorMessage));
+
+        expect(itemRepository.activate).not.toHaveBeenCalled();
       });
     });
   });

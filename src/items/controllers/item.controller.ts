@@ -11,6 +11,7 @@ import { Item } from '../entities/item.entity';
 import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
 import { PriceRangeDto } from '../dto/price-range.dto';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -60,7 +61,7 @@ export class ItemsController {
 
   @IsAddressValid()
   @Post()
-  create(@Body() itemRequestDto: ItemRequestDto) {
+  create(@Body() itemRequestDto: DraftItemRequestDto) {
     return this.itemService.create(itemRequestDto);
   }
 
@@ -89,5 +90,11 @@ export class ItemsController {
   ): Promise<Item> {
     delistItemRequestDto.itemId = itemId;
     return this.itemService.delistAnItem(delistItemRequestDto);
+  }
+
+  @IsAddressValid()
+  @Patch('/:itemId/activate')
+  activate(@Param('itemId') itemId: string, @Body() itemRequest: ItemRequestDto): Promise<Item> {
+    return this.itemService.activate(itemId, itemRequest);
   }
 }
