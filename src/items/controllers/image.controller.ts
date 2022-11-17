@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Query, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { PinataService } from '../services/pinata.service';
 import { IpfsAttribute } from 'src/common/types/ipfs-attribute';
@@ -9,11 +9,7 @@ export class ImagesController {
 
   @Post('/upload')
   @UseInterceptors(FileInterceptor('image'))
-  async upload(
-    @UploadedFile() image: Express.Multer.File,
-    @Body() attributes: IpfsAttribute,
-    @Query('itemId') itemId: string
-  ) {
-    return this.pinataService.upload(image, attributes, itemId);
+  async upload(@UploadedFile() image: Express.Multer.File, @Body() attributes: IpfsAttribute) {
+    return this.pinataService.upload(image, attributes);
   }
 }
