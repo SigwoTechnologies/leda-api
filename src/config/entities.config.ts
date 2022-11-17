@@ -3,4 +3,5 @@ export { History } from '../items/entities/history.entity';
 export { Image } from '../items/entities/image.entity';
 export { Item } from '../items/entities/item.entity';
 export { ItemLike } from '../items/entities/item-like.entity';
+export { ItemProperty } from '../items/entities/item-property.entity';
 export { Tag } from '../items/entities/tag.entity';

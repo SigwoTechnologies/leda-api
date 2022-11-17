@@ -16,6 +16,7 @@ import { Image } from './image.entity';
 import { History } from './history.entity';
 import { Tag } from './tag.entity';
 import { ItemLike } from './item-like.entity';
+import { ItemProperty } from './item-property.entity';
 
 @Entity()
 export class Item {
@@ -88,6 +89,9 @@ export class Item {
 
   @OneToMany(() => ItemLike, (table) => table.item, { cascade: true })
   itemLikes: ItemLike[];
+
+  @OneToMany(() => ItemProperty, (table) => table.item, { cascade: true })
+  itemProperties: ItemProperty[];
 
   @CreateDateColumn()
   createdAt: Date;

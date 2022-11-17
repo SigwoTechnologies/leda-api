@@ -19,6 +19,7 @@ import { Account } from '../../account/entities/account.entity';
 import { Image } from '../entities/image.entity';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { History } from '../entities/history.entity';
+import { ItemProperty } from '../entities/item-property.entity';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -46,10 +47,13 @@ export class ItemRepository extends Repository<Item> {
         'tag.id',
         'author.accountId',
         'author.address',
+        'property.key',
+        'property.value',
       ])
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.tags', 'tag')
       .innerJoin('item.author', 'author')
+      .innerJoin('item.itemProperties', 'property')
       .leftJoin('item.image', 'image');
   }
 
@@ -196,11 +200,19 @@ export class ItemRepository extends Repository<Item> {
       return newTag;
     });
 
+    const itemProperties = itemRequest.itemProperties.map((itemProp) => {
+      const newProp = new ItemProperty();
+      newProp.key = itemProp.key;
+      newProp.value = itemProp.value;
+      return newProp;
+    });
+
     const item = this.create({
       collectionAddress,
       name,
       description,
       tags,
+      itemProperties,
       royalty,
       author: new Account(accountId),
       owner: new Account(accountId),
