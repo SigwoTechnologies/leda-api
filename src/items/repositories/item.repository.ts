@@ -10,11 +10,15 @@ import {
   SelectQueryBuilder,
 } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { Account } from '../../config/entities.config';
 import { ItemStatus } from '../enums/item-status.enum';
 import { Between } from 'typeorm';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { Tag } from '../entities/tag.entity';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
+import { Account } from '../../account/entities/account.entity';
+import { Image } from '../entities/image.entity';
+import { TransactionType } from '../enums/transaction-type.enum';
+import { History } from '../entities/history.entity';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -43,10 +47,10 @@ export class ItemRepository extends Repository<Item> {
         'author.accountId',
         'author.address',
       ])
-      .innerJoin('item.image', 'image')
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.tags', 'tag')
-      .innerJoin('item.author', 'author');
+      .innerJoin('item.author', 'author')
+      .leftJoin('item.image', 'image');
   }
 
   async findAll(): Promise<Item[]> {
@@ -58,7 +62,8 @@ export class ItemRepository extends Repository<Item> {
 
   async findByAccount(accountId: string): Promise<Item[]> {
     return this.getItemQueryBuilder()
-      .where('item.ownerId = :accountId OR item.authorId = :accountId', { accountId })
+      .where('item.status != :status', { status: ItemStatus.Draft })
+      .andWhere('(item.ownerId = :accountId OR item.authorId = :accountId)', { accountId })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
@@ -67,6 +72,7 @@ export class ItemRepository extends Repository<Item> {
     return this.getItemQueryBuilder()
       .innerJoin('item.itemLikes', 'itemLikes')
       .where('itemLikes.accountId = :accountId', { accountId })
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
@@ -74,7 +80,14 @@ export class ItemRepository extends Repository<Item> {
   async findById(itemId: string): Promise<Item> {
     return this.getItemQueryBuilder()
       .where('item.itemId = :itemId', { itemId })
-      .orderBy('item.createdAt', 'DESC')
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
+      .getOne();
+  }
+
+  async findDraftById(itemId: string): Promise<Item> {
+    return this.getItemQueryBuilder()
+      .where('item.itemId = :itemId', { itemId })
+      .andWhere('item.status = :status', { status: ItemStatus.Draft })
       .getOne();
   }
 
@@ -172,33 +185,25 @@ export class ItemRepository extends Repository<Item> {
     };
   }
 
-  async createItem(itemRequestDto: ItemRequestDto, account: Account): Promise<Item> {
-    const { tokenId, name, collectionAddress, description, royalty, status, image, wei } =
-      itemRequestDto;
+  async createItem(itemRequest: DraftItemRequestDto, account: Account): Promise<Item> {
+    const { name, collectionAddress, description, royalty } = itemRequest;
 
     const { accountId, address } = account;
 
-    const tags = itemRequestDto.tags.map((tag) => {
+    const tags = itemRequest.tags.map((tag) => {
       const newTag = new Tag();
       newTag.name = tag;
       return newTag;
     });
 
     const item = this.create({
-      tokenId,
       collectionAddress,
       name,
       description,
-      price: wei,
       tags,
       royalty,
-      status,
-      image: { url: image.url, cid: image.cid },
       author: new Account(accountId),
       owner: new Account(accountId),
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      likes: 0,
     });
 
     await this.save(item);
@@ -218,6 +223,23 @@ export class ItemRepository extends Repository<Item> {
       .getCount();
 
     return number > 0;
+  }
+
+  async activate(item: Item, itemRequest: ItemRequestDto): Promise<Item> {
+    const { tokenId, image } = itemRequest;
+
+    item.tokenId = tokenId;
+    item.status = ItemStatus.NotListed;
+    item.image = { url: image.url, cid: image.cid } as Image;
+
+    const history = new History();
+    history.transactionType = TransactionType.Minted;
+    history.owner = new Account(item.author.accountId);
+
+    item.history = [history];
+
+    await this.save(item);
+    return item;
   }
 
   private getPaginationConditions(paginationDto: ItemPaginationDto): FindOptionsWhere<Item>[] {

@@ -1,21 +1,15 @@
-import {
-  ArrayMaxSize,
-  ArrayMinSize,
-  ArrayNotEmpty,
-  IsArray,
-  Max,
-  MaxLength,
-  Min,
-} from 'class-validator';
+import { Max, MaxLength, Min } from 'class-validator';
 import { Account } from '../../account/entities/account.entity';
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { ItemStatus } from '../enums/item-status.enum';
 import { Image } from './image.entity';
@@ -29,12 +23,10 @@ export class Item {
   itemId: string;
 
   // TODO: !IMPORTANT: MAKE THIS FIELD UNIQUE ONCE IN PROD
-  // @Column({ unique: true })
-  // tokenId: number;
-
-  @Column({ unique: false })
+  @Column({ unique: false, nullable: true })
   tokenId: number;
 
+  // TODO: !IMPORTANT: MAKE THIS FIELD UNIQUE ONCE IN PROD
   @Column({ unique: false, nullable: true })
   listId: number;
 
@@ -62,7 +54,7 @@ export class Item {
   @Column({
     type: 'enum',
     enum: ItemStatus,
-    default: ItemStatus.NotListed,
+    default: ItemStatus.Draft,
   })
   status: ItemStatus;
 
@@ -88,7 +80,7 @@ export class Item {
   @JoinColumn({ name: 'imageId' })
   image: Image;
 
-  @Column()
+  @Column({ default: 0 })
   likes: number;
 
   @OneToMany(() => History, (table) => table.item, { cascade: true })
@@ -97,10 +89,10 @@ export class Item {
   @OneToMany(() => ItemLike, (table) => table.item, { cascade: true })
   itemLikes: ItemLike[];
 
-  @Column()
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column()
+  @UpdateDateColumn()
   updatedAt: Date;
 
   constructor(id: string) {
