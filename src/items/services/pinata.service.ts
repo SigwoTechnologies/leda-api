@@ -9,6 +9,7 @@ import { BusinessErrors } from '../../common/constants';
 import { PinataResponse } from '../../common/types/pinata-response';
 import { IpfsAttribute } from 'src/common/types/ipfs-attribute';
 import { IpfsTrait } from 'src/common/types/ipfs-trait';
+import { ReservedAttribute } from '../enums/reserved-attribute.enum';
 
 @Injectable()
 export class PinataService {
@@ -33,13 +34,13 @@ export class PinataService {
   }
 
   async uploadMetadata(imageHash: string, attributes: IpfsAttribute): Promise<PinataResponse> {
-    const name = attributes['reserved::name'];
+    const name = attributes[ReservedAttribute.name];
     if (!name) throw new BusinessException(BusinessErrors.ipfs_name_required);
 
-    const description = attributes['reserved::description'];
+    const description = attributes[ReservedAttribute.description];
     if (!description) throw new BusinessException(BusinessErrors.ipfs_description_required);
 
-    const external_url = attributes['reserved::external_url'];
+    const external_url = attributes[ReservedAttribute.external_url];
     if (!external_url) throw new BusinessException(BusinessErrors.ipfs_external_url_required);
 
     const atts = this.getFormattedAttributes(attributes);
