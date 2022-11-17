@@ -35,6 +35,7 @@ describe('AccountController', () => {
             price: '1',
             royalty: 1,
             tags: [],
+            itemProperties: [],
             status: ItemStatus.Listed,
             tokenId: 1,
             listId: 1,

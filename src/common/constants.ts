@@ -75,6 +75,21 @@ export const BusinessErrors = {
   incorrect_tags_size: {
     name: 'INCORRECT_TAGS_SIZE',
     message: 'The tags amount must be between 1 and 8',
-    code: 6007,
+    code: 4007,
+  },
+  ipfs_name_required: {
+    name: 'IPFS_NAME_REQUIRED',
+    message: 'The image name is required. Please verify your information and try again.',
+    code: 4008,
+  },
+  ipfs_description_required: {
+    name: 'IPFS_DESCRIPTION_REQUIRED',
+    message: 'The image description is required. Please verify your information and try again.',
+    code: 4009,
+  },
+  ipfs_external_url_required: {
+    name: 'IPFS_EXTERNAL_URL_REQUIRED',
+    message: 'The image external url is required. Please verify your information and try again.',
+    code: 4010,
   },
 };
