@@ -10,6 +10,7 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   ArrayNotEmpty,
+  IsOptional,
 } from 'class-validator';
 import { ItemPropertyDto } from './item-property.dto';
 
@@ -45,8 +46,7 @@ export class DraftItemRequestDto {
   tags: string[];
 
   @IsArray()
-  @ArrayNotEmpty()
-  @ArrayMinSize(1)
   @ArrayMaxSize(10)
+  @IsOptional()
   itemProperties: ItemPropertyDto[];
 }

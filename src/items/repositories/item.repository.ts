@@ -53,7 +53,7 @@ export class ItemRepository extends Repository<Item> {
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.tags', 'tag')
       .innerJoin('item.author', 'author')
-      .innerJoin('item.itemProperties', 'property')
+      .leftJoin('item.itemProperties', 'property')
       .leftJoin('item.image', 'image');
   }
 
@@ -190,17 +190,24 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async createItem(itemRequest: DraftItemRequestDto, account: Account): Promise<Item> {
-    const { name, collectionAddress, description, royalty } = itemRequest;
+    const {
+      name,
+      collectionAddress,
+      description,
+      royalty,
+      tags: tagsProps,
+      itemProperties: itemPropertiesProps,
+    } = itemRequest;
 
     const { accountId, address } = account;
 
-    const tags = itemRequest.tags.map((tag) => {
+    const tags = tagsProps.map((tag) => {
       const newTag = new Tag();
       newTag.name = tag;
       return newTag;
     });
 
-    const itemProperties = itemRequest.itemProperties.map((itemProp) => {
+    const itemProperties = itemPropertiesProps.map((itemProp) => {
       const newProp = new ItemProperty();
       newProp.key = itemProp.key;
       newProp.value = itemProp.value;
