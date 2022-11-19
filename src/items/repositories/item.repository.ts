@@ -238,7 +238,7 @@ export class ItemRepository extends Repository<Item> {
       .innerJoin('item.itemLikes', 'itemLike')
       .where('itemLike.accountId = :accountId', { accountId })
       .andWhere('item.itemId = :itemId', { itemId })
-      .andWhere('item.status = :status', { status: ItemStatus.Listed })
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .getCount();
 
     return number > 0;

@@ -15,7 +15,7 @@ export class ItemLikeRepository extends Repository<ItemLike> {
     return this.createQueryBuilder('itemLike')
       .innerJoin('itemLike.item', 'item')
       .where('item.itemId = :itemId', { itemId })
-      .andWhere('item.status = :status', { status: ItemStatus.Listed })
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .getCount();
   }
 
