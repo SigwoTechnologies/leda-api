@@ -146,8 +146,10 @@ export class ItemService {
   }
 
   async like(itemId: string, address: string): Promise<Item> {
-    const item = await this.itemRepository.findById(itemId);
-    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+    const itemToLike = await this.itemRepository.findById(itemId);
+    const history = await this.historyRepository.findAllByItemId(itemId);
+
+    if (!itemToLike) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     const account = await this.accountRepository.findByAddress(address);
     if (!account) throw new NotFoundException(`The account with address ${address} does not exist`);
@@ -165,15 +167,15 @@ export class ItemService {
         account: new Account(account.accountId),
       });
 
-      item.likes = currentLikes - 1;
+      itemToLike.likes = currentLikes - 1;
     } else {
       await this.itemLikeRepository.createItemLike(itemId, account.accountId);
 
-      item.likes = currentLikes + 1;
+      itemToLike.likes = currentLikes + 1;
     }
+    await this.itemRepository.updateLikesOnItem(itemId, itemToLike.likes);
 
-    await this.itemRepository.updateLikesOnItem(itemId, item.likes);
-
+    const item = { ...itemToLike, history };
     return item;
   }
 
