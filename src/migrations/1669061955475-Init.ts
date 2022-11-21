@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Init1668540641096 implements MigrationInterface {
-  name = 'Init1668540641096';
+export class Init1669061955475 implements MigrationInterface {
+  name = 'Init1669061955475';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -17,7 +17,10 @@ export class Init1668540641096 implements MigrationInterface {
       `CREATE TABLE "item_like" ("itemLikeId" uuid NOT NULL DEFAULT uuid_generate_v4(), "itemId" uuid, "accountId" uuid, CONSTRAINT "PK_c3e97ab2c88fdff97bf4f77960f" PRIMARY KEY ("itemLikeId"))`
     );
     await queryRunner.query(
-      `CREATE TABLE "item" ("itemId" uuid NOT NULL DEFAULT uuid_generate_v4(), "tokenId" integer NOT NULL, "listId" integer, "collectionAddress" character varying NOT NULL, "name" character varying NOT NULL, "description" character varying NOT NULL, "price" character varying, "royalty" integer NOT NULL, "status" "public"."item_status_enum" NOT NULL DEFAULT '0', "likes" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, "authorId" uuid, "ownerId" uuid, "imageId" uuid, CONSTRAINT "REL_4e9b8917d85122b13f11939d7d" UNIQUE ("imageId"), CONSTRAINT "PK_51d980088ed0b9a65dc50c94e92" PRIMARY KEY ("itemId"))`
+      `CREATE TABLE "item_property" ("itemPropertyId" uuid NOT NULL DEFAULT uuid_generate_v4(), "key" character varying NOT NULL, "value" character varying NOT NULL, "itemId" uuid, CONSTRAINT "PK_f7d1201728096929708d890b116" PRIMARY KEY ("itemPropertyId"))`
+    );
+    await queryRunner.query(
+      `CREATE TABLE "item" ("itemId" uuid NOT NULL DEFAULT uuid_generate_v4(), "tokenId" integer, "listId" integer, "collectionAddress" character varying NOT NULL, "name" character varying NOT NULL, "description" character varying NOT NULL, "price" character varying, "royalty" integer NOT NULL, "status" "public"."item_status_enum" NOT NULL DEFAULT '3', "likes" integer NOT NULL DEFAULT '0', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "authorId" uuid, "ownerId" uuid, "imageId" uuid, CONSTRAINT "REL_4e9b8917d85122b13f11939d7d" UNIQUE ("imageId"), CONSTRAINT "PK_51d980088ed0b9a65dc50c94e92" PRIMARY KEY ("itemId"))`
     );
     await queryRunner.query(
       `CREATE TABLE "account" ("accountId" uuid NOT NULL DEFAULT uuid_generate_v4(), "address" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "UQ_83603c168bc00b20544539fbea6" UNIQUE ("address"), CONSTRAINT "PK_b1a9fdd281787a66a213f5b725b" PRIMARY KEY ("accountId"))`
@@ -38,6 +41,9 @@ export class Init1668540641096 implements MigrationInterface {
       `ALTER TABLE "item_like" ADD CONSTRAINT "FK_5cee6d339d6726b436cbc4ae7f9" FOREIGN KEY ("accountId") REFERENCES "account"("accountId") ON DELETE CASCADE ON UPDATE NO ACTION`
     );
     await queryRunner.query(
+      `ALTER TABLE "item_property" ADD CONSTRAINT "FK_db347c1090b7ade933a46c74ed6" FOREIGN KEY ("itemId") REFERENCES "item"("itemId") ON DELETE CASCADE ON UPDATE NO ACTION`
+    );
+    await queryRunner.query(
       `ALTER TABLE "item" ADD CONSTRAINT "FK_04548d2604521d54d9ac383df0c" FOREIGN KEY ("authorId") REFERENCES "account"("accountId") ON DELETE CASCADE ON UPDATE NO ACTION`
     );
     await queryRunner.query(
@@ -53,6 +59,9 @@ export class Init1668540641096 implements MigrationInterface {
     await queryRunner.query(`ALTER TABLE "item" DROP CONSTRAINT "FK_3b030ef7f2840a721547a3c492e"`);
     await queryRunner.query(`ALTER TABLE "item" DROP CONSTRAINT "FK_04548d2604521d54d9ac383df0c"`);
     await queryRunner.query(
+      `ALTER TABLE "item_property" DROP CONSTRAINT "FK_db347c1090b7ade933a46c74ed6"`
+    );
+    await queryRunner.query(
       `ALTER TABLE "item_like" DROP CONSTRAINT "FK_5cee6d339d6726b436cbc4ae7f9"`
     );
     await queryRunner.query(
@@ -67,6 +76,7 @@ export class Init1668540641096 implements MigrationInterface {
     );
     await queryRunner.query(`DROP TABLE "account"`);
     await queryRunner.query(`DROP TABLE "item"`);
+    await queryRunner.query(`DROP TABLE "item_property"`);
     await queryRunner.query(`DROP TABLE "item_like"`);
     await queryRunner.query(`DROP TABLE "tag"`);
     await queryRunner.query(`DROP TABLE "history"`);
