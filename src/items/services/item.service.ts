@@ -30,6 +30,10 @@ export class ItemService {
     return this.itemRepository.findAll();
   }
 
+  async getNewest(qty: number): Promise<Item[]> {
+    return this.itemRepository.getNewest(qty);
+  }
+
   async findPagination(paginationValues: ItemPaginationDto) {
     return this.itemRepository.pagination(paginationValues);
   }

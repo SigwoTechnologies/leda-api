@@ -30,6 +30,12 @@ export class ItemsController {
   }
 
   @Public()
+  @Get('/newest/:qty')
+  getNewest(@Param('qty') qty: number): Promise<Item[]> {
+    return this.itemService.getNewest(qty);
+  }
+
+  @Public()
   @Get('/history')
   findAllHistory(): Promise<History[]> {
     return this.historyService.findAll();
