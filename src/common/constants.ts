@@ -92,4 +92,14 @@ export const BusinessErrors = {
     message: 'The image external url is required. Please verify your information and try again.',
     code: 4010,
   },
+  newest_tohigh_number: {
+    name: 'NEWEST_TOHIGH_NUMBER',
+    message: 'Please provide a lower number to find newest items',
+    code: 4011,
+  },
+  newest_zero_notallowed: {
+    name: 'NEWEST_ZERO_NOTALLOWED',
+    message: 'Zero is not a valid value. Please try again with another one',
+    code: 4012,
+  },
 };

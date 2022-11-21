@@ -31,6 +31,10 @@ export class ItemService {
   }
 
   async getNewest(qty: number): Promise<Item[]> {
+    const maxToSearch = 15;
+    if (+qty >= maxToSearch) throw new BusinessException(BusinessErrors.newest_tohigh_number);
+    if (+qty === 0) throw new BusinessException(BusinessErrors.newest_zero_notallowed);
+
     return this.itemRepository.getNewest(qty);
   }
 
