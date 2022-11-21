@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class Init1669061955475 implements MigrationInterface {
-  name = 'Init1669061955475';
+export class Init1669062725559 implements MigrationInterface {
+  name = 'Init1669062725559';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -19,6 +19,7 @@ export class Init1669061955475 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE "item_property" ("itemPropertyId" uuid NOT NULL DEFAULT uuid_generate_v4(), "key" character varying NOT NULL, "value" character varying NOT NULL, "itemId" uuid, CONSTRAINT "PK_f7d1201728096929708d890b116" PRIMARY KEY ("itemPropertyId"))`
     );
+    await queryRunner.query(`CREATE TYPE "public"."item_status_enum" AS ENUM('0', '1', '2', '3')`);
     await queryRunner.query(
       `CREATE TABLE "item" ("itemId" uuid NOT NULL DEFAULT uuid_generate_v4(), "tokenId" integer, "listId" integer, "collectionAddress" character varying NOT NULL, "name" character varying NOT NULL, "description" character varying NOT NULL, "price" character varying, "royalty" integer NOT NULL, "status" "public"."item_status_enum" NOT NULL DEFAULT '3', "likes" integer NOT NULL DEFAULT '0', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "authorId" uuid, "ownerId" uuid, "imageId" uuid, CONSTRAINT "REL_4e9b8917d85122b13f11939d7d" UNIQUE ("imageId"), CONSTRAINT "PK_51d980088ed0b9a65dc50c94e92" PRIMARY KEY ("itemId"))`
     );
@@ -76,6 +77,7 @@ export class Init1669061955475 implements MigrationInterface {
     );
     await queryRunner.query(`DROP TABLE "account"`);
     await queryRunner.query(`DROP TABLE "item"`);
+    await queryRunner.query(`DROP TYPE "public"."item_status_enum"`);
     await queryRunner.query(`DROP TABLE "item_property"`);
     await queryRunner.query(`DROP TABLE "item_like"`);
     await queryRunner.query(`DROP TABLE "tag"`);
