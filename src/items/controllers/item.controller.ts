@@ -12,6 +12,7 @@ import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
+import { NewestItemsRequestDto } from '../dto/newest-items-request.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -27,6 +28,12 @@ export class ItemsController {
   @Get('/paginate')
   paginate(@Query() paginationDto: ItemPaginationDto) {
     return this.itemService.findPagination(paginationDto);
+  }
+
+  @Public()
+  @Get('/newest')
+  getNewest(@Query() NewestQuery: NewestItemsRequestDto): Promise<Item[]> {
+    return this.itemService.getNewest(NewestQuery.qty);
   }
 
   @Public()

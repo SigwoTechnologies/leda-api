@@ -57,6 +57,14 @@ export class ItemRepository extends Repository<Item> {
       .leftJoin('item.image', 'image');
   }
 
+  async getNewest(qty: number): Promise<Item[]> {
+    return await this.getItemQueryBuilder()
+      .where('item.status=:status', { status: ItemStatus.Listed })
+      .orderBy('item.createdAt', 'DESC')
+      .take(qty)
+      .getMany();
+  }
+
   async findAll(): Promise<Item[]> {
     return this.getItemQueryBuilder()
       .where('item.status=:status', { status: ItemStatus.Listed })
