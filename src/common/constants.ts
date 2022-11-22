@@ -102,4 +102,9 @@ export const BusinessErrors = {
     message: 'Zero is not a valid value. Please try again with another one',
     code: 4012,
   },
+  provide_newest_max_number: {
+    name: 'PROVIDE_NEWEST_MAX_NUMBER',
+    message: 'Please provide a max number to find',
+    code: 4013,
+  },
 };
