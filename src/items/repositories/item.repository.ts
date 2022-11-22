@@ -58,11 +58,11 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async getNewest(qty: number): Promise<Item[]> {
-    const items = await this.getItemQueryBuilder()
+    return await this.getItemQueryBuilder()
       .where('item.status=:status', { status: ItemStatus.Listed })
       .orderBy('item.createdAt', 'DESC')
+      .take(qty)
       .getMany();
-    return items.slice(0, qty);
   }
 
   async findAll(): Promise<Item[]> {

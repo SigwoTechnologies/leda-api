@@ -33,7 +33,7 @@ export class ItemsController {
   @Public()
   @Get('/newest')
   getNewest(@Query() NewestQuery: NewestItemsRequestDto): Promise<Item[]> {
-    return this.itemService.getNewest(Number(NewestQuery.qty));
+    return this.itemService.getNewest(NewestQuery.qty);
   }
 
   @Public()
