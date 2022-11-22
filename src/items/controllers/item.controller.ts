@@ -32,7 +32,7 @@ export class ItemsController {
   @Public()
   @Get('/newest/:qty')
   getNewest(@Param('qty') qty: number): Promise<Item[]> {
-    return this.itemService.getNewest(qty);
+    return this.itemService.getNewest(Number(qty));
   }
 
   @Public()
