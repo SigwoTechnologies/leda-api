@@ -19,9 +19,6 @@ export class Collection {
   @Column({ unique: true, nullable: false })
   name: string;
 
-  @Column({ nullable: false })
-  address: string;
-
   @OneToMany(() => Item, (table) => table.collection, {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete',
