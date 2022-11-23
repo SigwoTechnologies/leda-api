@@ -19,6 +19,8 @@ export class DraftItemRequestDto {
   @IsNotEmpty()
   address: string;
 
+  collectionId: string;
+
   @IsEthereumAddress()
   @IsNotEmpty()
   collectionAddress: string;

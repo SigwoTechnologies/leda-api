@@ -13,9 +13,9 @@ export const appConfig = () => ({
     synchronize: process.env.POSTGRES_SYNC,
     timezone: 'Z',
     extra: {
-      ssl: {
-        rejectUnauthorized: false,
-      },
+      // ssl: {
+      //   rejectUnauthorized: false,
+      // },
     },
   },
   pinataUrl: process.env.PINATA_URL || '',

@@ -1,5 +1,6 @@
 import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { CollectionRepository } from '../collections/repositories/collection.repository';
 import { AccountRepository } from '../account/repositories/account.repository';
 import { ImagesController } from './controllers/image.controller';
 import { ItemsController } from './controllers/item.controller';
@@ -23,6 +24,7 @@ import { PinataService } from './services/pinata.service';
     PinataRepository,
     ItemRepository,
     ItemLikeRepository,
+    CollectionRepository,
   ],
   exports: [ItemService, HistoryService],
 })

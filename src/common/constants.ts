@@ -107,4 +107,9 @@ export const BusinessErrors = {
     message: 'Please provide a max number to find',
     code: 4013,
   },
+  collection_not_associated: {
+    name: 'COLLECTION_NOT_ASSOCIATED',
+    message: 'The given collection address does not have an associated collection.',
+    code: 4014,
+  },
 };

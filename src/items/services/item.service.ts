@@ -16,6 +16,7 @@ import { PriceRangeDto } from '../dto/price-range.dto';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { CollectionRepository } from '../../collections/repositories/collection.repository';
 
 @Injectable()
 export class ItemService {
@@ -23,7 +24,8 @@ export class ItemService {
     private itemRepository: ItemRepository,
     private accountRepository: AccountRepository,
     private historyRepository: HistoryRepository,
-    private itemLikeRepository: ItemLikeRepository
+    private itemLikeRepository: ItemLikeRepository,
+    private collectionRepository: CollectionRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -69,9 +71,15 @@ export class ItemService {
   async create(itemRequest: DraftItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
+    const collection = await this.collectionRepository.findById(
+      itemRequest.collectionId || process.env.DEFAULT_COLLECTION_ID
+    );
+
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.createItem(itemRequest, account);
+    if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
+
+    return this.itemRepository.createItem(itemRequest, account, collection);
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
