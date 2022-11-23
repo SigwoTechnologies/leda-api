@@ -26,24 +26,24 @@ export class CollectionRepository extends Repository<Collection> {
   }
 
   async findById(id: string): Promise<Collection | undefined> {
-    const account = await this.findOne({
+    const data = await this.findOne({
       where: { id },
     });
 
-    if (!account) return;
+    if (!data) return;
 
-    return account;
+    return data;
   }
 
   async findByOwner(address: string): Promise<Collection[] | undefined> {
-    const account = await this.find({
+    const data = await this.find({
       where: { owner: new Account(address) },
       relations: { items: true },
     });
 
-    if (!account) return;
+    if (!data) return;
 
-    return account;
+    return data;
   }
 
   async createCollection(
