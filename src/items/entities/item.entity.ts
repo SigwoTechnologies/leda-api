@@ -43,6 +43,9 @@ export class Item {
   description: string;
 
   @Column({ nullable: true })
+  collectionAddress: string;
+
+  @Column({ nullable: true })
   price: string;
 
   @Column()

@@ -52,6 +52,7 @@ const collectionRepositoryMock = () => ({
   findById: jest.fn(),
   findByOwner: jest.fn(),
   createCollection: jest.fn(),
+  getDefaultCollection: jest.fn(),
 });
 
 describe('ItemService', () => {
@@ -91,6 +92,7 @@ describe('ItemService', () => {
         itemProperties: [],
         status: ItemStatus.NotListed,
         tokenId: 1,
+        collectionAddress: 'test',
         collection: {} as Collection,
         author: {} as Account,
         owner: {} as Account,
@@ -230,7 +232,7 @@ describe('ItemService', () => {
         const collection = { id: '1' } as Collection;
         const expected = items[0];
 
-        collectionRepository.findById.mockResolvedValue({ ...collection });
+        collectionRepository.getDefaultCollection.mockResolvedValue({ ...collection });
         accountRepository.findByAddress.mockResolvedValue({ ...account });
         itemRepository.createItem.mockResolvedValue({ ...expected });
 

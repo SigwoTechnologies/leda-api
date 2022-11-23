@@ -66,6 +66,7 @@ describe('ItemsController', () => {
         updatedAt: new Date(),
         history: [],
         itemLikes: [],
+        collectionAddress: '',
       },
     ];
   });
@@ -144,6 +145,7 @@ describe('ItemsController', () => {
         tags: [],
         itemProperties: [],
         collectionId: '',
+        collectionName: '',
       });
 
       expect(actual).toEqual(expected);
