@@ -14,15 +14,15 @@ export class CollectionRepository extends Repository<Collection> {
   async pagination(paginationDto: PaginationDto): Promise<Collection[] | undefined> {
     const { limit, skip } = paginationDto;
 
-    const account = await this.find({
+    const data = await this.find({
       relations: { items: true },
       take: limit,
       skip: skip,
     });
 
-    if (!account) return;
+    if (!data) return;
 
-    return account;
+    return data;
   }
 
   async findById(id: string): Promise<Collection | undefined> {
