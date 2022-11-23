@@ -8,9 +8,5 @@ export class CreateCollectionDto {
 
   @IsEthereumAddress()
   @IsNotEmpty()
-  address: string;
-
-  @IsEthereumAddress()
-  @IsNotEmpty()
   ownerAddress: string;
 }

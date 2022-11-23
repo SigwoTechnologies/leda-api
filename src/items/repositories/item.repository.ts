@@ -50,6 +50,7 @@ export class ItemRepository extends Repository<Item> {
         'author.address',
         'property.key',
         'property.value',
+        'collection.id',
         'collection.name',
         'collection.address',
       ])

@@ -25,9 +25,18 @@ export class CollectionRepository extends Repository<Collection> {
     return data;
   }
 
-  async findById(id: string): Promise<Collection | undefined> {
+  async findByName(name: string): Promise<Collection | undefined> {
     const data = await this.findOne({
-      where: { id },
+      where: { name },
+    });
+
+    if (!data) return;
+
+    return data;
+  }
+  async getDefaultCollection(): Promise<Collection | undefined> {
+    const data = await this.findOne({
+      where: { name: process.env.DEFAULT_COLLECTION_NAME },
     });
 
     if (!data) return;
@@ -46,13 +55,9 @@ export class CollectionRepository extends Repository<Collection> {
     return data;
   }
 
-  async createCollection(
-    { name, address }: CreateCollectionDto,
-    owner: Account
-  ): Promise<Collection> {
+  async createCollection({ name }: CreateCollectionDto, owner: Account): Promise<Collection> {
     const data = this.create({
       name,
-      address,
       owner: new Account(owner.accountId),
     });
 
