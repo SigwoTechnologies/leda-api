@@ -28,6 +28,7 @@ export class CollectionRepository extends Repository<Collection> {
   async findByName(name: string): Promise<Collection | undefined> {
     const data = await this.findOne({
       where: { name },
+      relations: { items: true },
     });
 
     if (!data) return;

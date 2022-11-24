@@ -1,10 +1,9 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Collection } from '../../collections/entities/collection.entity';
 import { CollectionService } from '../../collections/services/collection.service';
-import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Item } from '../../items/entities/item.entity';
 import { ItemService } from '../../items/services/item.service';
-import { Public } from 'src/auth/decorators/public.decorator';
 @Controller('accounts')
 export class AccountsController {
   constructor(private itemService: ItemService, private collectionService: CollectionService) {}
