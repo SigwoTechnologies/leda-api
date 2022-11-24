@@ -44,9 +44,9 @@ export class CollectionRepository extends Repository<Collection> {
     return data;
   }
 
-  async findByOwner(address: string): Promise<Collection[] | undefined> {
+  async findByOwner(account: Account): Promise<Collection[] | undefined> {
     const data = await this.find({
-      where: { owner: new Account(address) },
+      where: { owner: new Account(account.accountId) },
       relations: { items: true },
     });
 
