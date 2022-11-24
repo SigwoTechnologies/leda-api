@@ -23,7 +23,7 @@ export class AccountsController {
   @IsAddressValid()
   @Get('/:address/collections-list')
   findListCollections(@Param('address') address: string): Promise<Collection[]> {
-    return this.collectionService.findByOwner(address);
+    return this.collectionService.findCollectionsListByOwner(address);
   }
 
   @IsAddressValid()
