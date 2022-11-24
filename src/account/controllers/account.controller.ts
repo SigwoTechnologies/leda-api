@@ -4,6 +4,7 @@ import { CollectionService } from '../../collections/services/collection.service
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Item } from '../../items/entities/item.entity';
 import { ItemService } from '../../items/services/item.service';
+import { Public } from 'src/auth/decorators/public.decorator';
 @Controller('accounts')
 export class AccountsController {
   constructor(private itemService: ItemService, private collectionService: CollectionService) {}
@@ -20,9 +21,9 @@ export class AccountsController {
     return this.collectionService.findByOwner(address);
   }
 
-  @IsAddressValid()
+  @Public()
   @Get('/:address/collections-list')
-  findListCollections(@Param('address') address: string): Promise<Collection[]> {
+  findCollectionsList(@Param('address') address: string): Promise<Collection[]> {
     return this.collectionService.findCollectionsListByOwner(address);
   }
 
