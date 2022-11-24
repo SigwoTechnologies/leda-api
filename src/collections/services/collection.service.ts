@@ -17,8 +17,8 @@ export class CollectionService {
     return this.collectionRepository.pagination(paginationValues);
   }
 
-  async findByName(name: string) {
-    return this.collectionRepository.findByName(name);
+  async findById(id: string) {
+    return this.collectionRepository.findById(id);
   }
 
   async findByOwner(address: string): Promise<Collection[]> {

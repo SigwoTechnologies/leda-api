@@ -25,10 +25,19 @@ export class CollectionRepository extends Repository<Collection> {
     return data;
   }
 
+  async findById(id: string): Promise<Collection | undefined> {
+    const data = await this.findOne({
+      where: { id },
+      relations: { items: true },
+    });
+
+    if (!data) return;
+
+    return data;
+  }
   async findByName(name: string): Promise<Collection | undefined> {
     const data = await this.findOne({
       where: { name },
-      relations: { items: true },
     });
 
     if (!data) return;

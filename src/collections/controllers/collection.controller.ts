@@ -13,8 +13,8 @@ export class CollectionsController {
     return this.collectionService.findPagination(paginationDto);
   }
 
-  @Get('/:name')
-  getByName(@Param('name') name: string) {
-    return this.collectionService.findByName(name);
+  @Get('/:id')
+  getByName(@Param('id') id: string) {
+    return this.collectionService.findById(id);
   }
 }
