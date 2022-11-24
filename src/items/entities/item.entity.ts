@@ -17,6 +17,7 @@ import { History } from './history.entity';
 import { Tag } from './tag.entity';
 import { ItemLike } from './item-like.entity';
 import { ItemProperty } from './item-property.entity';
+import { Collection } from '../../collections/entities/collection.entity';
 
 @Entity()
 export class Item {
@@ -35,14 +36,14 @@ export class Item {
   tags: Tag[];
 
   @Column()
-  collectionAddress: string;
-
-  @Column()
   @MaxLength(100)
   name: string;
 
   @Column()
   description: string;
+
+  @Column({ nullable: true })
+  collectionAddress: string;
 
   @Column({ nullable: true })
   price: string;
@@ -72,6 +73,13 @@ export class Item {
   })
   @JoinColumn({ name: 'ownerId' })
   owner: Account;
+
+  @ManyToOne(() => Collection, (table) => table.items, {
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
+  })
+  @JoinColumn({ name: 'collectionId' })
+  collection: Collection;
 
   @OneToOne(() => Image, {
     onDelete: 'CASCADE',

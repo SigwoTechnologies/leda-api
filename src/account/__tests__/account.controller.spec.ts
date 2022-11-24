@@ -3,11 +3,18 @@ import { Test } from '@nestjs/testing';
 import { Item } from '../../items/entities/item.entity';
 import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Account } from '../entities/account.entity';
-import { Image } from '../../config/entities.config';
+import { Collection, Image } from '../../config/entities.config';
 import { ItemService } from '../../items/services/item.service';
+import { CollectionService } from '../../collections/services/collection.service';
 
 const itemServiceMock = () => ({
   findByAddress: jest.fn(),
+});
+
+const collectionServiceMock = () => ({
+  create: jest.fn(),
+  findPagination: jest.fn(),
+  findByOwner: jest.fn(),
 });
 
 describe('AccountController', () => {
@@ -17,7 +24,10 @@ describe('AccountController', () => {
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       controllers: [AccountsController],
-      providers: [{ provide: ItemService, useFactory: itemServiceMock }],
+      providers: [
+        { provide: ItemService, useFactory: itemServiceMock },
+        { provide: CollectionService, useFactory: collectionServiceMock },
+      ],
     }).compile();
 
     controller = await module.get(AccountsController);
@@ -35,11 +45,12 @@ describe('AccountController', () => {
             price: '1',
             royalty: 1,
             tags: [],
+            collectionAddress: '',
             itemProperties: [],
             status: ItemStatus.Listed,
             tokenId: 1,
             listId: 1,
-            collectionAddress: 'test',
+            collection: {} as Collection,
             author: {} as Account,
             owner: {} as Account,
             image: {} as Image,

@@ -5,3 +5,4 @@ export { Item } from '../items/entities/item.entity';
 export { ItemLike } from '../items/entities/item-like.entity';
 export { ItemProperty } from '../items/entities/item-property.entity';
 export { Tag } from '../items/entities/tag.entity';
+export { Collection } from '../collections/entities/collection.entity';

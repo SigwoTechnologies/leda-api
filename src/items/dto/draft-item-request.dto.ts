@@ -12,12 +12,15 @@ import {
   ArrayNotEmpty,
   IsOptional,
 } from 'class-validator';
+import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import { ItemPropertyDto } from './item-property.dto';
 
 export class DraftItemRequestDto {
   @IsEthereumAddress()
   @IsNotEmpty()
   address: string;
+
+  collection: CreateCollectionDto;
 
   @IsEthereumAddress()
   @IsNotEmpty()

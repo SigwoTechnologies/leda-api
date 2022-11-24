@@ -20,6 +20,7 @@ import { Image } from '../entities/image.entity';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { History } from '../entities/history.entity';
 import { ItemProperty } from '../entities/item-property.entity';
+import { Collection } from '../../collections/entities/collection.entity';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -49,11 +50,15 @@ export class ItemRepository extends Repository<Item> {
         'author.address',
         'property.key',
         'property.value',
+        'collection.id',
+        'collection.name',
+        'collection.description',
       ])
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.tags', 'tag')
       .innerJoin('item.author', 'author')
       .leftJoin('item.itemProperties', 'property')
+      .leftJoin('item.collection', 'collection')
       .leftJoin('item.image', 'image');
   }
 
@@ -197,10 +202,13 @@ export class ItemRepository extends Repository<Item> {
     };
   }
 
-  async createItem(itemRequest: DraftItemRequestDto, account: Account): Promise<Item> {
+  async createItem(
+    itemRequest: DraftItemRequestDto,
+    account: Account,
+    collection: Collection
+  ): Promise<Item> {
     const {
       name,
-      collectionAddress,
       description,
       royalty,
       tags: tagsProps,
@@ -223,7 +231,6 @@ export class ItemRepository extends Repository<Item> {
     });
 
     const item = this.create({
-      collectionAddress,
       name,
       description,
       tags,
@@ -231,6 +238,7 @@ export class ItemRepository extends Repository<Item> {
       royalty,
       author: new Account(accountId),
       owner: new Account(accountId),
+      collection: new Collection(collection.id),
     });
 
     await this.save(item);

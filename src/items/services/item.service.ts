@@ -1,21 +1,22 @@
+import { Injectable } from '@nestjs/common';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
+import { CollectionRepository } from '../../collections/repositories/collection.repository';
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
-import { HistoryRepository } from '../repositories/history.repository';
-import { Injectable } from '@nestjs/common';
-import { Item } from '../entities/item.entity';
-import { ItemLikeRepository } from '../repositories/item-like.repository';
-import { ItemPaginationDto } from '../dto/pagination-request.dto';
-import { ItemRepository } from '../repositories/item.repository';
-import { ItemStatus } from '../enums/item-status.enum';
-import { ListItemRequestDto } from '../dto/list-item-request.dto';
-import { PriceRangeDto } from '../dto/price-range.dto';
-import { TransactionType } from '../enums/transaction-type.enum';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { ListItemRequestDto } from '../dto/list-item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
+import { Item } from '../entities/item.entity';
+import { ItemStatus } from '../enums/item-status.enum';
+import { TransactionType } from '../enums/transaction-type.enum';
+import { HistoryRepository } from '../repositories/history.repository';
+import { ItemLikeRepository } from '../repositories/item-like.repository';
+import { ItemRepository } from '../repositories/item.repository';
 
 @Injectable()
 export class ItemService {
@@ -23,7 +24,8 @@ export class ItemService {
     private itemRepository: ItemRepository,
     private accountRepository: AccountRepository,
     private historyRepository: HistoryRepository,
-    private itemLikeRepository: ItemLikeRepository
+    private itemLikeRepository: ItemLikeRepository,
+    private collectionRepository: CollectionRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -69,9 +71,31 @@ export class ItemService {
   async create(itemRequest: DraftItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
+    const collection = await this.getCollection(itemRequest, account);
+
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.createItem(itemRequest, account);
+    if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
+
+    return this.itemRepository.createItem(itemRequest, account, collection);
+  }
+
+  async getCollection(itemRequest: DraftItemRequestDto, account: Account) {
+    if (!itemRequest.collection.name) {
+      return this.collectionRepository.getDefaultCollection();
+    }
+
+    const collection = await this.collectionRepository.findByName(itemRequest.collection.name);
+
+    if (collection) return collection;
+
+    return this.collectionRepository.createCollection(
+      {
+        name: itemRequest.collection.name,
+        description: itemRequest.collection.description,
+      },
+      account
+    );
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
