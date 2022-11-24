@@ -21,7 +21,7 @@ export class AccountsController {
     return this.collectionService.findByOwner(address);
   }
 
-  @Public()
+  @IsAddressValid()
   @Get('/:address/collections-list')
   findCollectionsList(@Param('address') address: string): Promise<Collection[]> {
     return this.collectionService.findCollectionsListByOwner(address);
