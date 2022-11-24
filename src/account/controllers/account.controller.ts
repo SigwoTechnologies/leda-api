@@ -21,6 +21,12 @@ export class AccountsController {
   }
 
   @IsAddressValid()
+  @Get('/:address/collections-list')
+  findListCollections(@Param('address') address: string): Promise<Collection[]> {
+    return this.collectionService.findByOwner(address);
+  }
+
+  @IsAddressValid()
   @Get('/:address/liked-items')
   findLikedItems(@Param('address') address: string): Promise<Item[]> {
     return this.itemService.findLikedByAddress(address);

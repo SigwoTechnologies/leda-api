@@ -24,4 +24,11 @@ export class CollectionService {
 
     return this.collectionRepository.findByOwner(account);
   }
+  async findCollectionsListByOwner(address: string): Promise<Collection[]> {
+    const account = await this.accountRepository.findByAddress(address);
+
+    if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
+
+    return this.collectionRepository.findCollectionsListByOwner(account);
+  }
 }

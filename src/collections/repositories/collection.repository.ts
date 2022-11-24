@@ -54,6 +54,15 @@ export class CollectionRepository extends Repository<Collection> {
 
     return data;
   }
+  async findCollectionsListByOwner(account: Account): Promise<Collection[] | undefined> {
+    const data = await this.find({
+      where: { owner: new Account(account.accountId) },
+    });
+
+    if (!data) return;
+
+    return data;
+  }
 
   async createCollection({ name }: CreateCollectionDto, owner: Account): Promise<Collection> {
     const data = this.create({
