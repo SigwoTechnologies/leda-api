@@ -52,6 +52,7 @@ export class ItemRepository extends Repository<Item> {
         'property.value',
         'collection.id',
         'collection.name',
+        'collection.description',
       ])
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.tags', 'tag')
