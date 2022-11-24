@@ -144,8 +144,7 @@ describe('ItemsController', () => {
         royalty: 1,
         tags: [],
         itemProperties: [],
-        collectionId: '',
-        collectionName: '',
+        collection: {} as Collection,
       });
 
       expect(actual).toEqual(expected);

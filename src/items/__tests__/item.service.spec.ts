@@ -53,6 +53,7 @@ const collectionRepositoryMock = () => ({
   findByOwner: jest.fn(),
   createCollection: jest.fn(),
   getDefaultCollection: jest.fn(),
+  findByName: jest.fn(),
 });
 
 describe('ItemService', () => {
@@ -93,7 +94,7 @@ describe('ItemService', () => {
         status: ItemStatus.NotListed,
         tokenId: 1,
         collectionAddress: 'test',
-        collection: {} as Collection,
+        collection: { name: 'collection', description: 'description' } as Collection,
         author: {} as Account,
         owner: {} as Account,
         image: {} as Image,
@@ -123,7 +124,28 @@ describe('ItemService', () => {
   describe('When findById function is called', () => {
     describe('and the itemId exist', () => {
       it('should return the expected item', async () => {
-        const expected = items[0];
+        const expected = {
+          itemId: '1',
+          name: 'test',
+          description: 'test',
+          price: '1',
+          royalty: 1,
+          tags: [],
+          itemProperties: [],
+          status: ItemStatus.NotListed,
+          tokenId: 1,
+          collectionAddress: 'test',
+          collection: { name: 'collection', description: 'description' } as Collection,
+          author: {} as Account,
+          owner: {} as Account,
+          image: {} as Image,
+          listId: 1,
+          likes: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          history: [],
+          itemLikes: [],
+        };
 
         itemRepository.findById.mockResolvedValue({ ...expected });
 
@@ -229,14 +251,19 @@ describe('ItemService', () => {
     describe('and the account exist', () => {
       it('should return the expected item', async () => {
         const account = { accountId: '456' } as Account;
-        const collection = { id: '1' } as Collection;
+        const collection = { id: '1', name: 'name', description: 'description' } as Collection;
         const expected = items[0];
 
         collectionRepository.getDefaultCollection.mockResolvedValue({ ...collection });
         accountRepository.findByAddress.mockResolvedValue({ ...account });
         itemRepository.createItem.mockResolvedValue({ ...expected });
+        collectionRepository.findByName.mockResolvedValue({ ...collection });
+        collectionRepository.createCollection.mockResolvedValue({ ...collection });
 
-        const actual = await service.create({ address: '123' } as DraftItemRequestDto);
+        const actual = await service.create({
+          address: '123',
+          collection: { description: collection.description, name: collection.name },
+        } as DraftItemRequestDto);
 
         expect(actual).toEqual(expected);
       });

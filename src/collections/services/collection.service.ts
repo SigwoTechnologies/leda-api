@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { AccountRepository } from 'src/account/repositories/account.repository';
-import { BusinessErrors } from 'src/common/constants';
-import { BusinessException } from 'src/common/exceptions/exception-types';
+import { AccountRepository } from '../../account/repositories/account.repository';
+import { BusinessErrors } from '../../common/constants';
+import { BusinessException } from '../../common/exceptions/exception-types';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 import { Collection } from '../entities/collection.entity';
 import { CollectionRepository } from '../repositories/collection.repository';
