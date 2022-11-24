@@ -81,18 +81,18 @@ export class ItemService {
   }
 
   async getCollection(itemRequest: DraftItemRequestDto, account: Account) {
-    if (!itemRequest.collectionName) {
+    if (!itemRequest.collection.name) {
       return this.collectionRepository.getDefaultCollection();
     }
 
-    const collection = await this.collectionRepository.findByName(itemRequest.collectionName);
+    const collection = await this.collectionRepository.findByName(itemRequest.collection.name);
 
     if (collection) return collection;
 
     return this.collectionRepository.createCollection(
       {
-        name: itemRequest.collectionName,
-        description: itemRequest.collectionDescription,
+        name: itemRequest.collection.name,
+        description: itemRequest.collection.description,
       },
       account
     );
