@@ -16,6 +16,9 @@ export class Collection {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @Column({ nullable: true })
+  description: string;
+
   @Column({ unique: true, nullable: false })
   name: string;
 

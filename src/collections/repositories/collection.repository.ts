@@ -64,9 +64,13 @@ export class CollectionRepository extends Repository<Collection> {
     return data;
   }
 
-  async createCollection({ name }: CreateCollectionDto, owner: Account): Promise<Collection> {
+  async createCollection(
+    { name, description }: CreateCollectionDto,
+    owner: Account
+  ): Promise<Collection> {
     const data = this.create({
       name,
+      description,
       owner: new Account(owner.accountId),
     });
 

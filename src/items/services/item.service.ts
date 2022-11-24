@@ -93,7 +93,7 @@ export class ItemService {
     return this.collectionRepository.createCollection(
       {
         name: itemRequest.collectionName,
-        ownerAddress: itemRequest.address,
+        description: itemRequest.collectionDescription,
       },
       account
     );
