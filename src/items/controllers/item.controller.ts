@@ -104,4 +104,10 @@ export class ItemsController {
   activate(@Param('itemId') itemId: string, @Body() itemRequest: ItemRequestDto): Promise<Item> {
     return this.itemService.activate(itemId, itemRequest);
   }
+
+  @IsAddressValid()
+  @Patch('/:itemId/hide-unhide')
+  hideAndUnhide(@Param('itemId') itemId: string): Promise<Item> {
+    return this.itemService.hideAndUnhide(itemId);
+  }
 }
