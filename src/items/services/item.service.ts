@@ -81,7 +81,9 @@ export class ItemService {
   }
 
   async getCollection(itemRequest: DraftItemRequestDto, account: Account) {
-    if (!itemRequest.collection.name) {
+    console.log(itemRequest.collection);
+
+    if (!itemRequest?.collection?.name) {
       return this.collectionRepository.getDefaultCollection();
     }
 
@@ -216,5 +218,12 @@ export class ItemService {
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     return this.itemRepository.activate(item, itemRequest);
+  }
+
+  async hideAndUnhide(itemId: string): Promise<Item> {
+    const item = await this.itemRepository.findById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    return this.itemRepository.hideAndUnhide(item);
   }
 }

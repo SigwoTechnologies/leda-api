@@ -277,6 +277,27 @@ export class ItemRepository extends Repository<Item> {
     return item;
   }
 
+  async hideAndUnhide(item: Item): Promise<Item> {
+    if (ItemStatus.Hidden === item.status) {
+      await this.save({
+        itemId: item.itemId,
+        status: ItemStatus.Visible,
+      });
+
+      item.status = ItemStatus.Visible;
+      return item;
+    }
+
+    await this.save({
+      itemId: item.itemId,
+      status: ItemStatus.Hidden,
+    });
+
+    item.status = ItemStatus.Hidden;
+
+    return item;
+  }
+
   private getPaginationConditions(paginationDto: ItemPaginationDto): FindOptionsWhere<Item>[] {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
