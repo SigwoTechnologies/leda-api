@@ -1,9 +1,9 @@
 import { Collection } from '../entities/collection.entity';
+import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
 import { Account } from '../../config/entities.config';
-import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -27,7 +27,16 @@ export class CollectionRepository extends Repository<Collection> {
       skip: skip,
     } as FindManyOptions<Collection>;
 
-    const conditions = this.getPaginationConditions(paginationDto);
+    /* if (mintType) {
+      queryOptions.where = {
+        items: {
+          type: mintType,
+        },
+      };
+    } */
+
+    let conditions;
+    if (paginationDto.search) conditions = this.getPaginationConditions(paginationDto);
 
     queryOptions.where = conditions;
 
