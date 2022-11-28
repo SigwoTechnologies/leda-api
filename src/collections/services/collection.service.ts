@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException } from '../../common/exceptions/exception-types';
-import { PaginationDto } from '../../common/dto/pagination.dto';
 import { Collection } from '../entities/collection.entity';
 import { CollectionRepository } from '../repositories/collection.repository';
+import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 
 @Injectable()
 export class CollectionService {
@@ -13,7 +13,7 @@ export class CollectionService {
     private accountRepository: AccountRepository
   ) {}
 
-  async findPagination(paginationValues: PaginationDto) {
+  async findPagination(paginationValues: CollectionPaginationDto) {
     return this.collectionRepository.pagination(paginationValues);
   }
 

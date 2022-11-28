@@ -1,7 +1,7 @@
 import { Collection } from '../entities/collection.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { CreateCollectionDto } from '../dto/create-collection.dto';
+import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
 import { Account } from '../../config/entities.config';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
@@ -11,10 +11,25 @@ export class CollectionRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
-  async pagination(paginationDto: PaginationDto): Promise<Collection[] | undefined> {
+  async pagination(paginationDto: PaginationDto): Promise<CollectionResponseDto | undefined> {
     const { limit, skip } = paginationDto;
 
-    const data = await this.find({
+    const queryOptions = {
+      relations: { items: true },
+      take: limit,
+      skip: skip,
+    };
+
+    const [result, totalCount] = await this.findAndCount(queryOptions);
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      limit: paginationDto.limit,
+      collections: result,
+    };
+
+    /* const data = await this.find({
       relations: { items: true },
       take: limit,
       skip: skip,
@@ -22,7 +37,7 @@ export class CollectionRepository extends Repository<Collection> {
 
     if (!data) return;
 
-    return data;
+    return data; */
   }
 
   async findById(id: string): Promise<Collection | undefined> {
