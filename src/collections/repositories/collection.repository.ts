@@ -70,7 +70,19 @@ export class CollectionRepository extends Repository<Collection> {
   async findById(id: string): Promise<Collection | undefined> {
     const data = await this.findOne({
       where: { id },
-      relations: { items: true },
+      relations: {
+        items: {
+          image: true,
+          owner: true,
+          author: true,
+        },
+        owner: true,
+      },
+      select: {
+        owner: {
+          address: true,
+        },
+      },
     });
 
     if (!data) return;
