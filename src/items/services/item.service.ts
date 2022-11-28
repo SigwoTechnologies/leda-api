@@ -81,8 +81,6 @@ export class ItemService {
   }
 
   async getCollection(itemRequest: DraftItemRequestDto, account: Account) {
-    console.log(itemRequest.collection);
-
     if (!itemRequest?.collection?.name) {
       return this.collectionRepository.getDefaultCollection();
     }
