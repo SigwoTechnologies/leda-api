@@ -1,10 +1,9 @@
-import { IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class CollectionPaginationDto extends PaginationDto {
   @IsOptional()
   @IsString()
-  @IsUUID(4)
   collectionId: string;
 
   @IsOptional()
