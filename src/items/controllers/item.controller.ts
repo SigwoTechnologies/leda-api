@@ -13,6 +13,7 @@ import { ItemService } from '../services/item.service';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { NewestItemsRequestDto } from '../dto/newest-items-request.dto';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -103,5 +104,14 @@ export class ItemsController {
   @Patch('/:itemId/activate')
   activate(@Param('itemId') itemId: string, @Body() itemRequest: ItemRequestDto): Promise<Item> {
     return this.itemService.activate(itemId, itemRequest);
+  }
+
+  @IsAddressValid()
+  @Patch('/:itemId/process-lazy-item')
+  processLazyItem(
+    @Param('itemId') itemId: string,
+    @Body() lazyItemRequest: LazyItemRequestDto
+  ): Promise<Item> {
+    return this.itemService.processLazyItem(itemId, lazyItemRequest);
   }
 }

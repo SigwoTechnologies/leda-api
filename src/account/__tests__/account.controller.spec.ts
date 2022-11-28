@@ -5,6 +5,7 @@ import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Account } from '../entities/account.entity';
 import { Image } from '../../config/entities.config';
 import { ItemService } from '../../items/services/item.service';
+import { Voucher } from '../../items/entities/voucher.entity';
 
 const itemServiceMock = () => ({
   findByAddress: jest.fn(),
@@ -48,6 +49,7 @@ describe('AccountController', () => {
             updatedAt: new Date(),
             history: [],
             itemLikes: [],
+            voucher: {} as Voucher,
           },
         ];
 

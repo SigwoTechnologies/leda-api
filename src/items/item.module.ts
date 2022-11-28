@@ -7,6 +7,7 @@ import { HistoryRepository } from './repositories/history.repository';
 import { ItemLikeRepository } from './repositories/item-like.repository';
 import { ItemRepository } from './repositories/item.repository';
 import { PinataRepository } from './repositories/pinata.repository';
+import { VoucherRepository } from './repositories/voucher.repository';
 import { HistoryService } from './services/history.service';
 import { ItemService } from './services/item.service';
 import { PinataService } from './services/pinata.service';
@@ -15,14 +16,15 @@ import { PinataService } from './services/pinata.service';
   imports: [HttpModule],
   controllers: [ItemsController, ImagesController],
   providers: [
-    ItemService,
-    PinataService,
-    HistoryService,
-    HistoryRepository,
     AccountRepository,
-    PinataRepository,
-    ItemRepository,
+    HistoryRepository,
+    HistoryService,
     ItemLikeRepository,
+    ItemRepository,
+    ItemService,
+    PinataRepository,
+    PinataService,
+    VoucherRepository,
   ],
   exports: [ItemService, HistoryService],
 })

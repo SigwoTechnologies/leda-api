@@ -16,6 +16,8 @@ import { TransactionType } from '../enums/transaction-type.enum';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { Voucher } from '../entities/voucher.entity';
+import { VoucherRepository } from '../repositories/voucher.repository';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
@@ -45,6 +47,10 @@ const itemLikeRepository = () => ({
   createItemLike: jest.fn(),
 });
 
+const voucherRepository = () => ({
+  createVoucher: jest.fn(),
+});
+
 describe('ItemService', () => {
   let service: ItemService;
   let itemRepository;
@@ -60,6 +66,7 @@ describe('ItemService', () => {
         { provide: AccountRepository, useFactory: accountRepositoryMock },
         { provide: HistoryRepository, useFactory: historyRepositoryMock },
         { provide: ItemLikeRepository, useFactory: itemLikeRepository },
+        { provide: VoucherRepository, useFactory: voucherRepository },
       ],
     }).compile();
 
@@ -89,6 +96,7 @@ describe('ItemService', () => {
         updatedAt: new Date(),
         history: [],
         itemLikes: [],
+        voucher: {} as Voucher,
       },
     ];
   });

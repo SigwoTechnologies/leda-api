@@ -2,6 +2,7 @@ import { Item } from '../../items/entities/item.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { History } from '../../items/entities/history.entity';
 import { ItemLike } from '../../items/entities/item-like.entity';
+import { Voucher } from '../../items/entities/voucher.entity';
 
 @Entity()
 export class Account {
@@ -19,6 +20,9 @@ export class Account {
 
   @OneToMany(() => ItemLike, (table) => table.item, { cascade: true })
   itemLikes: ItemLike[];
+
+  @OneToMany(() => Voucher, (voucher) => voucher.author, { cascade: true })
+  vouchers: Voucher[];
 
   @Column()
   createdAt: Date;

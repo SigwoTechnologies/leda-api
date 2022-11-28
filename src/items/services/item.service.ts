@@ -4,18 +4,20 @@ import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { HistoryRepository } from '../repositories/history.repository';
 import { Injectable } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
 import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemRepository } from '../repositories/item.repository';
+import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { TransactionType } from '../enums/transaction-type.enum';
-import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
-import { ItemRequestDto } from '../dto/item-request.dto';
+import { VoucherRepository } from '../repositories/voucher.repository';
 
 @Injectable()
 export class ItemService {
@@ -23,7 +25,8 @@ export class ItemService {
     private itemRepository: ItemRepository,
     private accountRepository: AccountRepository,
     private historyRepository: HistoryRepository,
-    private itemLikeRepository: ItemLikeRepository
+    private itemLikeRepository: ItemLikeRepository,
+    private voucherRepository: VoucherRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -192,5 +195,17 @@ export class ItemService {
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     return this.itemRepository.activate(item, itemRequest);
+  }
+
+  async processLazyItem(itemId: string, lazyItemRequest: LazyItemRequestDto): Promise<Item> {
+    const account = await this.accountRepository.findByAddress(lazyItemRequest.address);
+
+    if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
+
+    const item = await this.itemRepository.findDraftById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    await this.voucherRepository.createVoucher(item, lazyItemRequest, account);
+    return this.itemRepository.activateLazy(item, lazyItemRequest);
   }
 }

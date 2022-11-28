@@ -8,6 +8,7 @@ import { ItemService } from '../../items/services/item.service';
 import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Test } from '@nestjs/testing';
 import { PriceRangeDto } from '../dto/price-range.dto';
+import { Voucher } from '../entities/voucher.entity';
 
 const itemServiceMock = () => ({
   findAll: jest.fn(),
@@ -65,6 +66,7 @@ describe('ItemsController', () => {
         updatedAt: new Date(),
         history: [],
         itemLikes: [],
+        voucher: {} as Voucher,
       },
     ];
   });

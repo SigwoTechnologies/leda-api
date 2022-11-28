@@ -20,6 +20,7 @@ import { Image } from '../entities/image.entity';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { History } from '../entities/history.entity';
 import { ItemProperty } from '../entities/item-property.entity';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -198,24 +199,13 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async createItem(itemRequest: DraftItemRequestDto, account: Account): Promise<Item> {
-    const {
-      name,
-      collectionAddress,
-      description,
-      royalty,
-      tags: tagsProps,
-      itemProperties: itemPropertiesProps,
-    } = itemRequest;
-
-    const { accountId, address } = account;
-
-    const tags = tagsProps.map((tag) => {
+    const tags = itemRequest.tags.map((tag) => {
       const newTag = new Tag();
       newTag.name = tag;
       return newTag;
     });
 
-    const itemProperties = itemPropertiesProps.map((itemProp) => {
+    const itemProperties = itemRequest.itemProperties.map((itemProp) => {
       const newProp = new ItemProperty();
       newProp.key = itemProp.key;
       newProp.value = itemProp.value;
@@ -223,20 +213,20 @@ export class ItemRepository extends Repository<Item> {
     });
 
     const item = this.create({
-      collectionAddress,
-      name,
-      description,
+      collectionAddress: itemRequest.collectionAddress,
+      name: itemRequest.name,
+      description: itemRequest.description,
       tags,
       itemProperties,
-      royalty,
-      author: new Account(accountId),
-      owner: new Account(accountId),
+      royalty: itemRequest.royalty,
+      author: new Account(account.accountId),
+      owner: new Account(account.accountId),
     });
 
     await this.save(item);
 
-    item.owner.address = address;
-    item.author.address = address;
+    item.owner.address = account.address;
+    item.author.address = account.address;
 
     return item;
   }
@@ -264,6 +254,16 @@ export class ItemRepository extends Repository<Item> {
     history.owner = new Account(item.author.accountId);
 
     item.history = [history];
+
+    await this.save(item);
+    return item;
+  }
+
+  async activateLazy(item: Item, lazyItemRequest: LazyItemRequestDto): Promise<Item> {
+    const { image } = lazyItemRequest;
+
+    item.status = ItemStatus.Lazy;
+    item.image = { url: image.url, cid: image.cid } as Image;
 
     await this.save(item);
     return item;

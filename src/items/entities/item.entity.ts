@@ -17,6 +17,7 @@ import { History } from './history.entity';
 import { Tag } from './tag.entity';
 import { ItemLike } from './item-like.entity';
 import { ItemProperty } from './item-property.entity';
+import { Voucher } from './voucher.entity';
 
 @Entity()
 export class Item {
@@ -92,6 +93,9 @@ export class Item {
 
   @OneToMany(() => ItemProperty, (table) => table.item, { cascade: true })
   itemProperties: ItemProperty[];
+
+  @OneToOne(() => Voucher, (voucher) => voucher.item, { cascade: true })
+  voucher: Voucher;
 
   @CreateDateColumn()
   createdAt: Date;
