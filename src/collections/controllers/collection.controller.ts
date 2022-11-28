@@ -1,6 +1,5 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
 import { Public } from '../../auth/decorators/public.decorator';
-import { PaginationDto } from '../../common/dto/pagination.dto';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionService } from '../services/collection.service';
 

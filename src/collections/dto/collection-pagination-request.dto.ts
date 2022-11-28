@@ -1,17 +1,15 @@
-import { Type } from 'class-transformer';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 import { PaginationDto } from '../../common/dto/pagination.dto';
 
 export class CollectionPaginationDto extends PaginationDto {
-  @IsNumber()
   @IsOptional()
-  @Type(() => Number)
   @IsString()
-  collectionId: number;
+  @IsUUID(4)
+  collectionId: string;
 
   @IsOptional()
   @IsString()
-  creationDirection: 'asc' | 'desc';
+  creationOrder: 'asc' | 'desc';
 
   @IsOptional()
   @IsString()

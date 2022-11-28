@@ -1,9 +1,9 @@
 import { Collection } from '../entities/collection.entity';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
 import { Account } from '../../config/entities.config';
-import { PaginationDto } from '../../common/dto/pagination.dto';
+import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -11,13 +11,41 @@ export class CollectionRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
-  async pagination(paginationDto: PaginationDto): Promise<CollectionResponseDto | undefined> {
-    const { limit, skip } = paginationDto;
+  async pagination(
+    paginationDto: CollectionPaginationDto
+  ): Promise<CollectionResponseDto | undefined> {
+    const { limit, skip, collectionId, creationOrder, mintType } = paginationDto;
 
     const queryOptions = {
-      relations: { items: true },
+      relations: {
+        items: {
+          image: true,
+        },
+        owner: true,
+      },
       take: limit,
       skip: skip,
+    } as FindManyOptions<Collection>;
+
+    const conditions = this.getPaginationConditions(paginationDto);
+
+    queryOptions.where = conditions;
+
+    if (collectionId) {
+      queryOptions.where = {
+        id: collectionId,
+      };
+    }
+
+    if (creationOrder) {
+      queryOptions.order = {
+        createdAt: creationOrder,
+      };
+    }
+
+    queryOptions.order = {
+      ...queryOptions.order,
+      id: 'desc',
     };
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
@@ -28,16 +56,6 @@ export class CollectionRepository extends Repository<Collection> {
       limit: paginationDto.limit,
       collections: result,
     };
-
-    /* const data = await this.find({
-      relations: { items: true },
-      take: limit,
-      skip: skip,
-    });
-
-    if (!data) return;
-
-    return data; */
   }
 
   async findById(id: string): Promise<Collection | undefined> {
@@ -102,5 +120,32 @@ export class CollectionRepository extends Repository<Collection> {
     await this.save(data);
 
     return data;
+  }
+
+  private getPaginationConditions(
+    paginationDto: CollectionPaginationDto
+  ): FindOptionsWhere<Collection>[] {
+    const { search } = paginationDto;
+    const conditions = [] as FindOptionsWhere<Collection>[];
+    const condition1 = {} as FindOptionsWhere<Collection>;
+    const condition2 = { ...condition1 };
+
+    if (search) {
+      condition1.name = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+
+      condition2.description = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+    }
+
+    // This query will result on the following structure:
+    // (status = 1 and price between x and y and name like '%value%') OR
+    // (status = 1 and price between x and y and description like '%value%')
+    conditions.push(condition1);
+    conditions.push(condition2);
+
+    return conditions;
   }
 }
