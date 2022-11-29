@@ -4,6 +4,7 @@ import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from '
 import { Injectable } from '@nestjs/common';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
 import { Account } from '../../config/entities.config';
+import { getAverage } from '../../common/utils/average-item-likes-utils';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -32,25 +33,12 @@ export class CollectionRepository extends Repository<Collection> {
 
     queryOptions.where = conditions;
 
+    // TODO: Uncomment this code when the Lazy Minting feature is done
     /* if (mintType) {
       queryOptions.where = {
         items: {
           type: mintType,
         },
-      };
-    } */
-
-    // TODO: Make popularity order:
-    // TODO: Idea: Get the higher or lower average of likes in a collection.
-    // TODO: It's not the same have a collection with 10 NFTs and 1 like per NFT
-    // TODO: or have a collection with 4 NFTs with 400 likes each one of them.
-    // TODO: It means that we should make: (sum of NFTs likes on a colleaction) / length of the Items array.
-    // ! Sample
-    // TODO: Something like this: (2 + 4 + 8 + 10) / 4 ---> 6avg
-    // TODO: It must be lower than (10 + 20) / 2 ---> 15avg
-    /* if (popularityOrder) {
-      queryOptions.order = {
-        items: popularityOrder,
       };
     } */
 
@@ -67,11 +55,27 @@ export class CollectionRepository extends Repository<Collection> {
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
 
+    let collectionsRes: Collection[];
+
+    const collectionPopularity = result.map((res) => {
+      const orderedNfts = getAverage(res.items);
+      return { ...res, popularity: orderedNfts };
+    });
+
+    collectionsRes = collectionPopularity;
+
+    if (popularityOrder) {
+      collectionsRes = collectionPopularity.sort((a, b) => {
+        if (popularityOrder === 'asc') return a.popularity - b.popularity;
+        if (popularityOrder === 'desc') return b.popularity - a.popularity;
+      });
+    }
+
     return {
       totalCount,
       page: paginationDto.page,
       limit: paginationDto.limit,
-      collections: result,
+      collections: collectionsRes,
     };
   }
 
