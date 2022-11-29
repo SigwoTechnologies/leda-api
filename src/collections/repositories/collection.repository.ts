@@ -14,7 +14,7 @@ export class CollectionRepository extends Repository<Collection> {
   async pagination(
     paginationDto: CollectionPaginationDto
   ): Promise<CollectionResponseDto | undefined> {
-    const { limit, skip, collectionId, creationOrder, mintType } = paginationDto;
+    const { limit, skip, creationOrder, mintType, popularityOrder } = paginationDto;
 
     const queryOptions = {
       relations: {
@@ -27,6 +27,11 @@ export class CollectionRepository extends Repository<Collection> {
       skip: skip,
     } as FindManyOptions<Collection>;
 
+    let conditions: FindOptionsWhere<Collection>[];
+    if (paginationDto.search) conditions = this.getPaginationConditions(paginationDto);
+
+    queryOptions.where = conditions;
+
     /* if (mintType) {
       queryOptions.where = {
         items: {
@@ -35,16 +40,19 @@ export class CollectionRepository extends Repository<Collection> {
       };
     } */
 
-    let conditions;
-    if (paginationDto.search) conditions = this.getPaginationConditions(paginationDto);
-
-    queryOptions.where = conditions;
-
-    if (collectionId) {
-      queryOptions.where = {
-        id: collectionId,
+    // TODO: Make popularity order:
+    // TODO: Idea: Get the higher or lower average of likes in a collection.
+    // TODO: It's not the same have a collection with 10 NFTs and 1 like per NFT
+    // TODO: or have a collection with 4 NFTs with 400 likes each one of them.
+    // TODO: It means that we should make: (sum of NFTs likes on a colleaction) / length of the Items array.
+    // ! Sample
+    // TODO: Something like this: (2 + 4 + 8 + 10) / 4 ---> 6avg
+    // TODO: It must be lower than (10 + 20) / 2 ---> 15avg
+    /* if (popularityOrder) {
+      queryOptions.order = {
+        items: popularityOrder,
       };
-    }
+    } */
 
     if (creationOrder) {
       queryOptions.order = {

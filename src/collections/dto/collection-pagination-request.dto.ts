@@ -4,11 +4,11 @@ import { PaginationDto } from '../../common/dto/pagination.dto';
 export class CollectionPaginationDto extends PaginationDto {
   @IsOptional()
   @IsString()
-  collectionId: string;
+  creationOrder: 'asc' | 'desc';
 
   @IsOptional()
   @IsString()
-  creationOrder: 'asc' | 'desc';
+  popularityOrder: 'asc' | 'desc';
 
   @IsOptional()
   @IsString()
