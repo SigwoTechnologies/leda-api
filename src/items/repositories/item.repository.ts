@@ -70,6 +70,60 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
+  async nftsCollectionPagination(collectionId: string, paginationDto: ItemPaginationDto) {
+    const { limit, skip, likesOrder } = paginationDto;
+
+    const queryOptions = {
+      relations: {
+        image: true,
+        owner: true,
+        author: true,
+        collection: true,
+        tags: true,
+      },
+      select: {
+        image: { url: true },
+        owner: { accountId: true, address: true },
+        collection: { id: true },
+        author: { accountId: true, address: true },
+        tags: { name: true, id: true },
+      },
+      where: [] as FindOptionsWhere<Item>[],
+      take: limit,
+      skip: skip,
+    } as FindManyOptions<Item>;
+
+    const conditions = this.getPaginationConditions(paginationDto);
+
+    queryOptions.where = [
+      ...conditions,
+      {
+        collection: new Collection(collectionId),
+      },
+    ];
+
+    if (likesOrder) {
+      queryOptions.order = {
+        likes: likesOrder,
+      };
+    }
+
+    queryOptions.order = {
+      ...queryOptions.order,
+      createdAt: 'desc',
+      tokenId: 'desc',
+    };
+
+    const [result, totalCount] = await this.findAndCount(queryOptions);
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      limit: paginationDto.limit,
+      items: result,
+    };
+  }
+
   async findAll(): Promise<Item[]> {
     return this.getItemQueryBuilder()
       .where('item.status=:status', { status: ItemStatus.Listed })

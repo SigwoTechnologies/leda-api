@@ -26,6 +26,6 @@ import { PinataService } from './services/pinata.service';
     ItemLikeRepository,
     CollectionRepository,
   ],
-  exports: [ItemService, HistoryService],
+  exports: [ItemService, HistoryService, ItemRepository],
 })
 export class ItemModule {}
