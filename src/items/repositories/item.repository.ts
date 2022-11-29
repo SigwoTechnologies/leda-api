@@ -88,31 +88,30 @@ export class ItemRepository extends Repository<Item> {
         author: { accountId: true, address: true },
         tags: { name: true, id: true },
       },
-      where: [] as FindOptionsWhere<Item>[],
+      where: [
+        {
+          collection: new Collection(collectionId),
+        },
+      ] as FindOptionsWhere<Item>[],
       take: limit,
       skip: skip,
     } as FindManyOptions<Item>;
 
-    const conditions = this.getPaginationConditions(paginationDto);
+    const conditions = this.getPaginationNftsConditions(collectionId, paginationDto);
 
-    queryOptions.where = [
-      ...conditions,
-      {
-        collection: new Collection(collectionId),
-      },
-    ];
-
-    if (likesOrder) {
-      queryOptions.order = {
-        likes: likesOrder,
-      };
-    }
+    queryOptions.where = conditions;
 
     queryOptions.order = {
       ...queryOptions.order,
       createdAt: 'desc',
       tokenId: 'desc',
     };
+
+    if (likesOrder) {
+      queryOptions.order = {
+        likes: likesOrder,
+      };
+    }
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
 
@@ -356,6 +355,37 @@ export class ItemRepository extends Repository<Item> {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = { status: ItemStatus.Listed } as FindOptionsWhere<Item>;
+
+    if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
+
+    const condition2 = { ...condition1 };
+
+    if (search) {
+      condition1.name = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+
+      condition2.description = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+    }
+
+    // This query will result on the following structure:
+    // (status = 1 and price between x and y and name like '%value%') OR
+    // (status = 1 and price between x and y and description like '%value%')
+    conditions.push(condition1);
+    conditions.push(condition2);
+
+    return conditions;
+  }
+
+  private getPaginationNftsConditions(
+    collectionId: string,
+    paginationDto: ItemPaginationDto
+  ): FindOptionsWhere<Item>[] {
+    const { priceFrom, priceTo, search } = paginationDto;
+    const conditions = [] as FindOptionsWhere<Item>[];
+    const condition1 = { collection: new Collection(collectionId) } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
 
