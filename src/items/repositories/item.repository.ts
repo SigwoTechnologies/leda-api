@@ -177,6 +177,25 @@ export class ItemRepository extends Repository<Item> {
     return { from: +from, to: +to };
   }
 
+  async findPriceRangeCollectionItems(collectionId: string): Promise<PriceRangeDto> {
+    const query = this.createQueryBuilder('item')
+      .where('item.status = :status', {
+        status: ItemStatus.Listed,
+      })
+      .andWhere('item.collection = :collection', {
+        collection: new Collection(collectionId).id,
+      })
+      .andWhere('item.price IS NOT NULL');
+
+    const cheapestQuery = query.clone().orderBy('item.price', 'ASC');
+    const expensiveQuery = query.clone().orderBy('item.price', 'DESC');
+
+    const { price: from } = await cheapestQuery.limit(1).getOneOrFail();
+    const { price: to } = await expensiveQuery.limit(1).getOneOrFail();
+
+    return { from: +from, to: +to };
+  }
+
   async listAnItem(itemId: string, listId: number, price: string): Promise<void> {
     await this.update(
       {

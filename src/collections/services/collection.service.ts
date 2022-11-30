@@ -8,6 +8,7 @@ import { CollectionRepository } from '../repositories/collection.repository';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { Item } from 'src/config/entities.config';
 import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
+import { PriceRangeDto } from 'src/items/dto/price-range.dto';
 
 @Injectable()
 export class CollectionService {
@@ -47,5 +48,9 @@ export class CollectionService {
     if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
 
     return collection;
+  }
+
+  async findPriceRange(collectionId: string): Promise<PriceRangeDto> {
+    return this.itemsRepository.findPriceRangeCollectionItems(collectionId);
   }
 }
