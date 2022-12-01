@@ -85,7 +85,10 @@ export class ItemService {
       return this.collectionRepository.getDefaultCollection();
     }
 
-    const collection = await this.collectionRepository.findByName(itemRequest.collection.name);
+    const collection = await this.collectionRepository.findByName(
+      itemRequest.collection.name,
+      account
+    );
 
     if (collection) return collection;
 
