@@ -83,11 +83,6 @@ export class CollectionRepository extends Repository<Collection> {
     const data = await this.findOne({
       where: { id },
       relations: {
-        items: {
-          image: true,
-          owner: true,
-          author: true,
-        },
         owner: true,
       },
       select: {

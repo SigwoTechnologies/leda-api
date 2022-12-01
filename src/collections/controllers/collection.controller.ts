@@ -22,9 +22,12 @@ export class CollectionsController {
   }
 
   @Public()
-  @Get('/:id/paginate')
-  paginateNfts(@Param('id') id: string, @Query() paginationDto: ItemPaginationDto) {
-    return this.collectionService.findNftsOnCollection(id, paginationDto);
+  @Get('/:collectionId/paginate')
+  paginateNfts(
+    @Param('collectionId') collectionId: string,
+    @Query() paginationDto: ItemPaginationDto
+  ) {
+    return this.collectionService.findNftsOnCollection(collectionId, paginationDto);
   }
 
   @Public()

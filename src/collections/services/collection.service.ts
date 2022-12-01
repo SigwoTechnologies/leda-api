@@ -6,7 +6,6 @@ import { BusinessException } from '../../common/exceptions/exception-types';
 import { Collection } from '../entities/collection.entity';
 import { CollectionRepository } from '../repositories/collection.repository';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
-import { Item } from 'src/config/entities.config';
 import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
 import { PriceRangeDto } from 'src/items/dto/price-range.dto';
 
