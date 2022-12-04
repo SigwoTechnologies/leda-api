@@ -81,7 +81,7 @@ export class ItemService {
   }
 
   async getCollection(itemRequest: DraftItemRequestDto, account: Account) {
-    if (!itemRequest?.collection?.name) {
+    if (!itemRequest?.collection?.name.length) {
       return this.collectionRepository.getDefaultCollection();
     }
 

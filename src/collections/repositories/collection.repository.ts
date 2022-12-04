@@ -24,6 +24,12 @@ export class CollectionRepository extends Repository<Collection> {
         },
         owner: true,
       },
+      select: {
+        owner: {
+          address: true,
+        },
+        items: true,
+      },
       take: limit,
       skip: skip,
     } as FindManyOptions<Collection>;

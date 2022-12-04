@@ -5,6 +5,7 @@ import {
   DataSource,
   FindManyOptions,
   FindOptionsWhere,
+  Not,
   Raw,
   Repository,
   SelectQueryBuilder,
@@ -91,6 +92,7 @@ export class ItemRepository extends Repository<Item> {
       where: [
         {
           collection: new Collection(collectionId),
+          status: Not(ItemStatus.Hidden),
         },
       ] as FindOptionsWhere<Item>[],
       take: limit,
@@ -404,7 +406,10 @@ export class ItemRepository extends Repository<Item> {
   ): FindOptionsWhere<Item>[] {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
-    const condition1 = { collection: new Collection(collectionId) } as FindOptionsWhere<Item>;
+    const condition1 = {
+      collection: new Collection(collectionId),
+      status: Not(ItemStatus.Hidden),
+    } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
 

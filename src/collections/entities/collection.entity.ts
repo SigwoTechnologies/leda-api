@@ -10,6 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
+import { Max } from 'class-validator';
 
 @Entity()
 export class Collection {
@@ -17,9 +18,10 @@ export class Collection {
   id: string;
 
   @Column({ nullable: true })
+  @Max(255)
   description: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ unique: false, nullable: false })
   name: string;
 
   @OneToMany(() => Item, (table) => table.collection, {
