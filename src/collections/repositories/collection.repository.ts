@@ -96,9 +96,9 @@ export class CollectionRepository extends Repository<Collection> {
 
     return data;
   }
-  async findByName(name: string): Promise<Collection | undefined> {
+  async findByName(name: string, account: Account): Promise<Collection | undefined> {
     const data = await this.findOne({
-      where: { name },
+      where: { name, owner: new Account(account.accountId) },
     });
 
     if (!data) return;
