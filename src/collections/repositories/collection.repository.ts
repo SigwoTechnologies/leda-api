@@ -4,6 +4,8 @@ import { Injectable } from '@nestjs/common';
 import { CreateCollectionDto } from '../dto/create-collection.dto';
 import { Account } from '../../config/entities.config';
 import { PaginationDto } from '../../common/dto/pagination.dto';
+import { ItemRequestDto } from 'src/items/dto/item-request.dto';
+import { CollectionImage } from '../entities/collection-image.entity';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -99,5 +101,15 @@ export class CollectionRepository extends Repository<Collection> {
     await this.save(data);
 
     return data;
+  }
+
+  async activate(collection: Collection, { url, cid }: CollectionImage): Promise<Collection> {
+    collection.image = {
+      url,
+      cid,
+    } as CollectionImage;
+
+    await this.save(collection);
+    return collection;
   }
 }

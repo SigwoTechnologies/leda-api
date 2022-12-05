@@ -6,10 +6,12 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
+import { CollectionImage } from './collection-image.entity';
 
 @Entity()
 export class Collection {
@@ -19,7 +21,7 @@ export class Collection {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ unique: true, nullable: false })
+  @Column({ unique: false, nullable: false })
   name: string;
 
   @OneToMany(() => Item, (table) => table.collection, {
@@ -34,6 +36,14 @@ export class Collection {
   })
   @JoinColumn({ name: 'ownerId' })
   owner: Account;
+
+  @OneToOne(() => CollectionImage, {
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
+    cascade: true,
+  })
+  @JoinColumn({ name: 'imageId' })
+  image: CollectionImage;
 
   @CreateDateColumn()
   createdAt: Date;
