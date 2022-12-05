@@ -269,7 +269,7 @@ export class ItemRepository extends Repository<Item> {
     item.image = { url: image.url, cid: image.cid } as Image;
 
     const history = new History();
-    history.transactionType = TransactionType.Minted;
+    history.transactionType = TransactionType.Created;
     history.owner = new Account(item.author.accountId);
 
     item.history = [history];
