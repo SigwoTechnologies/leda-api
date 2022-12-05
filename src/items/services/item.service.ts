@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { CollectionImage } from 'src/collections/entities/collection-image.entity';
+import { Collection } from 'src/config/entities.config';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { CollectionRepository } from '../../collections/repositories/collection.repository';
@@ -71,7 +73,7 @@ export class ItemService {
   async create(itemRequest: DraftItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
-    const collection = await this.getCollection(itemRequest, account);
+    const collection = await this.getCollection(itemRequest.collection as Collection, account);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
@@ -80,22 +82,19 @@ export class ItemService {
     return this.itemRepository.createItem(itemRequest, account, collection);
   }
 
-  async getCollection(itemRequest: DraftItemRequestDto, account: Account) {
-    if (!itemRequest?.collection?.name) {
+  async getCollection({ name, description }: Collection, account: Account) {
+    if (!name.length) {
       return this.collectionRepository.getDefaultCollection();
     }
 
-    const collection = await this.collectionRepository.findByName(
-      itemRequest.collection.name,
-      account
-    );
+    const collection = await this.collectionRepository.findByName(name, account);
 
     if (collection) return collection;
 
     return this.collectionRepository.createCollection(
       {
-        name: itemRequest.collection.name,
-        description: itemRequest.collection.description,
+        name,
+        description,
       },
       account
     );
@@ -217,6 +216,19 @@ export class ItemService {
 
     const item = await this.itemRepository.findDraftById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    if (itemRequest.collection.image.url.length) {
+      const collection = await this.collectionRepository.findByName(
+        itemRequest.collection.name,
+        account
+      );
+      if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
+
+      await this.collectionRepository.activate(
+        collection,
+        itemRequest.collection.image as CollectionImage
+      );
+    }
 
     return this.itemRepository.activate(item, itemRequest);
   }
