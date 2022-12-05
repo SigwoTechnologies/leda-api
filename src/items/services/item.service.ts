@@ -222,7 +222,6 @@ export class ItemService {
         itemRequest.collection.name,
         account
       );
-
       if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
 
       await this.collectionRepository.activate(
