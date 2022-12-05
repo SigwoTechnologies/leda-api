@@ -217,7 +217,7 @@ export class ItemService {
     const item = await this.itemRepository.findDraftById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
-    if (itemRequest.collection.image.url.length) {
+    if (itemRequest.collection.image.url) {
       const collection = await this.collectionRepository.findByName(
         itemRequest.collection.name,
         account

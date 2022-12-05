@@ -91,6 +91,7 @@ export class CollectionRepository extends Repository<Collection> {
       where: { id },
       relations: {
         owner: true,
+        image: true,
       },
       select: {
         owner: {
