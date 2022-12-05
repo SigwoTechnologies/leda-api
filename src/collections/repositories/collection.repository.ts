@@ -1,10 +1,11 @@
-import { Collection } from '../entities/collection.entity';
-import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
-import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
+import { getAverage } from 'src/common/utils/average-item-likes-utils';
+import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
-import { getAverage } from '../../common/utils/average-item-likes-utils';
+import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
+import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
+import { CollectionImage } from '../entities/collection-image.entity';
+import { Collection } from '../entities/collection.entity';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -154,6 +155,16 @@ export class CollectionRepository extends Repository<Collection> {
     await this.save(data);
 
     return data;
+  }
+
+  async activate(collection: Collection, { url, cid }: CollectionImage): Promise<Collection> {
+    collection.image = {
+      url,
+      cid,
+    } as CollectionImage;
+
+    await this.save(collection);
+    return collection;
   }
 
   private getPaginationConditions(

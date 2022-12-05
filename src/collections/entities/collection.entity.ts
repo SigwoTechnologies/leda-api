@@ -6,11 +6,13 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
 import { Max } from 'class-validator';
+import { CollectionImage } from './collection-image.entity';
 
 @Entity()
 export class Collection {
@@ -36,6 +38,14 @@ export class Collection {
   })
   @JoinColumn({ name: 'ownerId' })
   owner: Account;
+
+  @OneToOne(() => CollectionImage, {
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
+    cascade: true,
+  })
+  @JoinColumn({ name: 'imageId' })
+  image: CollectionImage;
 
   @CreateDateColumn()
   createdAt: Date;

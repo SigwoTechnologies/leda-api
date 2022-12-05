@@ -54,6 +54,7 @@ const collectionRepositoryMock = () => ({
   createCollection: jest.fn(),
   getDefaultCollection: jest.fn(),
   findByName: jest.fn(),
+  activate: jest.fn(),
 });
 
 describe('ItemService', () => {
@@ -400,13 +401,18 @@ describe('ItemService', () => {
     describe('and the account and item exist', () => {
       it('should activate and return the expected item', async () => {
         const account = { accountId: '456' } as Account;
+        const collection = { image: { url: 'url', cid: 'cid' }, name: 'Leda' };
         const itemId = '123';
-        const itemRequest = { address: '123' } as ItemRequestDto;
+        const itemRequest = {
+          address: '123',
+          collection,
+        } as ItemRequestDto;
         const expected = items[0];
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
         itemRepository.findDraftById.mockResolvedValue({ ...expected });
         itemRepository.activate.mockResolvedValue({ ...expected });
+        collectionRepository.findByName.mockResolvedValue({ ...collection });
 
         const actual = await service.activate(itemId, itemRequest);
 

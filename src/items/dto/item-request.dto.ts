@@ -12,4 +12,9 @@ export class ItemRequestDto {
 
   @IsNotEmpty()
   image: ImageRequestDto;
+
+  collection: {
+    name: string;
+    image: ImageRequestDto;
+  };
 }

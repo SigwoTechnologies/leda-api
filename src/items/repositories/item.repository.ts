@@ -319,6 +319,7 @@ export class ItemRepository extends Repository<Item> {
 
     item.owner.address = address;
     item.author.address = address;
+    item.collection = collection;
 
     return item;
   }
