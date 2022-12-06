@@ -63,7 +63,6 @@ export class ItemsController {
     return this.itemService.findById(itemId);
   }
 
-  @IsAddressValid()
   @Get('/:itemId/voucher')
   getVoucher(@Param('itemId') itemId: string): Promise<Voucher> {
     return this.itemService.findVoucherByItemId(itemId);
