@@ -38,11 +38,11 @@ export class History {
   @JoinColumn({ name: 'itemId' })
   item: Item;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn({ type: 'timestamptz' })
   createdAt: Date;
 
   @UpdateDateColumn({
-    type: 'timestamp',
+    type: 'timestamptz',
   })
   updatedAt: Date;
 }

@@ -9,6 +9,11 @@ export class CreateCollectionDto {
 
   @IsNotEmpty()
   description: string;
+
+  image: {
+    url: string;
+    cid: string;
+  };
 }
 
 export class CollectionResponseDto {
