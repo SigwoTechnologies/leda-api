@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEthereumAddress, Min, IsPositive, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsEthereumAddress, Min, IsEnum } from 'class-validator';
 import { LazyProcessType } from '../enums/lazy-process-type.enum';
 import { ImageRequestDto } from './image-request.dto';
 

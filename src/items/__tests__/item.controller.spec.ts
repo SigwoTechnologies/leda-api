@@ -9,6 +9,7 @@ import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Test } from '@nestjs/testing';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { Voucher } from '../entities/voucher.entity';
+import { Collection } from '../../config/entities.config';
 
 const itemServiceMock = () => ({
   findAll: jest.fn(),
@@ -57,7 +58,7 @@ describe('ItemsController', () => {
         listId: 1,
         tags: [],
         itemProperties: [],
-        collectionAddress: 'test',
+        collection: {} as Collection,
         author: {} as Account,
         owner: {} as Account,
         image: {} as Image,
@@ -68,6 +69,7 @@ describe('ItemsController', () => {
         itemLikes: [],
         voucher: {} as Voucher,
         isLazy: false,
+        collectionAddress: '',
       },
     ];
   });
@@ -146,6 +148,7 @@ describe('ItemsController', () => {
         tags: [],
         itemProperties: [],
         price: '0',
+        collection: {} as Collection,
       });
 
       expect(actual).toEqual(expected);

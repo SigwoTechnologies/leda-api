@@ -20,6 +20,7 @@ import { Image } from '../entities/image.entity';
 import { TransactionType } from '../enums/transaction-type.enum';
 import { History } from '../entities/history.entity';
 import { ItemProperty } from '../entities/item-property.entity';
+import { Collection } from '../../collections/entities/collection.entity';
 import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 
 @Injectable()
@@ -52,11 +53,15 @@ export class ItemRepository extends Repository<Item> {
         'author.address',
         'property.key',
         'property.value',
+        'collection.id',
+        'collection.name',
+        'collection.description',
       ])
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.tags', 'tag')
       .innerJoin('item.author', 'author')
       .leftJoin('item.itemProperties', 'property')
+      .leftJoin('item.collection', 'collection')
       .leftJoin('item.image', 'image');
   }
 
@@ -232,7 +237,11 @@ export class ItemRepository extends Repository<Item> {
     };
   }
 
-  async createItem(itemRequest: DraftItemRequestDto, account: Account): Promise<Item> {
+  async createItem(
+    itemRequest: DraftItemRequestDto,
+    account: Account,
+    collection: Collection
+  ): Promise<Item> {
     const tags = itemRequest.tags.map((tag) => {
       const newTag = new Tag();
       newTag.name = tag;
@@ -247,7 +256,6 @@ export class ItemRepository extends Repository<Item> {
     });
 
     const item = this.create({
-      collectionAddress: itemRequest.collectionAddress,
       name: itemRequest.name,
       description: itemRequest.description,
       tags,
@@ -256,12 +264,14 @@ export class ItemRepository extends Repository<Item> {
       author: new Account(account.accountId),
       owner: new Account(account.accountId),
       price: itemRequest.price,
+      collection: new Collection(collection.id),
     });
 
     await this.save(item);
 
     item.owner.address = account.address;
     item.author.address = account.address;
+    item.collection = collection;
 
     return item;
   }
@@ -285,7 +295,7 @@ export class ItemRepository extends Repository<Item> {
     item.image = { url: image.url, cid: image.cid } as Image;
 
     const history = new History();
-    history.transactionType = TransactionType.Minted;
+    history.transactionType = TransactionType.Created;
     history.owner = new Account(item.author.accountId);
 
     item.history = [history];
@@ -302,6 +312,27 @@ export class ItemRepository extends Repository<Item> {
     item.image = { url: image.url, cid: image.cid } as Image;
 
     await this.save(item);
+    return item;
+  }
+
+  async hideAndUnhide(item: Item): Promise<Item> {
+    if (ItemStatus.Hidden === item.status) {
+      await this.save({
+        itemId: item.itemId,
+        status: ItemStatus.Visible,
+      });
+
+      item.status = ItemStatus.Visible;
+      return item;
+    }
+
+    await this.save({
+      itemId: item.itemId,
+      status: ItemStatus.Hidden,
+    });
+
+    item.status = ItemStatus.Hidden;
+
     return item;
   }
 

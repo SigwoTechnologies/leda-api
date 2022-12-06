@@ -7,6 +7,7 @@ import { dbProvider } from './common/providers/db.provider';
 import { ItemModule } from './items/item.module';
 import { AccountModule } from './account/account.module';
 import { PagerMiddleware } from './common/middlewares/pager.middleware';
+import { CollectionModule } from './collections/collection.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { PagerMiddleware } from './common/middlewares/pager.middleware';
     AuthModule,
     ItemModule,
     AccountModule,
+    CollectionModule,
   ],
   controllers: [],
   providers: [],

@@ -1,19 +1,20 @@
+import { Injectable } from '@nestjs/common';
+import { CollectionImage } from 'src/collections/entities/collection-image.entity';
+import { Collection } from 'src/config/entities.config';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
+import { CollectionRepository } from '../../collections/repositories/collection.repository';
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException, NotFoundException } from '../../common/exceptions/exception-types';
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
-import { HistoryRepository } from '../repositories/history.repository';
-import { Injectable } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
 import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { ItemStatus } from '../enums/item-status.enum';
-import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 import { ListItemRequestDto } from '../dto/list-item-request.dto';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { TransactionType } from '../enums/transaction-type.enum';
@@ -21,6 +22,8 @@ import { VoucherRepository } from '../repositories/voucher.repository';
 import { LazyProcessType } from '../enums/lazy-process-type.enum';
 import { Voucher } from '../entities/voucher.entity';
 import { TransferDto } from '../dto/transfer-request.dto';
+import { HistoryRepository } from '../repositories/history.repository';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 
 @Injectable()
 export class ItemService {
@@ -29,7 +32,8 @@ export class ItemService {
     private accountRepository: AccountRepository,
     private historyRepository: HistoryRepository,
     private itemLikeRepository: ItemLikeRepository,
-    private voucherRepository: VoucherRepository
+    private voucherRepository: VoucherRepository,
+    private collectionRepository: CollectionRepository
   ) {}
 
   async findAll(): Promise<Item[]> {
@@ -84,9 +88,31 @@ export class ItemService {
   async create(itemRequest: DraftItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
+    const collection = await this.getCollection(itemRequest?.collection as Collection, account);
+
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.createItem(itemRequest, account);
+    if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
+
+    return this.itemRepository.createItem(itemRequest, account, collection);
+  }
+
+  async getCollection(collectionDto: Collection, account: Account) {
+    if (!collectionDto?.name?.length) {
+      return this.collectionRepository.getDefaultCollection();
+    }
+
+    const collection = await this.collectionRepository.findByName(collectionDto.name, account);
+
+    if (collection) return collection;
+
+    return this.collectionRepository.createCollection(
+      {
+        name: collectionDto.name,
+        description: collectionDto.description,
+      },
+      account
+    );
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
@@ -239,6 +265,19 @@ export class ItemService {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
+    if (itemRequest.collection?.image?.url) {
+      const collection = await this.collectionRepository.findByName(
+        itemRequest.collection.name,
+        account
+      );
+      if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
+
+      await this.collectionRepository.activate(
+        collection,
+        itemRequest.collection.image as CollectionImage
+      );
+    }
+
     return this.itemRepository.activate(item, itemRequest);
   }
 
@@ -291,5 +330,12 @@ export class ItemService {
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
     await this.itemRepository.transfer(itemId, account.accountId, transfer.tokenId);
+  }
+
+  async hideAndUnhide(itemId: string): Promise<Item> {
+    const item = await this.itemRepository.findById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    return this.itemRepository.hideAndUnhide(item);
   }
 }

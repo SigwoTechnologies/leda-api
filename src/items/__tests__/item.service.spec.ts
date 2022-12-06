@@ -18,6 +18,8 @@ import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { Voucher } from '../entities/voucher.entity';
 import { VoucherRepository } from '../repositories/voucher.repository';
+import { Collection } from '../../config/entities.config';
+import { CollectionRepository } from '../../collections/repositories/collection.repository';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
@@ -43,7 +45,7 @@ const historyRepositoryMock = () => ({
   createHistory: jest.fn(),
 });
 
-const itemLikeRepository = () => ({
+const itemLikeRepositoryMock = () => ({
   getTotalOfLikesFromItem: jest.fn(),
   createItemLike: jest.fn(),
 });
@@ -52,11 +54,22 @@ const voucherRepository = () => ({
   createVoucher: jest.fn(),
 });
 
+const collectionRepositoryMock = () => ({
+  pagination: jest.fn(),
+  findById: jest.fn(),
+  findByOwner: jest.fn(),
+  createCollection: jest.fn(),
+  getDefaultCollection: jest.fn(),
+  findByName: jest.fn(),
+  activate: jest.fn(),
+});
+
 describe('ItemService', () => {
   let service: ItemService;
   let itemRepository;
   let accountRepository;
   let historyRepository;
+  let collectionRepository;
   let items: Item[] = [];
 
   beforeEach(async () => {
@@ -66,8 +79,9 @@ describe('ItemService', () => {
         { provide: ItemRepository, useFactory: itemRepositoryMock },
         { provide: AccountRepository, useFactory: accountRepositoryMock },
         { provide: HistoryRepository, useFactory: historyRepositoryMock },
-        { provide: ItemLikeRepository, useFactory: itemLikeRepository },
         { provide: VoucherRepository, useFactory: voucherRepository },
+        { provide: ItemLikeRepository, useFactory: itemLikeRepositoryMock },
+        { provide: CollectionRepository, useFactory: collectionRepositoryMock },
       ],
     }).compile();
 
@@ -75,6 +89,7 @@ describe('ItemService', () => {
     itemRepository = await module.get(ItemRepository);
     accountRepository = await module.get(AccountRepository);
     historyRepository = await module.get(HistoryRepository);
+    collectionRepository = await module.get(CollectionRepository);
 
     items = [
       {
@@ -88,6 +103,7 @@ describe('ItemService', () => {
         status: ItemStatus.NotListed,
         tokenId: 1,
         collectionAddress: 'test',
+        collection: { name: 'collection', description: 'description' } as Collection,
         author: {} as Account,
         owner: {} as Account,
         image: {} as Image,
@@ -119,7 +135,28 @@ describe('ItemService', () => {
   describe('When findById function is called', () => {
     describe('and the itemId exist', () => {
       it('should return the expected item', async () => {
-        const expected = items[0];
+        const expected = {
+          itemId: '1',
+          name: 'test',
+          description: 'test',
+          price: '1',
+          royalty: 1,
+          tags: [],
+          itemProperties: [],
+          status: ItemStatus.NotListed,
+          tokenId: 1,
+          collectionAddress: 'test',
+          collection: { name: 'collection', description: 'description' } as Collection,
+          author: {} as Account,
+          owner: {} as Account,
+          image: {} as Image,
+          listId: 1,
+          likes: 1,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          history: [],
+          itemLikes: [],
+        };
 
         itemRepository.findActiveById.mockResolvedValue({ ...expected });
 
@@ -225,12 +262,19 @@ describe('ItemService', () => {
     describe('and the account exist', () => {
       it('should return the expected item', async () => {
         const account = { accountId: '456' } as Account;
+        const collection = { id: '1', name: 'name', description: 'description' } as Collection;
         const expected = items[0];
 
+        collectionRepository.getDefaultCollection.mockResolvedValue({ ...collection });
         accountRepository.findByAddress.mockResolvedValue({ ...account });
         itemRepository.createItem.mockResolvedValue({ ...expected });
+        collectionRepository.findByName.mockResolvedValue({ ...collection });
+        collectionRepository.createCollection.mockResolvedValue({ ...collection });
 
-        const actual = await service.create({ address: '123' } as DraftItemRequestDto);
+        const actual = await service.create({
+          address: '123',
+          collection: { description: collection.description, name: collection.name },
+        } as DraftItemRequestDto);
 
         expect(actual).toEqual(expected);
       });
@@ -367,13 +411,18 @@ describe('ItemService', () => {
     describe('and the account and item exist', () => {
       it('should activate and return the expected item', async () => {
         const account = { accountId: '456' } as Account;
+        const collection = { image: { url: 'url', cid: 'cid' }, name: 'Leda' };
         const itemId = '123';
-        const itemRequest = { address: '123' } as ItemRequestDto;
+        const itemRequest = {
+          address: '123',
+          collection,
+        } as ItemRequestDto;
         const expected = items[0];
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
         itemRepository.findById.mockResolvedValue({ ...expected });
         itemRepository.activate.mockResolvedValue({ ...expected });
+        collectionRepository.findByName.mockResolvedValue({ ...collection });
 
         const actual = await service.activate(itemId, itemRequest);
 

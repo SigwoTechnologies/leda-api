@@ -118,4 +118,9 @@ export const BusinessErrors = {
     message: 'The given voucher id was not found. Please verify your information and try again',
     code: 4015,
   },
+  collection_not_associated: {
+    name: 'COLLECTION_NOT_ASSOCIATED',
+    message: 'The given collection address does not have an associated collection.',
+    code: 4016,
+  },
 };
