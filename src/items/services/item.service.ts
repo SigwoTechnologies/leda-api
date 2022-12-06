@@ -290,6 +290,6 @@ export class ItemService {
     const account = await this.accountRepository.findByAddress(transfer.owner);
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    await this.itemRepository.transfer(itemId, account.accountId);
+    await this.itemRepository.transfer(itemId, account.accountId, transfer.tokenId);
   }
 }

@@ -154,19 +154,19 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async buyItem(itemId: string, accountId: string): Promise<void> {
-    await this.transferOwnership(itemId, accountId);
+    await this.update(
+      {
+        itemId,
+      },
+      {
+        owner: new Account(accountId),
+        status: ItemStatus.Sold,
+        updatedAt: new Date(),
+      }
+    );
   }
 
-  async transfer(itemId: string, accountId: string): Promise<void> {
-    await this.transferOwnership(itemId, accountId);
-  }
-
-  // TODO:
-  // Update TokenId
-  // What about listId?
-  //
-
-  async transferOwnership(itemId: string, accountId: string): Promise<void> {
+  async transfer(itemId: string, accountId: string, tokenId: number): Promise<void> {
     await this.update(
       {
         itemId,
@@ -175,6 +175,7 @@ export class ItemRepository extends Repository<Item> {
         owner: new Account(accountId),
         status: ItemStatus.Sold,
         isLazy: false,
+        tokenId,
         updatedAt: new Date(),
       }
     );

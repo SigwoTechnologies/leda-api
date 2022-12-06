@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEthereumAddress } from 'class-validator';
+import { IsNotEmpty, IsEthereumAddress, IsNumber } from 'class-validator';
 
 export class TransferDto {
   @IsEthereumAddress()
@@ -7,4 +7,8 @@ export class TransferDto {
 
   @IsNotEmpty()
   voucherId: string;
+
+  @IsNotEmpty()
+  @IsNumber()
+  tokenId: number;
 }
