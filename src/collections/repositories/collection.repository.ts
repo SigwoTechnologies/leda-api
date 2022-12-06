@@ -13,6 +13,28 @@ export class CollectionRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
+  async getNewest(qty: number): Promise<{ totalCount: number; collections: Collection[] }> {
+    const queryOptions = {
+      relations: {
+        owner: true,
+        image: true,
+      },
+      select: {
+        owner: {
+          address: true,
+        },
+      },
+      take: qty,
+    } as unknown as FindManyOptions<Collection>;
+
+    const [collections, totalCount] = await this.findAndCount(queryOptions);
+
+    return {
+      totalCount,
+      collections,
+    };
+  }
+
   async pagination(
     paginationDto: CollectionPaginationDto
   ): Promise<CollectionResponseDto | undefined> {
@@ -20,11 +42,9 @@ export class CollectionRepository extends Repository<Collection> {
 
     const queryOptions = {
       relations: {
-        items: {
-          image: true,
-        },
         owner: true,
         image: true,
+        items: true,
       },
       select: {
         owner: {

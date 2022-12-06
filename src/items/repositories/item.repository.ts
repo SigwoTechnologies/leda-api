@@ -231,6 +231,7 @@ export class ItemRepository extends Repository<Item> {
 
   getNewestByCollection(collectionId: string, take: number): Promise<Item[]> {
     return this.find({
+      relations: { image: true, owner: true },
       where: { collection: new Collection(collectionId) },
       order: { createdAt: 'desc' },
       take,
