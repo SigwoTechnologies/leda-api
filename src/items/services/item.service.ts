@@ -73,7 +73,7 @@ export class ItemService {
   async create(itemRequest: DraftItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
-    const collection = await this.getCollection(itemRequest.collection as Collection, account);
+    const collection = await this.getCollection(itemRequest?.collection as Collection, account);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
@@ -82,19 +82,19 @@ export class ItemService {
     return this.itemRepository.createItem(itemRequest, account, collection);
   }
 
-  async getCollection({ name, description }: Collection, account: Account) {
-    if (!name.length) {
+  async getCollection(collectionDto: Collection, account: Account) {
+    if (!collectionDto?.name?.length) {
       return this.collectionRepository.getDefaultCollection();
     }
 
-    const collection = await this.collectionRepository.findByName(name, account);
+    const collection = await this.collectionRepository.findByName(collectionDto.name, account);
 
     if (collection) return collection;
 
     return this.collectionRepository.createCollection(
       {
-        name,
-        description,
+        name: collectionDto.name,
+        description: collectionDto.description,
       },
       account
     );
@@ -217,7 +217,7 @@ export class ItemService {
     const item = await this.itemRepository.findDraftById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
-    if (itemRequest.collection.image.url.length) {
+    if (itemRequest.collection?.image?.url) {
       const collection = await this.collectionRepository.findByName(
         itemRequest.collection.name,
         account
