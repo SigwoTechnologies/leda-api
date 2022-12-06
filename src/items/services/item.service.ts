@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CollectionImage } from 'src/collections/entities/collection-image.entity';
 import { Collection } from 'src/config/entities.config';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
