@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CollectionImage } from 'src/collections/entities/collection-image.entity';
 import { Collection } from 'src/config/entities.config';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
@@ -88,31 +87,11 @@ export class ItemService {
   async create(itemRequest: DraftItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
-    const collection = await this.getCollection(itemRequest?.collection as Collection, account);
-
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
+    const collection = await this.getCollection(itemRequest?.collection as Collection, account);
 
     return this.itemRepository.createItem(itemRequest, account, collection);
-  }
-
-  async getCollection(collectionDto: Collection, account: Account) {
-    if (!collectionDto?.name?.length) {
-      return this.collectionRepository.getDefaultCollection();
-    }
-
-    const collection = await this.collectionRepository.findByName(collectionDto.name, account);
-
-    if (collection) return collection;
-
-    return this.collectionRepository.createCollection(
-      {
-        name: collectionDto.name,
-        description: collectionDto.description,
-      },
-      account
-    );
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
@@ -265,20 +244,28 @@ export class ItemService {
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
-    if (itemRequest.collection?.image?.url) {
-      const collection = await this.collectionRepository.findByName(
-        itemRequest.collection.name,
-        account
-      );
-      if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
+    const collection = await this.getCollection(itemRequest?.collection as Collection, account);
 
-      await this.collectionRepository.activate(
-        collection,
-        itemRequest.collection.image as CollectionImage
-      );
+    return this.itemRepository.activate(item, itemRequest, collection);
+  }
+
+  async getCollection(collectionDto: Collection, account: Account) {
+    if (!collectionDto?.name?.length) {
+      return this.collectionRepository.getDefaultCollection();
     }
 
-    return this.itemRepository.activate(item, itemRequest);
+    const collection = await this.collectionRepository.findByName(collectionDto.name, account);
+
+    if (collection) return collection;
+
+    return this.collectionRepository.createCollection(
+      {
+        name: collectionDto.name,
+        description: collectionDto.description,
+        image: collectionDto.image,
+      },
+      account
+    );
   }
 
   async processLazyItem(itemId: string, lazyItemRequest: LazyItemRequestDto): Promise<Item> {

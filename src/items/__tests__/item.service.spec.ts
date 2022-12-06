@@ -411,7 +411,11 @@ describe('ItemService', () => {
     describe('and the account and item exist', () => {
       it('should activate and return the expected item', async () => {
         const account = { accountId: '456' } as Account;
-        const collection = { image: { url: 'url', cid: 'cid' }, name: 'Leda' };
+        const collection = {
+          image: { url: 'url', cid: 'cid' },
+          name: 'Leda',
+          description: 'description',
+        };
         const itemId = '123';
         const itemRequest = {
           address: '123',
@@ -426,7 +430,7 @@ describe('ItemService', () => {
 
         const actual = await service.activate(itemId, itemRequest);
 
-        expect(itemRepository.activate).toHaveBeenCalledWith(expected, itemRequest);
+        expect(itemRepository.activate).toHaveBeenCalledWith(expected, itemRequest, collection);
         expect(actual).toEqual(expected);
       });
     });

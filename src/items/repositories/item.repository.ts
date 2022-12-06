@@ -287,12 +287,13 @@ export class ItemRepository extends Repository<Item> {
     return number > 0;
   }
 
-  async activate(item: Item, itemRequest: ItemRequestDto): Promise<Item> {
+  async activate(item: Item, itemRequest: ItemRequestDto, collection: Collection): Promise<Item> {
     const { tokenId, image } = itemRequest;
 
     item.tokenId = tokenId;
     item.status = ItemStatus.NotListed;
     item.image = { url: image.url, cid: image.cid } as Image;
+    item.collection = new Collection(collection.id);
 
     const history = new History();
     history.transactionType = TransactionType.Created;
