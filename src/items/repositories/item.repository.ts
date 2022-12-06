@@ -229,6 +229,14 @@ export class ItemRepository extends Repository<Item> {
     await this.update({ itemId }, { likes });
   }
 
+  getNewestByCollection(collectionId: string, take: number): Promise<Item[]> {
+    return this.find({
+      where: { collection: new Collection(collectionId) },
+      order: { createdAt: 'desc' },
+      take,
+    });
+  }
+
   async pagination(paginationDto: ItemPaginationDto) {
     const { limit, skip, likesOrder } = paginationDto;
 
