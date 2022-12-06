@@ -24,6 +24,7 @@ export class CollectionRepository extends Repository<Collection> {
           image: true,
         },
         owner: true,
+        image: true,
       },
       select: {
         owner: {
