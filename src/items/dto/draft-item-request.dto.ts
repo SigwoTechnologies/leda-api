@@ -49,4 +49,8 @@ export class DraftItemRequestDto {
   @ArrayMaxSize(10)
   @IsOptional()
   itemProperties: ItemPropertyDto[];
+
+  @IsNotEmpty()
+  @IsOptional()
+  price: string;
 }

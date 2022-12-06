@@ -67,6 +67,7 @@ describe('ItemsController', () => {
         history: [],
         itemLikes: [],
         voucher: {} as Voucher,
+        isLazy: false,
       },
     ];
   });
@@ -144,6 +145,7 @@ describe('ItemsController', () => {
         royalty: 1,
         tags: [],
         itemProperties: [],
+        price: '0',
       });
 
       expect(actual).toEqual(expected);

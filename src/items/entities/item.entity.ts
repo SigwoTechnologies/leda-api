@@ -85,6 +85,9 @@ export class Item {
   @Column({ default: 0 })
   likes: number;
 
+  @Column({ default: false })
+  isLazy: boolean;
+
   @OneToMany(() => History, (table) => table.item, { cascade: true })
   history: History[];
 

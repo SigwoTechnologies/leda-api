@@ -26,7 +26,7 @@ export class Voucher {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'itemId' })
   item: Item;
 
   @ManyToOne(() => Account, (account) => account.vouchers, {

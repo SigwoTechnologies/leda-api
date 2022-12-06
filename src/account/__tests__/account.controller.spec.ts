@@ -50,6 +50,7 @@ describe('AccountController', () => {
             history: [],
             itemLikes: [],
             voucher: {} as Voucher,
+            isLazy: false,
           },
         ];
 

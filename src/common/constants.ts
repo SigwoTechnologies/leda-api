@@ -107,4 +107,15 @@ export const BusinessErrors = {
     message: 'Please provide a max number to find',
     code: 4013,
   },
+  lazy_process_type_not_defined: {
+    name: 'LAZY_PROCESS_TYPE_REQUIRED',
+    message:
+      'The process type for lazy items is required. Please verify your information and try again',
+    code: 4014,
+  },
+  voucher_not_found: {
+    name: 'VOUCHER_ID_NOT_FOUND',
+    message: 'The given voucher id was not found. Please verify your information and try again',
+    code: 4015,
+  },
 };

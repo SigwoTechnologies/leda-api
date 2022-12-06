@@ -40,7 +40,9 @@ export class ItemRepository extends Repository<Item> {
         'item.royalty',
         'item.likes',
         'item.status',
+        'item.isLazy',
         'image.url',
+        'image.cid',
         'item.createdAt',
         'owner.accountId',
         'owner.address',
@@ -91,6 +93,10 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async findById(itemId: string): Promise<Item> {
+    return this.getItemQueryBuilder().where('item.itemId = :itemId', { itemId }).getOne();
+  }
+
+  async findActiveById(itemId: string): Promise<Item> {
     return this.getItemQueryBuilder()
       .where('item.itemId = :itemId', { itemId })
       .andWhere('item.status != :status', { status: ItemStatus.Draft })
@@ -129,6 +135,15 @@ export class ItemRepository extends Repository<Item> {
     );
   }
 
+  async listLazyItem(itemId: string, price: string): Promise<void> {
+    await this.update(
+      {
+        itemId,
+      },
+      { price, status: ItemStatus.Listed, updatedAt: new Date() }
+    );
+  }
+
   async delistAnItem(itemId: string): Promise<void> {
     await this.update(
       {
@@ -139,11 +154,29 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async buyItem(itemId: string, accountId: string): Promise<void> {
+    await this.transferOwnership(itemId, accountId);
+  }
+
+  async transfer(itemId: string, accountId: string): Promise<void> {
+    await this.transferOwnership(itemId, accountId);
+  }
+
+  // TODO:
+  // Update TokenId
+  // What about listId?
+  //
+
+  async transferOwnership(itemId: string, accountId: string): Promise<void> {
     await this.update(
       {
         itemId,
       },
-      { owner: new Account(accountId), status: ItemStatus.NotListed, updatedAt: new Date() }
+      {
+        owner: new Account(accountId),
+        status: ItemStatus.Sold,
+        isLazy: false,
+        updatedAt: new Date(),
+      }
     );
   }
 
@@ -221,6 +254,7 @@ export class ItemRepository extends Repository<Item> {
       royalty: itemRequest.royalty,
       author: new Account(account.accountId),
       owner: new Account(account.accountId),
+      price: itemRequest.price,
     });
 
     await this.save(item);
@@ -259,10 +293,11 @@ export class ItemRepository extends Repository<Item> {
     return item;
   }
 
-  async activateLazy(item: Item, lazyItemRequest: LazyItemRequestDto): Promise<Item> {
+  async activateLazyItem(item: Item, lazyItemRequest: LazyItemRequestDto): Promise<Item> {
     const { image } = lazyItemRequest;
 
-    item.status = ItemStatus.Lazy;
+    item.status = ItemStatus.Listed;
+    item.isLazy = true;
     item.image = { url: image.url, cid: image.cid } as Image;
 
     await this.save(item);

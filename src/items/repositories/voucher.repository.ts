@@ -10,6 +10,15 @@ export class VoucherRepository extends Repository<Voucher> {
   constructor(private dataSource: DataSource) {
     super(Voucher, dataSource.createEntityManager());
   }
+
+  async findVoucherByItemId(itemId: string) {
+    return this.findOne({
+      where: { item: new Item(itemId) },
+      relations: { author: true },
+      select: { author: { address: true } },
+    });
+  }
+
   async createVoucher(
     item: Item,
     lazyItemRequest: LazyItemRequestDto,
@@ -28,5 +37,12 @@ export class VoucherRepository extends Repository<Voucher> {
     voucher.author.address = account.address;
 
     return voucher;
+  }
+
+  async deleteVoucher(accountId: string, itemId: string): Promise<void> {
+    this.delete({
+      item: new Item(itemId),
+      author: new Account(accountId),
+    });
   }
 }

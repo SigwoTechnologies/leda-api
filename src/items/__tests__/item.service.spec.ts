@@ -22,6 +22,7 @@ import { VoucherRepository } from '../repositories/voucher.repository';
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
   findById: jest.fn(),
+  findActiveById: jest.fn(),
   findDraftById: jest.fn(),
   findByAccount: jest.fn(),
   findPriceRange: jest.fn(),
@@ -97,6 +98,7 @@ describe('ItemService', () => {
         history: [],
         itemLikes: [],
         voucher: {} as Voucher,
+        isLazy: false,
       },
     ];
   });
@@ -119,7 +121,7 @@ describe('ItemService', () => {
       it('should return the expected item', async () => {
         const expected = items[0];
 
-        itemRepository.findById.mockResolvedValue({ ...expected });
+        itemRepository.findActiveById.mockResolvedValue({ ...expected });
 
         const actual = await service.findById('123');
 
@@ -132,7 +134,7 @@ describe('ItemService', () => {
         const unexistingId = '123';
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () => service.findById(unexistingId);
 
@@ -266,7 +268,7 @@ describe('ItemService', () => {
         expected.listId = listId;
         expected.status = ItemStatus.Listed;
 
-        itemRepository.findById.mockResolvedValue({ ...items[0] });
+        itemRepository.findActiveById.mockResolvedValue({ ...items[0] });
         accountRepository.findByAddress.mockResolvedValue({ account: { accountId: '1' } });
         historyRepository.findAllByItemId.mockResolvedValue(history);
 
@@ -287,7 +289,7 @@ describe('ItemService', () => {
         const unexistingId = '123';
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () =>
           service.listAnItem({ address: '', itemId: unexistingId, listId: 1, price: '1' });
@@ -309,7 +311,7 @@ describe('ItemService', () => {
         const item = { listId: 1 } as Item;
         const account = { accountId: '1' } as Account;
 
-        itemRepository.findById.mockResolvedValue(item);
+        itemRepository.findActiveById.mockResolvedValue(item);
 
         accountRepository.findByAddress.mockResolvedValue(account);
 
@@ -333,7 +335,7 @@ describe('ItemService', () => {
         const unexistingAddress = 'address';
         const errorMessage = `The item with id ${unexistingItemId} does not exist`;
 
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () =>
           service.delistAnItem({ itemId: unexistingItemId, address: unexistingAddress });
@@ -348,7 +350,7 @@ describe('ItemService', () => {
         const unexistingAddress = 'address';
         const errorMessage = `The account with address ${unexistingAddress} does not exist`;
 
-        itemRepository.findById.mockResolvedValue({} as Item);
+        itemRepository.findActiveById.mockResolvedValue({} as Item);
         accountRepository.findByAddress.mockResolvedValue(null);
 
         const exception = () => service.delistAnItem({ itemId, address: unexistingAddress });
@@ -370,7 +372,7 @@ describe('ItemService', () => {
         const expected = items[0];
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
-        itemRepository.findDraftById.mockResolvedValue({ ...expected });
+        itemRepository.findById.mockResolvedValue({ ...expected });
         itemRepository.activate.mockResolvedValue({ ...expected });
 
         const actual = await service.activate(itemId, itemRequest);
@@ -406,7 +408,7 @@ describe('ItemService', () => {
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () => service.activate(unexistingId, itemRequest);
 
