@@ -17,6 +17,7 @@ import { History } from './history.entity';
 import { Tag } from './tag.entity';
 import { ItemLike } from './item-like.entity';
 import { ItemProperty } from './item-property.entity';
+import { Voucher } from './voucher.entity';
 import { Collection } from '../../collections/entities/collection.entity';
 
 @Entity()
@@ -92,6 +93,9 @@ export class Item {
   @Column({ default: 0 })
   likes: number;
 
+  @Column({ default: false })
+  isLazy: boolean;
+
   @OneToMany(() => History, (table) => table.item, { cascade: true })
   history: History[];
 
@@ -100,6 +104,9 @@ export class Item {
 
   @OneToMany(() => ItemProperty, (table) => table.item, { cascade: true })
   itemProperties: ItemProperty[];
+
+  @OneToOne(() => Voucher, (voucher) => voucher.item, { cascade: true })
+  voucher: Voucher;
 
   @CreateDateColumn()
   createdAt: Date;

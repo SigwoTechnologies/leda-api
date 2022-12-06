@@ -8,16 +8,21 @@ import { BusinessException, NotFoundException } from '../../common/exceptions/ex
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
-import { ItemRequestDto } from '../dto/item-request.dto';
-import { ListItemRequestDto } from '../dto/list-item-request.dto';
-import { ItemPaginationDto } from '../dto/pagination-request.dto';
-import { PriceRangeDto } from '../dto/price-range.dto';
 import { Item } from '../entities/item.entity';
-import { ItemStatus } from '../enums/item-status.enum';
-import { TransactionType } from '../enums/transaction-type.enum';
-import { HistoryRepository } from '../repositories/history.repository';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
 import { ItemRepository } from '../repositories/item.repository';
+import { ItemRequestDto } from '../dto/item-request.dto';
+import { ItemStatus } from '../enums/item-status.enum';
+import { ListItemRequestDto } from '../dto/list-item-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
+import { TransactionType } from '../enums/transaction-type.enum';
+import { VoucherRepository } from '../repositories/voucher.repository';
+import { LazyProcessType } from '../enums/lazy-process-type.enum';
+import { Voucher } from '../entities/voucher.entity';
+import { TransferDto } from '../dto/transfer-request.dto';
+import { HistoryRepository } from '../repositories/history.repository';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 
 @Injectable()
 export class ItemService {
@@ -26,6 +31,7 @@ export class ItemService {
     private accountRepository: AccountRepository,
     private historyRepository: HistoryRepository,
     private itemLikeRepository: ItemLikeRepository,
+    private voucherRepository: VoucherRepository,
     private collectionRepository: CollectionRepository
   ) {}
 
@@ -42,7 +48,7 @@ export class ItemService {
   }
 
   async findById(itemId: string): Promise<Item> {
-    const item = await this.itemRepository.findById(itemId);
+    const item = await this.itemRepository.findActiveById(itemId);
 
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
@@ -69,16 +75,27 @@ export class ItemService {
     return this.itemRepository.findPriceRange();
   }
 
+  async findVoucherByItemId(itemId: string): Promise<Voucher> {
+    const item = await this.itemRepository.findActiveById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    const voucher = await this.voucherRepository.findVoucherByItemId(itemId);
+
+    return voucher;
+  }
+
   async create(itemRequest: DraftItemRequestDto): Promise<Item> {
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.createItem(itemRequest, account);
+    const collection = await this.getCollection(itemRequest?.collection as Collection, account);
+
+    return this.itemRepository.createItem(itemRequest, account, collection);
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
-    const item = await this.itemRepository.findById(itemId);
+    const item = await this.itemRepository.findActiveById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     const account = await this.accountRepository.findByAddress(newOwnerAddress);
@@ -104,7 +121,7 @@ export class ItemService {
   }
 
   async listAnItem({ address, itemId, listId, price }: ListItemRequestDto): Promise<Item> {
-    const item = await this.itemRepository.findById(itemId);
+    const item = await this.itemRepository.findActiveById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     const account = await this.accountRepository.findByAddress(address);
@@ -129,8 +146,26 @@ export class ItemService {
     return item;
   }
 
+  async listLazyItem(item: Item, accountId: string, price: string): Promise<Item> {
+    await this.itemRepository.listLazyItem(item.itemId, price);
+
+    item.price = price;
+    item.status = ItemStatus.Listed;
+
+    await this.historyRepository.createHistory({
+      itemId: item.itemId,
+      price,
+      accountId,
+      transactionType: TransactionType.Listed,
+    });
+
+    item.history = await this.historyRepository.findAllByItemId(item.itemId);
+
+    return item;
+  }
+
   async delistAnItem({ itemId, address }: DelistItemRequestDto): Promise<Item> {
-    const item = await this.itemRepository.findById(itemId);
+    const item = await this.itemRepository.findActiveById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     const account = await this.accountRepository.findByAddress(address);
@@ -152,8 +187,23 @@ export class ItemService {
     return item;
   }
 
+  async delistLazyItem(item: Item, accountId: string): Promise<Item> {
+    await this.itemRepository.delistAnItem(item.itemId);
+
+    await this.historyRepository.createHistory({
+      itemId: item.itemId,
+      accountId: accountId,
+      transactionType: TransactionType.Delisted,
+    });
+
+    item.status = ItemStatus.NotListed;
+    item.history = await this.historyRepository.findAllByItemId(item.itemId);
+
+    return item;
+  }
+
   async like(itemId: string, address: string): Promise<Item> {
-    const itemToLike = await this.itemRepository.findById(itemId);
+    const itemToLike = await this.itemRepository.findActiveById(itemId);
     const history = await this.historyRepository.findAllByItemId(itemId);
 
     if (!itemToLike) throw new NotFoundException(`The item with id ${itemId} does not exist`);
@@ -191,7 +241,7 @@ export class ItemService {
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    const item = await this.itemRepository.findDraftById(itemId);
+    const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     const collection = await this.getCollection(itemRequest?.collection as Collection, account);
@@ -216,6 +266,57 @@ export class ItemService {
       },
       account
     );
+  }
+
+  async processLazyItem(itemId: string, lazyItemRequest: LazyItemRequestDto): Promise<Item> {
+    const account = await this.accountRepository.findByAddress(lazyItemRequest.address);
+
+    if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
+
+    const item = await this.itemRepository.findById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    if (lazyItemRequest.lazyProcessType === LazyProcessType.Activation)
+      return this.processLazyActivation(item, lazyItemRequest, account);
+
+    if (lazyItemRequest.lazyProcessType === LazyProcessType.Listing)
+      return this.processLazyListing(item, lazyItemRequest, account);
+
+    if (lazyItemRequest.lazyProcessType === LazyProcessType.Delisting)
+      return this.processLazyDelisting(item, account);
+
+    throw new BusinessException(BusinessErrors.lazy_process_type_not_defined);
+  }
+
+  async processLazyActivation(item: Item, lazyItemRequest: LazyItemRequestDto, account: Account) {
+    await this.voucherRepository.createVoucher(item, lazyItemRequest, account);
+    return this.itemRepository.activateLazyItem(item, lazyItemRequest);
+  }
+
+  async processLazyListing(item: Item, lazyItemRequest: LazyItemRequestDto, account: Account) {
+    await this.voucherRepository.deleteVoucher(account.accountId, item.itemId);
+    await this.voucherRepository.createVoucher(item, lazyItemRequest, account);
+    return this.listLazyItem(item, account.accountId, lazyItemRequest.price);
+  }
+
+  async processLazyDelisting(item: Item, account: Account) {
+    await this.voucherRepository.deleteVoucher(account.accountId, item.itemId);
+    return this.delistLazyItem(item, account.accountId);
+  }
+
+  async transfer(itemId: string, transfer: TransferDto) {
+    const voucher = await this.voucherRepository.findOneBy({ voucherId: transfer.voucherId });
+    if (!voucher) throw new BusinessException(BusinessErrors.voucher_not_found);
+
+    await this.voucherRepository.delete(transfer.voucherId);
+
+    const item = await this.itemRepository.findById(itemId);
+    if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
+
+    const account = await this.accountRepository.findByAddress(transfer.owner);
+    if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
+
+    await this.itemRepository.transfer(itemId, account.accountId, transfer.tokenId);
   }
 
   async hideAndUnhide(itemId: string): Promise<Item> {
