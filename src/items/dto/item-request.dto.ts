@@ -15,6 +15,7 @@ export class ItemRequestDto {
 
   collection: {
     name: string;
+    description: string;
     image: ImageRequestDto;
   };
 }

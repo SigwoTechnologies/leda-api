@@ -88,27 +88,22 @@ export class CollectionRepository extends Repository<Collection> {
   }
 
   async createCollection(
-    { name, description }: CreateCollectionDto,
+    createCollectionDto: CreateCollectionDto,
     owner: Account
   ): Promise<Collection> {
     const data = this.create({
-      name,
-      description,
+      name: createCollectionDto.name,
+      description: createCollectionDto.description,
       owner: new Account(owner.accountId),
     });
+
+    data.image = {
+      url: createCollectionDto.image.url,
+      cid: createCollectionDto.image.cid,
+    } as CollectionImage;
 
     await this.save(data);
 
     return data;
-  }
-
-  async activate(collection: Collection, { url, cid }: CollectionImage): Promise<Collection> {
-    collection.image = {
-      url,
-      cid,
-    } as CollectionImage;
-
-    await this.save(collection);
-    return collection;
   }
 }
