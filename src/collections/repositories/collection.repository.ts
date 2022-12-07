@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { getAverage } from '../../common/utils/average-item-likes-utils';
-import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
+import { ItemStatus } from '../../items/enums/item-status.enum';
+import { DataSource, FindManyOptions, FindOptionsWhere, Not, Raw, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
@@ -52,7 +53,11 @@ export class CollectionRepository extends Repository<Collection> {
         },
         items: true,
       },
-
+      where: {
+        items: {
+          status: Not(ItemStatus.Hidden),
+        },
+      },
       take: limit,
       skip: skip,
     } as FindManyOptions<Collection>;
