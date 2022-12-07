@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { getAverage } from 'src/common/utils/average-item-likes-utils';
+import { getAverage } from '../../common/utils/average-item-likes-utils';
 import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
