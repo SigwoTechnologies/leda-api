@@ -26,4 +26,10 @@ export class LazyItemRequestDto {
   @IsNotEmpty()
   @IsEnum(LazyProcessType)
   lazyProcessType: LazyProcessType;
+
+  collection: {
+    name: string;
+    description: string;
+    image: ImageRequestDto;
+  };
 }
