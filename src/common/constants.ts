@@ -123,4 +123,10 @@ export const BusinessErrors = {
     message: 'The given collection address does not have an associated collection.',
     code: 4016,
   },
+  collection_not_found: {
+    name: 'COLLECTION_NOT_FOUND',
+    message:
+      'The collection you are looking for does not exist. Please verify your information and try again.',
+    code: 4016,
+  },
 };

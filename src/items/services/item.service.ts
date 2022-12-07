@@ -89,9 +89,7 @@ export class ItemService {
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    const collection = await this.getCollection(itemRequest?.collection as Collection, account);
-
-    return this.itemRepository.createItem(itemRequest, account, collection);
+    return this.itemRepository.createItem(itemRequest, account);
   }
 
   async buyItem({ itemId, address: newOwnerAddress }: BuyRequestDto): Promise<Item> {
@@ -237,6 +235,7 @@ export class ItemService {
   }
 
   async activate(itemId: string, itemRequest: ItemRequestDto): Promise<Item> {
+    console.log('itemrequest', itemRequest);
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
@@ -251,12 +250,18 @@ export class ItemService {
 
   async getCollection(collectionDto: Collection, account: Account) {
     if (!collectionDto?.name?.length) {
-      return this.collectionRepository.getDefaultCollection();
+      const defaultCollection = await this.collectionRepository.getDefaultCollection();
+      console.log('defaultCollection', defaultCollection);
+      return defaultCollection;
     }
 
     const collection = await this.collectionRepository.findByName(collectionDto.name, account);
 
+    console.log('custom', collection);
+
     if (collection) return collection;
+
+    console.log('collectionDto', collectionDto);
 
     return this.collectionRepository.createCollection(
       {
@@ -290,7 +295,8 @@ export class ItemService {
 
   async processLazyActivation(item: Item, lazyItemRequest: LazyItemRequestDto, account: Account) {
     await this.voucherRepository.createVoucher(item, lazyItemRequest, account);
-    return this.itemRepository.activateLazyItem(item, lazyItemRequest);
+    const collection = await this.getCollection(lazyItemRequest?.collection as Collection, account);
+    return this.itemRepository.activateLazyItem(item, lazyItemRequest, collection);
   }
 
   async processLazyListing(item: Item, lazyItemRequest: LazyItemRequestDto, account: Account) {

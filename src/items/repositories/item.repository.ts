@@ -188,13 +188,12 @@ export class ItemRepository extends Repository<Item> {
 
   async findPriceRangeCollectionItems(collectionId: string): Promise<PriceRangeDto> {
     const query = this.createQueryBuilder('item')
+      .innerJoin('item.collection', 'collection')
       .where('item.status = :status', {
         status: ItemStatus.Listed,
       })
-      .andWhere('item.collection = :collection', {
-        collection: new Collection(collectionId).id,
-      })
-      .andWhere('item.price IS NOT NULL');
+      .andWhere('item.price IS NOT NULL')
+      .andWhere('collection.id = :collectionId', { collectionId });
 
     const cheapestQuery = query.clone().orderBy('item.price', 'ASC');
     const expensiveQuery = query.clone().orderBy('item.price', 'DESC');
@@ -256,6 +255,7 @@ export class ItemRepository extends Repository<Item> {
         isLazy: false,
         tokenId,
         updatedAt: new Date(),
+        price: null,
       }
     );
   }
@@ -320,11 +320,7 @@ export class ItemRepository extends Repository<Item> {
     };
   }
 
-  async createItem(
-    itemRequest: DraftItemRequestDto,
-    account: Account,
-    collection: Collection
-  ): Promise<Item> {
+  async createItem(itemRequest: DraftItemRequestDto, account: Account): Promise<Item> {
     const tags = itemRequest.tags.map((tag) => {
       const newTag = new Tag();
       newTag.name = tag;
@@ -347,14 +343,12 @@ export class ItemRepository extends Repository<Item> {
       author: new Account(account.accountId),
       owner: new Account(account.accountId),
       price: itemRequest.price,
-      collection: new Collection(collection.id),
     });
 
     await this.save(item);
 
     item.owner.address = account.address;
     item.author.address = account.address;
-    item.collection = collection;
 
     return item;
   }
@@ -388,12 +382,17 @@ export class ItemRepository extends Repository<Item> {
     return item;
   }
 
-  async activateLazyItem(item: Item, lazyItemRequest: LazyItemRequestDto): Promise<Item> {
+  async activateLazyItem(
+    item: Item,
+    lazyItemRequest: LazyItemRequestDto,
+    collection: Collection
+  ): Promise<Item> {
     const { image } = lazyItemRequest;
 
     item.status = ItemStatus.Listed;
     item.isLazy = true;
     item.image = { url: image.url, cid: image.cid } as Image;
+    item.collection = new Collection(collection.id);
 
     await this.save(item);
     return item;

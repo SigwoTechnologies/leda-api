@@ -45,7 +45,9 @@ export class CollectionRepository extends Repository<Collection> {
       relations: {
         owner: true,
         image: true,
-        items: true,
+        items: {
+          image: true,
+        },
       },
       select: {
         owner: {
