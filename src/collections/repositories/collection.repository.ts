@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { getAverage } from 'src/common/utils/average-item-likes-utils';
-import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
-import { Account } from '../../config/entities.config';
+import { getAverage } from '../../common/utils/average-item-likes-utils';
+import { ItemStatus } from '../../items/enums/item-status.enum';
+import { DataSource, FindManyOptions, FindOptionsWhere, Not, Raw, Repository } from 'typeorm';
+import { Account, Item } from '../../config/entities.config';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
 import { CollectionImage } from '../entities/collection-image.entity';
@@ -52,6 +53,7 @@ export class CollectionRepository extends Repository<Collection> {
         },
         items: true,
       },
+
       take: limit,
       skip: skip,
     } as FindManyOptions<Collection>;
@@ -98,7 +100,6 @@ export class CollectionRepository extends Repository<Collection> {
         if (popularityOrder === 'desc') return b.popularity - a.popularity;
       });
     }
-
     return {
       totalCount,
       page: paginationDto.page,
@@ -125,6 +126,7 @@ export class CollectionRepository extends Repository<Collection> {
 
     return data;
   }
+
   async findByName(name: string, account: Account): Promise<Collection | undefined> {
     const data = await this.findOne({
       where: { name, owner: new Account(account.accountId) },
@@ -212,9 +214,6 @@ export class CollectionRepository extends Repository<Collection> {
       );
     }
 
-    // This query will result on the following structure:
-    // (status = 1 and price between x and y and name like '%value%') OR
-    // (status = 1 and price between x and y and description like '%value%')
     conditions.push(condition1);
     conditions.push(condition2);
 
