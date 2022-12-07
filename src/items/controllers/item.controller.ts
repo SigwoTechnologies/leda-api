@@ -13,6 +13,9 @@ import { ItemService } from '../services/item.service';
 import { PriceRangeDto } from '../dto/price-range.dto';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { NewestItemsRequestDto } from '../dto/newest-items-request.dto';
+import { Voucher } from '../entities/voucher.entity';
+import { TransferDto } from '../dto/transfer-request.dto';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 
 @Controller('items')
 export class ItemsController {
@@ -58,6 +61,11 @@ export class ItemsController {
   @Get('/:itemId')
   findById(@Param('itemId') itemId: string): Promise<Item> {
     return this.itemService.findById(itemId);
+  }
+
+  @Get('/:itemId/voucher')
+  getVoucher(@Param('itemId') itemId: string): Promise<Voucher> {
+    return this.itemService.findVoucherByItemId(itemId);
   }
 
   @IsAddressValid()
@@ -106,6 +114,20 @@ export class ItemsController {
   }
 
   @IsAddressValid()
+  @Patch('/:itemId/process-lazy-item')
+  processLazyItem(
+    @Param('itemId') itemId: string,
+    @Body() lazyItemRequest: LazyItemRequestDto
+  ): Promise<Item> {
+    return this.itemService.processLazyItem(itemId, lazyItemRequest);
+  }
+
+  @IsAddressValid()
+  @Patch('/:itemId/transfer')
+  transfer(@Param('itemId') itemId: string, @Body() transferDto: TransferDto): Promise<void> {
+    return this.itemService.transfer(itemId, transferDto);
+  }
+
   @Patch('/:itemId/hide-unhide')
   hideAndUnhide(@Param('itemId') itemId: string): Promise<Item> {
     return this.itemService.hideAndUnhide(itemId);

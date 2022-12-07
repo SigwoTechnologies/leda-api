@@ -5,44 +5,50 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Item } from './item.entity';
 
 @Entity()
-export class History {
+export class Voucher {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
-
-  @Column({ nullable: true })
-  price: string;
+  voucherId: string;
 
   @Column()
-  transactionType: string;
+  minPrice: string;
 
-  @Column({ nullable: true })
-  listId: number;
+  @Column()
+  uri: string;
 
-  @ManyToOne(() => Account, (table) => table.history, {
-    onDelete: 'CASCADE',
-    orphanedRowAction: 'delete',
-  })
-  @JoinColumn({ name: 'ownerId' })
-  owner: Account;
-
-  @ManyToOne(() => Item, (table) => table.history, {
+  @OneToOne(() => Item, {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete',
   })
   @JoinColumn({ name: 'itemId' })
   item: Item;
 
-  @CreateDateColumn({ type: 'timestamptz' })
+  @ManyToOne(() => Account, (account) => account.vouchers, {
+    onDelete: 'CASCADE',
+    orphanedRowAction: 'delete',
+  })
+  @JoinColumn({ name: 'authorId' })
+  author: Account;
+
+  @Column()
+  royalties: number;
+
+  @Column()
+  signature: string;
+
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({
-    type: 'timestamptz',
-  })
+  @UpdateDateColumn()
   updatedAt: Date;
+
+  constructor(id: string) {
+    this.voucherId = id;
+  }
 }

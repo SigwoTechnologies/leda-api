@@ -16,12 +16,15 @@ import { TransactionType } from '../enums/transaction-type.enum';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
+import { Voucher } from '../entities/voucher.entity';
+import { VoucherRepository } from '../repositories/voucher.repository';
 import { Collection } from '../../config/entities.config';
 import { CollectionRepository } from '../../collections/repositories/collection.repository';
 
 const itemRepositoryMock = () => ({
   findAll: jest.fn(),
   findById: jest.fn(),
+  findActiveById: jest.fn(),
   findDraftById: jest.fn(),
   findByAccount: jest.fn(),
   findPriceRange: jest.fn(),
@@ -45,6 +48,10 @@ const historyRepositoryMock = () => ({
 const itemLikeRepositoryMock = () => ({
   getTotalOfLikesFromItem: jest.fn(),
   createItemLike: jest.fn(),
+});
+
+const voucherRepository = () => ({
+  createVoucher: jest.fn(),
 });
 
 const collectionRepositoryMock = () => ({
@@ -72,6 +79,7 @@ describe('ItemService', () => {
         { provide: ItemRepository, useFactory: itemRepositoryMock },
         { provide: AccountRepository, useFactory: accountRepositoryMock },
         { provide: HistoryRepository, useFactory: historyRepositoryMock },
+        { provide: VoucherRepository, useFactory: voucherRepository },
         { provide: ItemLikeRepository, useFactory: itemLikeRepositoryMock },
         { provide: CollectionRepository, useFactory: collectionRepositoryMock },
       ],
@@ -105,6 +113,8 @@ describe('ItemService', () => {
         updatedAt: new Date(),
         history: [],
         itemLikes: [],
+        voucher: {} as Voucher,
+        isLazy: false,
       },
     ];
   });
@@ -148,7 +158,7 @@ describe('ItemService', () => {
           itemLikes: [],
         };
 
-        itemRepository.findById.mockResolvedValue({ ...expected });
+        itemRepository.findActiveById.mockResolvedValue({ ...expected });
 
         const actual = await service.findById('123');
 
@@ -161,7 +171,7 @@ describe('ItemService', () => {
         const unexistingId = '123';
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () => service.findById(unexistingId);
 
@@ -302,7 +312,7 @@ describe('ItemService', () => {
         expected.listId = listId;
         expected.status = ItemStatus.Listed;
 
-        itemRepository.findById.mockResolvedValue({ ...items[0] });
+        itemRepository.findActiveById.mockResolvedValue({ ...items[0] });
         accountRepository.findByAddress.mockResolvedValue({ account: { accountId: '1' } });
         historyRepository.findAllByItemId.mockResolvedValue(history);
 
@@ -323,7 +333,7 @@ describe('ItemService', () => {
         const unexistingId = '123';
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () =>
           service.listAnItem({ address: '', itemId: unexistingId, listId: 1, price: '1' });
@@ -345,7 +355,7 @@ describe('ItemService', () => {
         const item = { listId: 1 } as Item;
         const account = { accountId: '1' } as Account;
 
-        itemRepository.findById.mockResolvedValue(item);
+        itemRepository.findActiveById.mockResolvedValue(item);
 
         accountRepository.findByAddress.mockResolvedValue(account);
 
@@ -369,7 +379,7 @@ describe('ItemService', () => {
         const unexistingAddress = 'address';
         const errorMessage = `The item with id ${unexistingItemId} does not exist`;
 
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () =>
           service.delistAnItem({ itemId: unexistingItemId, address: unexistingAddress });
@@ -384,7 +394,7 @@ describe('ItemService', () => {
         const unexistingAddress = 'address';
         const errorMessage = `The account with address ${unexistingAddress} does not exist`;
 
-        itemRepository.findById.mockResolvedValue({} as Item);
+        itemRepository.findActiveById.mockResolvedValue({} as Item);
         accountRepository.findByAddress.mockResolvedValue(null);
 
         const exception = () => service.delistAnItem({ itemId, address: unexistingAddress });
@@ -401,7 +411,11 @@ describe('ItemService', () => {
     describe('and the account and item exist', () => {
       it('should activate and return the expected item', async () => {
         const account = { accountId: '456' } as Account;
-        const collection = { image: { url: 'url', cid: 'cid' }, name: 'Leda' };
+        const collection = {
+          image: { url: 'url', cid: 'cid' },
+          name: 'Leda',
+          description: 'description',
+        };
         const itemId = '123';
         const itemRequest = {
           address: '123',
@@ -410,13 +424,13 @@ describe('ItemService', () => {
         const expected = items[0];
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
-        itemRepository.findDraftById.mockResolvedValue({ ...expected });
+        itemRepository.findById.mockResolvedValue({ ...expected });
         itemRepository.activate.mockResolvedValue({ ...expected });
         collectionRepository.findByName.mockResolvedValue({ ...collection });
 
         const actual = await service.activate(itemId, itemRequest);
 
-        expect(itemRepository.activate).toHaveBeenCalledWith(expected, itemRequest);
+        expect(itemRepository.activate).toHaveBeenCalledWith(expected, itemRequest, collection);
         expect(actual).toEqual(expected);
       });
     });
@@ -447,7 +461,7 @@ describe('ItemService', () => {
         const errorMessage = `The item with id ${unexistingId} does not exist`;
 
         accountRepository.findByAddress.mockResolvedValue({ ...account });
-        itemRepository.findById.mockResolvedValue(null);
+        itemRepository.findActiveById.mockResolvedValue(null);
 
         const exception = () => service.activate(unexistingId, itemRequest);
 
