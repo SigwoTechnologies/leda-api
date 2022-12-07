@@ -1,6 +1,8 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
+import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
+import { PriceRangeDto } from 'src/items/dto/price-range.dto';
 import { Public } from '../../auth/decorators/public.decorator';
-import { PaginationDto } from '../../common/dto/pagination.dto';
+import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionService } from '../services/collection.service';
 
 @Controller('collections')
@@ -9,13 +11,28 @@ export class CollectionsController {
 
   @Public()
   @Get('/paginate')
-  paginate(@Query() paginationDto: PaginationDto) {
-    return this.collectionService.findPagination(paginationDto);
+  paginate(@Query() paginationDto: CollectionPaginationDto) {
+    return this.collectionService.findPaginationCollection(paginationDto);
   }
 
   @Public()
   @Get('/:id')
   getByName(@Param('id') id: string) {
     return this.collectionService.findById(id);
+  }
+
+  @Public()
+  @Get('/:collectionId/paginate')
+  paginateNfts(
+    @Param('collectionId') collectionId: string,
+    @Query() paginationDto: ItemPaginationDto
+  ) {
+    return this.collectionService.findNftsOnCollection(collectionId, paginationDto);
+  }
+
+  @Public()
+  @Get('/:collectionId/price-range')
+  findPriceRange(@Param('collectionId') collectionId: string): Promise<PriceRangeDto> {
+    return this.collectionService.findPriceRange(collectionId);
   }
 }

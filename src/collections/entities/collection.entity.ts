@@ -11,6 +11,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
+import { Max } from 'class-validator';
 import { CollectionImage } from './collection-image.entity';
 
 @Entity()
@@ -19,6 +20,7 @@ export class Collection {
   id: string;
 
   @Column({ nullable: true })
+  @Max(255)
   description: string;
 
   @Column({ unique: false, nullable: false })

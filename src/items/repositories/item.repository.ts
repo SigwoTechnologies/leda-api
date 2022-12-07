@@ -5,6 +5,7 @@ import {
   DataSource,
   FindManyOptions,
   FindOptionsWhere,
+  Not,
   Raw,
   Repository,
   SelectQueryBuilder,
@@ -73,6 +74,60 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
+  async nftsCollectionPagination(collectionId: string, paginationDto: ItemPaginationDto) {
+    const { limit, skip, likesOrder } = paginationDto;
+
+    const queryOptions = {
+      relations: {
+        image: true,
+        owner: true,
+        author: true,
+        collection: true,
+        tags: true,
+      },
+      select: {
+        image: { url: true },
+        owner: { accountId: true, address: true },
+        collection: { id: true },
+        author: { accountId: true, address: true },
+        tags: { name: true, id: true },
+      },
+      where: [
+        {
+          collection: new Collection(collectionId),
+          status: Not(ItemStatus.Hidden),
+        },
+      ] as FindOptionsWhere<Item>[],
+      take: limit,
+      skip: skip,
+    } as FindManyOptions<Item>;
+
+    const conditions = this.getPaginationNftsConditions(collectionId, paginationDto);
+
+    queryOptions.where = conditions;
+
+    queryOptions.order = {
+      ...queryOptions.order,
+      createdAt: 'desc',
+      tokenId: 'desc',
+    };
+
+    if (likesOrder) {
+      queryOptions.order = {
+        likes: likesOrder,
+      };
+    }
+
+    const [result, totalCount] = await this.findAndCount(queryOptions);
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      limit: paginationDto.limit,
+      items: result,
+    };
+  }
+
   async findAll(): Promise<Item[]> {
     return this.getItemQueryBuilder()
       .where('item.status=:status', { status: ItemStatus.Listed })
@@ -119,6 +174,25 @@ export class ItemRepository extends Repository<Item> {
     const query = this.createQueryBuilder('item')
       .where('item.status = :status', {
         status: ItemStatus.Listed,
+      })
+      .andWhere('item.price IS NOT NULL');
+
+    const cheapestQuery = query.clone().orderBy('item.price', 'ASC');
+    const expensiveQuery = query.clone().orderBy('item.price', 'DESC');
+
+    const { price: from } = await cheapestQuery.limit(1).getOneOrFail();
+    const { price: to } = await expensiveQuery.limit(1).getOneOrFail();
+
+    return { from: +from, to: +to };
+  }
+
+  async findPriceRangeCollectionItems(collectionId: string): Promise<PriceRangeDto> {
+    const query = this.createQueryBuilder('item')
+      .where('item.status = :status', {
+        status: ItemStatus.Listed,
+      })
+      .andWhere('item.collection = :collection', {
+        collection: new Collection(collectionId).id,
       })
       .andWhere('item.price IS NOT NULL');
 
@@ -341,6 +415,40 @@ export class ItemRepository extends Repository<Item> {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = { status: ItemStatus.Listed } as FindOptionsWhere<Item>;
+
+    if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
+
+    const condition2 = { ...condition1 };
+
+    if (search) {
+      condition1.name = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+
+      condition2.description = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+    }
+
+    // This query will result on the following structure:
+    // (status = 1 and price between x and y and name like '%value%') OR
+    // (status = 1 and price between x and y and description like '%value%')
+    conditions.push(condition1);
+    conditions.push(condition2);
+
+    return conditions;
+  }
+
+  private getPaginationNftsConditions(
+    collectionId: string,
+    paginationDto: ItemPaginationDto
+  ): FindOptionsWhere<Item>[] {
+    const { priceFrom, priceTo, search } = paginationDto;
+    const conditions = [] as FindOptionsWhere<Item>[];
+    const condition1 = {
+      collection: new Collection(collectionId),
+      status: Not(ItemStatus.Hidden),
+    } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
 

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
-import { PaginationDto } from '../../common/dto/pagination.dto';
+import { getAverage } from '../../common/utils/average-item-likes-utils';
+import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
-import { CreateCollectionDto } from '../dto/create-collection.dto';
+import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
+import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
 import { CollectionImage } from '../entities/collection-image.entity';
 import { Collection } from '../entities/collection.entity';
 
@@ -12,29 +13,83 @@ export class CollectionRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
-  async pagination(paginationDto: PaginationDto): Promise<Collection[] | undefined> {
-    const { limit, skip } = paginationDto;
+  async pagination(
+    paginationDto: CollectionPaginationDto
+  ): Promise<CollectionResponseDto | undefined> {
+    const { limit, skip, creationOrder, mintType, popularityOrder } = paginationDto;
 
-    const data = await this.find({
-      relations: { items: true },
+    const queryOptions = {
+      relations: {
+        items: {
+          image: true,
+        },
+        owner: true,
+      },
+      select: {
+        owner: {
+          address: true,
+        },
+        items: true,
+      },
       take: limit,
       skip: skip,
+    } as FindManyOptions<Collection>;
+
+    let conditions: FindOptionsWhere<Collection>[];
+    if (paginationDto.search) conditions = this.getPaginationConditions(paginationDto);
+
+    queryOptions.where = conditions;
+
+    // TODO: Uncomment this code when the Lazy Minting feature is done
+    /* if (mintType) {
+      queryOptions.where = {
+        items: {
+          type: mintType,
+        },
+      };
+    } */
+
+    if (creationOrder) {
+      queryOptions.order = {
+        createdAt: creationOrder,
+      };
+    }
+
+    queryOptions.order = {
+      ...queryOptions.order,
+      id: 'desc',
+    };
+
+    const [result, totalCount] = await this.findAndCount(queryOptions);
+
+    let collectionsRes: Collection[];
+
+    const collectionPopularity = result.map((res) => {
+      const orderedNfts = getAverage(res.items);
+      return { ...res, popularity: orderedNfts };
     });
 
-    if (!data) return;
+    collectionsRes = collectionPopularity;
 
-    return data;
+    if (popularityOrder) {
+      collectionsRes = collectionPopularity.sort((a, b) => {
+        if (popularityOrder === 'asc') return a.popularity - b.popularity;
+        if (popularityOrder === 'desc') return b.popularity - a.popularity;
+      });
+    }
+
+    return {
+      totalCount,
+      page: paginationDto.page,
+      limit: paginationDto.limit,
+      collections: collectionsRes,
+    };
   }
 
   async findById(id: string): Promise<Collection | undefined> {
     const data = await this.findOne({
       where: { id },
       relations: {
-        items: {
-          image: true,
-          owner: true,
-          author: true,
-        },
         owner: true,
       },
       select: {
@@ -105,5 +160,32 @@ export class CollectionRepository extends Repository<Collection> {
     await this.save(data);
 
     return data;
+  }
+
+  private getPaginationConditions(
+    paginationDto: CollectionPaginationDto
+  ): FindOptionsWhere<Collection>[] {
+    const { search } = paginationDto;
+    const conditions = [] as FindOptionsWhere<Collection>[];
+    const condition1 = {} as FindOptionsWhere<Collection>;
+    const condition2 = { ...condition1 };
+
+    if (search) {
+      condition1.name = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+
+      condition2.description = Raw(
+        (alias) => `LOWER(${alias}) Like '%${paginationDto.search?.toLowerCase()}%'`
+      );
+    }
+
+    // This query will result on the following structure:
+    // (status = 1 and price between x and y and name like '%value%') OR
+    // (status = 1 and price between x and y and description like '%value%')
+    conditions.push(condition1);
+    conditions.push(condition2);
+
+    return conditions;
   }
 }

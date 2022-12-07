@@ -31,6 +31,6 @@ import { VoucherService } from './services/voucher.service';
     VoucherService,
     CollectionRepository,
   ],
-  exports: [ItemService, HistoryService],
+  exports: [ItemService, HistoryService, ItemRepository],
 })
 export class ItemModule {}
