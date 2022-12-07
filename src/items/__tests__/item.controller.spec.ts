@@ -8,6 +8,7 @@ import { ItemService } from '../../items/services/item.service';
 import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Test } from '@nestjs/testing';
 import { PriceRangeDto } from '../dto/price-range.dto';
+import { Voucher } from '../entities/voucher.entity';
 import { Collection } from '../../config/entities.config';
 
 const itemServiceMock = () => ({
@@ -66,6 +67,8 @@ describe('ItemsController', () => {
         updatedAt: new Date(),
         history: [],
         itemLikes: [],
+        voucher: {} as Voucher,
+        isLazy: false,
         collectionAddress: '',
       },
     ];
@@ -144,6 +147,7 @@ describe('ItemsController', () => {
         royalty: 1,
         tags: [],
         itemProperties: [],
+        price: '0',
         collection: {} as Collection,
       });
 

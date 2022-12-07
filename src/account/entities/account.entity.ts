@@ -2,6 +2,7 @@ import { Item } from '../../items/entities/item.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { History } from '../../items/entities/history.entity';
 import { ItemLike } from '../../items/entities/item-like.entity';
+import { Voucher } from '../../items/entities/voucher.entity';
 import { Collection } from '../../collections/entities/collection.entity';
 
 @Entity()
@@ -20,6 +21,9 @@ export class Account {
 
   @OneToMany(() => ItemLike, (table) => table.item, { cascade: true })
   itemLikes: ItemLike[];
+
+  @OneToMany(() => Voucher, (voucher) => voucher.author, { cascade: true })
+  vouchers: Voucher[];
 
   @OneToMany(() => Collection, (table) => table.owner, { cascade: true })
   collections: Collection[];

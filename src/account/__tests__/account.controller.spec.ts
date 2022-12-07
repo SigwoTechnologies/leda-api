@@ -5,6 +5,7 @@ import { ItemStatus } from '../../items/enums/item-status.enum';
 import { Account } from '../entities/account.entity';
 import { Collection, Image } from '../../config/entities.config';
 import { ItemService } from '../../items/services/item.service';
+import { Voucher } from '../../items/entities/voucher.entity';
 import { CollectionService } from '../../collections/services/collection.service';
 import { getAverage } from '../../common/utils/average-item-likes-utils';
 
@@ -60,6 +61,8 @@ describe('AccountController', () => {
             updatedAt: new Date(),
             history: [],
             itemLikes: [],
+            voucher: {} as Voucher,
+            isLazy: false,
           },
         ];
 
