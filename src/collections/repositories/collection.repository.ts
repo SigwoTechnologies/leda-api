@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { getAverage } from '../../common/utils/average-item-likes-utils';
-import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
+import { ItemStatus } from '../../items/enums/item-status.enum';
+import { DataSource, FindManyOptions, FindOptionsWhere, Not, Raw, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
@@ -13,6 +14,28 @@ export class CollectionRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
+  async getNewest(qty: number): Promise<{ totalCount: number; collections: Collection[] }> {
+    const queryOptions = {
+      relations: {
+        owner: true,
+        image: true,
+      },
+      select: {
+        owner: {
+          address: true,
+        },
+      },
+      take: qty,
+    } as unknown as FindManyOptions<Collection>;
+
+    const [collections, totalCount] = await this.findAndCount(queryOptions);
+
+    return {
+      totalCount,
+      collections,
+    };
+  }
+
   async pagination(
     paginationDto: CollectionPaginationDto
   ): Promise<CollectionResponseDto | undefined> {
@@ -20,16 +43,20 @@ export class CollectionRepository extends Repository<Collection> {
 
     const queryOptions = {
       relations: {
-        items: {
-          image: true,
-        },
         owner: true,
+        image: true,
+        items: true,
       },
       select: {
         owner: {
           address: true,
         },
         items: true,
+      },
+      where: {
+        items: {
+          status: Not(ItemStatus.Hidden),
+        },
       },
       take: limit,
       skip: skip,
@@ -77,7 +104,6 @@ export class CollectionRepository extends Repository<Collection> {
         if (popularityOrder === 'desc') return b.popularity - a.popularity;
       });
     }
-
     return {
       totalCount,
       page: paginationDto.page,
@@ -91,6 +117,7 @@ export class CollectionRepository extends Repository<Collection> {
       where: { id },
       relations: {
         owner: true,
+        image: true,
       },
       select: {
         owner: {
@@ -103,6 +130,7 @@ export class CollectionRepository extends Repository<Collection> {
 
     return data;
   }
+
   async findByName(name: string, account: Account): Promise<Collection | undefined> {
     const data = await this.findOne({
       where: { name, owner: new Account(account.accountId) },
@@ -162,6 +190,16 @@ export class CollectionRepository extends Repository<Collection> {
     return data;
   }
 
+  async activate(collection: Collection, { url, cid }: CollectionImage): Promise<Collection> {
+    collection.image = {
+      url,
+      cid,
+    } as CollectionImage;
+
+    await this.save(collection);
+    return collection;
+  }
+
   private getPaginationConditions(
     paginationDto: CollectionPaginationDto
   ): FindOptionsWhere<Collection>[] {
@@ -180,9 +218,6 @@ export class CollectionRepository extends Repository<Collection> {
       );
     }
 
-    // This query will result on the following structure:
-    // (status = 1 and price between x and y and name like '%value%') OR
-    // (status = 1 and price between x and y and description like '%value%')
     conditions.push(condition1);
     conditions.push(condition2);
 

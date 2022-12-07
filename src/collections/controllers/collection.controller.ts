@@ -1,4 +1,5 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
+import { NewestItemsRequestDto } from 'src/items/dto/newest-items-request.dto';
 import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
 import { PriceRangeDto } from 'src/items/dto/price-range.dto';
 import { Public } from '../../auth/decorators/public.decorator';
@@ -13,6 +14,12 @@ export class CollectionsController {
   @Get('/paginate')
   paginate(@Query() paginationDto: CollectionPaginationDto) {
     return this.collectionService.findPaginationCollection(paginationDto);
+  }
+
+  @Public()
+  @Get('/newest')
+  getNewest(@Query() NewestQuery: NewestItemsRequestDto) {
+    return this.collectionService.getNewest(NewestQuery.qty);
   }
 
   @Public()

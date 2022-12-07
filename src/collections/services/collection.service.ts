@@ -21,6 +21,17 @@ export class CollectionService {
     return this.collectionRepository.pagination(paginationValues);
   }
 
+  async getNewest(qty: number) {
+    const { totalCount, collections } = await this.collectionRepository.getNewest(qty);
+    for await (const collection of collections) {
+      collection.items = await this.itemsRepository.getNewestByCollection(collection.id, 1);
+    }
+    return {
+      totalCount,
+      collections,
+    };
+  }
+
   async findById(id: string) {
     return this.collectionRepository.findById(id);
   }

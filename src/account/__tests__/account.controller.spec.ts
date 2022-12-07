@@ -7,6 +7,7 @@ import { Collection, Image } from '../../config/entities.config';
 import { ItemService } from '../../items/services/item.service';
 import { Voucher } from '../../items/entities/voucher.entity';
 import { CollectionService } from '../../collections/services/collection.service';
+import { getAverage } from '../../common/utils/average-item-likes-utils';
 
 const itemServiceMock = () => ({
   findByAddress: jest.fn(),
