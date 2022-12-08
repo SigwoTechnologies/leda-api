@@ -5,6 +5,7 @@ import {
   FindManyOptions,
   FindOptionsWhere,
   Not,
+  In,
   Raw,
   Repository,
   SelectQueryBuilder,
@@ -415,7 +416,7 @@ export class ItemRepository extends Repository<Item> {
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = {
       status: Not(ItemStatus.Draft),
-      isHidden: false,
+      isHidden: true,
     } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
