@@ -342,7 +342,7 @@ export class ItemRepository extends Repository<Item> {
       royalty: itemRequest.royalty,
       author: new Account(account.accountId),
       owner: new Account(account.accountId),
-      price: itemRequest.price,
+      price: itemRequest.price || null,
     });
 
     await this.save(item);
