@@ -103,7 +103,7 @@ export class ItemService {
     await this.itemRepository.buyItem(itemId, account.accountId);
 
     item.owner.address = account.address;
-    item.status = ItemStatus.Sold;
+    item.status = ItemStatus.NotListed;
 
     await this.historyRepository.createHistory({
       itemId,

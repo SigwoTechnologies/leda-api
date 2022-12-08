@@ -95,7 +95,7 @@ export class ItemRepository extends Repository<Item> {
       where: [
         {
           collection: new Collection(collectionId),
-          status: Not(ItemStatus.Hidden),
+          isHidden: false,
         },
       ] as FindOptionsWhere<Item>[],
       take: limit,
@@ -238,7 +238,7 @@ export class ItemRepository extends Repository<Item> {
       },
       {
         owner: new Account(accountId),
-        status: ItemStatus.Sold,
+        status: ItemStatus.NotListed,
         updatedAt: new Date(),
       }
     );
@@ -251,7 +251,7 @@ export class ItemRepository extends Repository<Item> {
       },
       {
         owner: new Account(accountId),
-        status: ItemStatus.Sold,
+        status: ItemStatus.NotListed,
         isLazy: false,
         tokenId,
         updatedAt: new Date(),
@@ -399,22 +399,12 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async hideAndUnhide(item: Item): Promise<Item> {
-    if (ItemStatus.Hidden === item.status) {
-      await this.save({
-        itemId: item.itemId,
-        status: ItemStatus.Visible,
-      });
-
-      item.status = ItemStatus.Visible;
-      return item;
-    }
+    item.isHidden = item.isHidden ? false : true;
 
     await this.save({
       itemId: item.itemId,
-      status: ItemStatus.Hidden,
+      isHidden: item.isHidden,
     });
-
-    item.status = ItemStatus.Hidden;
 
     return item;
   }
@@ -455,7 +445,7 @@ export class ItemRepository extends Repository<Item> {
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = {
       collection: new Collection(collectionId),
-      status: Not(ItemStatus.Hidden),
+      isHidden: false,
     } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));

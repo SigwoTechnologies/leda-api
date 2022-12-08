@@ -49,6 +49,9 @@ export class Item {
   @Column({ nullable: true })
   price: string;
 
+  @Column({ nullable: true })
+  isHidden: boolean;
+
   @Column()
   @Min(0)
   @Max(10)
