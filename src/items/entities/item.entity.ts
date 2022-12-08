@@ -49,7 +49,7 @@ export class Item {
   @Column({ nullable: true })
   price: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, default: false })
   isHidden: boolean;
 
   @Column()
