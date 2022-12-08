@@ -1,7 +1,6 @@
-import { ItemRequestDto } from '../dto/item-request.dto';
-import { ItemPaginationDto } from '../dto/pagination-request.dto';
-import { Item } from '../entities/item.entity';
+import { Injectable } from '@nestjs/common';
 import {
+  Between,
   DataSource,
   FindManyOptions,
   FindOptionsWhere,
@@ -10,19 +9,20 @@ import {
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
-import { Injectable } from '@nestjs/common';
-import { ItemStatus } from '../enums/item-status.enum';
-import { Between } from 'typeorm';
-import { PriceRangeDto } from '../dto/price-range.dto';
-import { Tag } from '../entities/tag.entity';
-import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { Account } from '../../account/entities/account.entity';
-import { Image } from '../entities/image.entity';
-import { TransactionType } from '../enums/transaction-type.enum';
-import { History } from '../entities/history.entity';
-import { ItemProperty } from '../entities/item-property.entity';
 import { Collection } from '../../collections/entities/collection.entity';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
+import { ItemRequestDto } from '../dto/item-request.dto';
 import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
+import { History } from '../entities/history.entity';
+import { Image } from '../entities/image.entity';
+import { ItemProperty } from '../entities/item-property.entity';
+import { Item } from '../entities/item.entity';
+import { Tag } from '../entities/tag.entity';
+import { ItemStatus } from '../enums/item-status.enum';
+import { TransactionType } from '../enums/transaction-type.enum';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -68,7 +68,8 @@ export class ItemRepository extends Repository<Item> {
 
   async getNewest(qty: number): Promise<Item[]> {
     return await this.getItemQueryBuilder()
-      .where('item.status=:status', { status: ItemStatus.Listed })
+      .where('item.isHidden != :isHidden', { isHidden: true })
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .orderBy('item.createdAt', 'DESC')
       .take(qty)
       .getMany();
@@ -130,7 +131,8 @@ export class ItemRepository extends Repository<Item> {
 
   async findAll(): Promise<Item[]> {
     return this.getItemQueryBuilder()
-      .where('item.status=:status', { status: ItemStatus.Listed })
+      .where('item.isHidden != :isHidden', { isHidden: true })
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
@@ -189,9 +191,8 @@ export class ItemRepository extends Repository<Item> {
   async findPriceRangeCollectionItems(collectionId: string): Promise<PriceRangeDto> {
     const query = this.createQueryBuilder('item')
       .innerJoin('item.collection', 'collection')
-      .where('item.status = :status', {
-        status: ItemStatus.Listed,
-      })
+      .where('item.isHidden != :isHidden', { isHidden: true })
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .andWhere('item.price IS NOT NULL')
       .andWhere('collection.id = :collectionId', { collectionId });
 
@@ -342,7 +343,7 @@ export class ItemRepository extends Repository<Item> {
       royalty: itemRequest.royalty,
       author: new Account(account.accountId),
       owner: new Account(account.accountId),
-      price: itemRequest.price,
+      price: itemRequest.price || null,
     });
 
     await this.save(item);
@@ -412,7 +413,10 @@ export class ItemRepository extends Repository<Item> {
   private getPaginationConditions(paginationDto: ItemPaginationDto): FindOptionsWhere<Item>[] {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
-    const condition1 = { status: ItemStatus.Listed } as FindOptionsWhere<Item>;
+    const condition1 = {
+      status: Not(ItemStatus.Draft),
+      isHidden: false,
+    } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
 
