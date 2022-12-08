@@ -68,7 +68,7 @@ export class ItemRepository extends Repository<Item> {
 
   async getNewest(qty: number): Promise<Item[]> {
     return await this.getItemQueryBuilder()
-      .where('item.status=:status', { status: ItemStatus.Listed })
+      .where('item.status != :status', { status: ItemStatus.Hidden })
       .orderBy('item.createdAt', 'DESC')
       .take(qty)
       .getMany();
@@ -130,7 +130,7 @@ export class ItemRepository extends Repository<Item> {
 
   async findAll(): Promise<Item[]> {
     return this.getItemQueryBuilder()
-      .where('item.status=:status', { status: ItemStatus.Listed })
+      .where('item.status != :status', { status: ItemStatus.Hidden })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
   }
@@ -189,9 +189,7 @@ export class ItemRepository extends Repository<Item> {
   async findPriceRangeCollectionItems(collectionId: string): Promise<PriceRangeDto> {
     const query = this.createQueryBuilder('item')
       .innerJoin('item.collection', 'collection')
-      .where('item.status = :status', {
-        status: ItemStatus.Listed,
-      })
+      .where('item.status != :status', { status: ItemStatus.Hidden })
       .andWhere('item.price IS NOT NULL')
       .andWhere('collection.id = :collectionId', { collectionId });
 
@@ -422,7 +420,7 @@ export class ItemRepository extends Repository<Item> {
   private getPaginationConditions(paginationDto: ItemPaginationDto): FindOptionsWhere<Item>[] {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
-    const condition1 = { status: ItemStatus.Listed } as FindOptionsWhere<Item>;
+    const condition1 = { status: Not(ItemStatus.Hidden) } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
 
