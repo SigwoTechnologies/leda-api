@@ -1,29 +1,28 @@
-import { ItemRequestDto } from '../dto/item-request.dto';
-import { ItemPaginationDto } from '../dto/pagination-request.dto';
-import { Item } from '../entities/item.entity';
+import { Injectable } from '@nestjs/common';
 import {
+  Between,
   DataSource,
   FindManyOptions,
   FindOptionsWhere,
   Not,
-  In,
   Raw,
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
-import { Injectable } from '@nestjs/common';
-import { ItemStatus } from '../enums/item-status.enum';
-import { Between } from 'typeorm';
-import { PriceRangeDto } from '../dto/price-range.dto';
-import { Tag } from '../entities/tag.entity';
-import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { Account } from '../../account/entities/account.entity';
-import { Image } from '../entities/image.entity';
-import { TransactionType } from '../enums/transaction-type.enum';
-import { History } from '../entities/history.entity';
-import { ItemProperty } from '../entities/item-property.entity';
 import { Collection } from '../../collections/entities/collection.entity';
+import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
+import { ItemRequestDto } from '../dto/item-request.dto';
 import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
+import { History } from '../entities/history.entity';
+import { Image } from '../entities/image.entity';
+import { ItemProperty } from '../entities/item-property.entity';
+import { Item } from '../entities/item.entity';
+import { Tag } from '../entities/tag.entity';
+import { ItemStatus } from '../enums/item-status.enum';
+import { TransactionType } from '../enums/transaction-type.enum';
 
 @Injectable()
 export class ItemRepository extends Repository<Item> {
@@ -69,7 +68,7 @@ export class ItemRepository extends Repository<Item> {
 
   async getNewest(qty: number): Promise<Item[]> {
     return await this.getItemQueryBuilder()
-      .where('item.status != :status', { status: ItemStatus.Hidden })
+      .where('item.isHidden != :isHidden', { isHidden: true })
       .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .orderBy('item.createdAt', 'DESC')
       .take(qty)
@@ -97,7 +96,7 @@ export class ItemRepository extends Repository<Item> {
       where: [
         {
           collection: new Collection(collectionId),
-          status: Not(ItemStatus.Hidden),
+          isHidden: false,
         },
       ] as FindOptionsWhere<Item>[],
       take: limit,
@@ -132,7 +131,7 @@ export class ItemRepository extends Repository<Item> {
 
   async findAll(): Promise<Item[]> {
     return this.getItemQueryBuilder()
-      .where('item.status != :status', { status: ItemStatus.Hidden })
+      .where('item.isHidden != :isHidden', { isHidden: true })
       .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .orderBy('item.createdAt', 'DESC')
       .getMany();
@@ -192,7 +191,7 @@ export class ItemRepository extends Repository<Item> {
   async findPriceRangeCollectionItems(collectionId: string): Promise<PriceRangeDto> {
     const query = this.createQueryBuilder('item')
       .innerJoin('item.collection', 'collection')
-      .where('item.status != :status', { status: ItemStatus.Hidden })
+      .where('item.isHidden != :isHidden', { isHidden: true })
       .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .andWhere('item.price IS NOT NULL')
       .andWhere('collection.id = :collectionId', { collectionId });
@@ -240,7 +239,7 @@ export class ItemRepository extends Repository<Item> {
       },
       {
         owner: new Account(accountId),
-        status: ItemStatus.Sold,
+        status: ItemStatus.NotListed,
         updatedAt: new Date(),
       }
     );
@@ -253,7 +252,7 @@ export class ItemRepository extends Repository<Item> {
       },
       {
         owner: new Account(accountId),
-        status: ItemStatus.Sold,
+        status: ItemStatus.NotListed,
         isLazy: false,
         tokenId,
         updatedAt: new Date(),
@@ -401,22 +400,12 @@ export class ItemRepository extends Repository<Item> {
   }
 
   async hideAndUnhide(item: Item): Promise<Item> {
-    if (ItemStatus.Hidden === item.status) {
-      await this.save({
-        itemId: item.itemId,
-        status: ItemStatus.Visible,
-      });
-
-      item.status = ItemStatus.Visible;
-      return item;
-    }
+    item.isHidden = item.isHidden ? false : true;
 
     await this.save({
       itemId: item.itemId,
-      status: ItemStatus.Hidden,
+      isHidden: item.isHidden,
     });
-
-    item.status = ItemStatus.Hidden;
 
     return item;
   }
@@ -425,7 +414,8 @@ export class ItemRepository extends Repository<Item> {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = {
-      status: Not(In([ItemStatus.Hidden, ItemStatus.Draft])),
+      status: Not(ItemStatus.Draft),
+      isHidden: false,
     } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
@@ -459,7 +449,8 @@ export class ItemRepository extends Repository<Item> {
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = {
       collection: new Collection(collectionId),
-      status: Not(In([ItemStatus.Hidden, ItemStatus.Draft])),
+      isHidden: false,
+      status: Not(ItemStatus.Draft),
     } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));

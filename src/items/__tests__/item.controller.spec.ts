@@ -70,6 +70,7 @@ describe('ItemsController', () => {
         voucher: {} as Voucher,
         isLazy: false,
         collectionAddress: '',
+        isHidden: false,
       },
     ];
   });
