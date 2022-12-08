@@ -53,7 +53,6 @@ export class DraftItemRequestDto {
   @IsOptional()
   itemProperties: ItemPropertyDto[];
 
-  @IsNotEmpty()
   @IsOptional()
   price: string;
 }
