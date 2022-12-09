@@ -47,6 +47,7 @@ export class ItemRepository extends Repository<Item> {
         'image.url',
         'image.cid',
         'item.createdAt',
+        'item.updatedAt',
         'owner.accountId',
         'owner.address',
         'tag.name',
@@ -69,9 +70,9 @@ export class ItemRepository extends Repository<Item> {
 
   async getNewest(qty: number): Promise<Item[]> {
     return await this.getItemQueryBuilder()
-      .where('item.isHidden != :isHidden', { isHidden: true })
-      .andWhere('item.status != :status', { status: ItemStatus.Draft })
-      .orderBy('item.createdAt', 'DESC')
+      .where('item.status = :status', { status: ItemStatus.Listed })
+      .andWhere('item.isHidden != :isHidden', { isHidden: true })
+      .orderBy('item.updatedAt', 'DESC')
       .take(qty)
       .getMany();
   }
@@ -415,7 +416,7 @@ export class ItemRepository extends Repository<Item> {
     const { priceFrom, priceTo, search } = paginationDto;
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = {
-      status: Not(ItemStatus.Draft),
+      status: ItemStatus.Listed,
       isHidden: false,
     } as FindOptionsWhere<Item>;
 
