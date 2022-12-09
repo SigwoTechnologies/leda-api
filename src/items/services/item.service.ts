@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { CreateCollectionDto } from 'src/collections/dto/create-collection.dto';
 import { Collection } from 'src/config/entities.config';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
@@ -8,21 +9,21 @@ import { BusinessException, NotFoundException } from '../../common/exceptions/ex
 import { BuyRequestDto } from '../dto/buy-request.dto';
 import { DelistItemRequestDto } from '../dto/delist-item-request.dto';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
-import { Item } from '../entities/item.entity';
-import { ItemLikeRepository } from '../repositories/item-like.repository';
-import { ItemPaginationDto } from '../dto/pagination-request.dto';
-import { ItemRepository } from '../repositories/item.repository';
 import { ItemRequestDto } from '../dto/item-request.dto';
-import { ItemStatus } from '../enums/item-status.enum';
-import { ListItemRequestDto } from '../dto/list-item-request.dto';
-import { PriceRangeDto } from '../dto/price-range.dto';
-import { TransactionType } from '../enums/transaction-type.enum';
-import { VoucherRepository } from '../repositories/voucher.repository';
-import { LazyProcessType } from '../enums/lazy-process-type.enum';
-import { Voucher } from '../entities/voucher.entity';
-import { TransferDto } from '../dto/transfer-request.dto';
-import { HistoryRepository } from '../repositories/history.repository';
 import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
+import { ListItemRequestDto } from '../dto/list-item-request.dto';
+import { ItemPaginationDto } from '../dto/pagination-request.dto';
+import { PriceRangeDto } from '../dto/price-range.dto';
+import { TransferDto } from '../dto/transfer-request.dto';
+import { Item } from '../entities/item.entity';
+import { Voucher } from '../entities/voucher.entity';
+import { ItemStatus } from '../enums/item-status.enum';
+import { LazyProcessType } from '../enums/lazy-process-type.enum';
+import { TransactionType } from '../enums/transaction-type.enum';
+import { HistoryRepository } from '../repositories/history.repository';
+import { ItemLikeRepository } from '../repositories/item-like.repository';
+import { ItemRepository } from '../repositories/item.repository';
+import { VoucherRepository } from '../repositories/voucher.repository';
 
 @Injectable()
 export class ItemService {
@@ -235,7 +236,6 @@ export class ItemService {
   }
 
   async activate(itemId: string, itemRequest: ItemRequestDto): Promise<Item> {
-    console.log('itemrequest', itemRequest);
     const account = await this.accountRepository.findByAddress(itemRequest.address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
@@ -248,20 +248,15 @@ export class ItemService {
     return this.itemRepository.activate(item, itemRequest, collection);
   }
 
-  async getCollection(collectionDto: Collection, account: Account) {
+  async getCollection(collectionDto: CreateCollectionDto, account: Account) {
     if (!collectionDto?.name?.length) {
       const defaultCollection = await this.collectionRepository.getDefaultCollection();
-      console.log('defaultCollection', defaultCollection);
       return defaultCollection;
     }
 
     const collection = await this.collectionRepository.findByName(collectionDto.name, account);
 
-    console.log('custom', collection);
-
     if (collection) return collection;
-
-    console.log('collectionDto', collectionDto);
 
     return this.collectionRepository.createCollection(
       {
@@ -277,7 +272,6 @@ export class ItemService {
     const account = await this.accountRepository.findByAddress(lazyItemRequest.address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
-
     const item = await this.itemRepository.findById(itemId);
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
