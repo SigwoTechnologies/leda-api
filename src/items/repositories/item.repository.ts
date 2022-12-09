@@ -70,6 +70,7 @@ export class ItemRepository extends Repository<Item> {
   async getNewest(qty: number): Promise<Item[]> {
     return await this.getItemQueryBuilder()
       .where('item.status = :status', { status: ItemStatus.Listed })
+      .andWhere('item.isHidden != :isHidden', { isHidden: true })
       .orderBy('item.updatedAt', 'DESC')
       .take(qty)
       .getMany();
@@ -415,6 +416,7 @@ export class ItemRepository extends Repository<Item> {
     const conditions = [] as FindOptionsWhere<Item>[];
     const condition1 = {
       status: ItemStatus.Listed,
+      isHidden: false,
     } as FindOptionsWhere<Item>;
 
     if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
