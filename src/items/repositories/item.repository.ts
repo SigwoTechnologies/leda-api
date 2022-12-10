@@ -375,6 +375,13 @@ export class ItemRepository extends Repository<Item> {
     item.image = { url: image.url, cid: image.cid } as Image;
     item.collection = new Collection(collection.id);
 
+    const history = {
+      transactionType: TransactionType.Created,
+      owner: new Account(item.author.accountId),
+    } as History;
+
+    item.history = [history];
+
     await this.save(item);
     return item;
   }
