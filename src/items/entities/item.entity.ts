@@ -37,7 +37,7 @@ export class Item {
   tags: Tag[];
 
   @Column()
-  @MaxLength(100)
+  @MaxLength(50)
   name: string;
 
   @Column()

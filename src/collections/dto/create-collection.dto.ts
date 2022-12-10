@@ -4,10 +4,11 @@ import { Collection } from '../entities/collection.entity';
 export class CreateCollectionDto {
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(32)
+  @MaxLength(50)
   name: string;
 
   @IsNotEmpty()
+  @Max(255)
   description: string;
 
   image: {
