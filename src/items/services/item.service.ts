@@ -321,6 +321,9 @@ export class ItemService {
 
   async hideAndUnhide(itemId: string): Promise<Item> {
     const item = await this.itemRepository.findById(itemId);
+
+    item.history = await this.historyRepository.findAllByItemId(itemId);
+
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     return this.itemRepository.hideAndUnhide(item);
