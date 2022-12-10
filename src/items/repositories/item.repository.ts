@@ -43,6 +43,7 @@ export class ItemRepository extends Repository<Item> {
         'item.likes',
         'item.status',
         'item.isLazy',
+        'item.collectionAddress',
         'item.isHidden',
         'image.url',
         'image.cid',
