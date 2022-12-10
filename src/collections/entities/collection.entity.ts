@@ -11,8 +11,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { Item } from '../../items/entities/item.entity';
+import { Image } from '../../items/entities/image.entity';
 import { Max } from 'class-validator';
-import { CollectionImage } from './collection-image.entity';
 
 @Entity()
 export class Collection {
@@ -39,13 +39,13 @@ export class Collection {
   @JoinColumn({ name: 'ownerId' })
   owner: Account;
 
-  @OneToOne(() => CollectionImage, {
+  @OneToOne(() => Image, {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete',
     cascade: true,
   })
   @JoinColumn({ name: 'imageId' })
-  image: CollectionImage;
+  image: Image;
 
   @CreateDateColumn()
   createdAt: Date;
