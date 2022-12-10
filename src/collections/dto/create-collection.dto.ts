@@ -4,7 +4,7 @@ import { Collection } from '../entities/collection.entity';
 export class CreateCollectionDto {
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(50)
+  @MaxLength(35)
   name: string;
 
   @IsNotEmpty()
