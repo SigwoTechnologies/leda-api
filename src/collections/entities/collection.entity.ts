@@ -24,7 +24,7 @@ export class Collection {
   description: string;
 
   @Column({ unique: false, nullable: false })
-  @Max(50)
+  @Max(35)
   name: string;
 
   @OneToMany(() => Item, (table) => table.collection, {
