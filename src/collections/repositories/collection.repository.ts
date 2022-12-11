@@ -6,6 +6,7 @@ import { CollectionPaginationDto } from '../dto/collection-pagination-request.dt
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
 import { Collection } from '../entities/collection.entity';
 import { Image } from '../../items/entities/image.entity';
+import { formatImageUrl } from '../../common/utils/image-utils';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -182,7 +183,7 @@ export class CollectionRepository extends Repository<Collection> {
     });
 
     data.image = {
-      url: createCollectionDto.image.url,
+      url: formatImageUrl(createCollectionDto.image.url),
       cid: createCollectionDto.image.cid,
     } as Image;
 
@@ -193,7 +194,7 @@ export class CollectionRepository extends Repository<Collection> {
 
   async activate(collection: Collection, { url, cid }: Image): Promise<Collection> {
     collection.image = {
-      url,
+      url: formatImageUrl(url),
       cid,
     } as Image;
 

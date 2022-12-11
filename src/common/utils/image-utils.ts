@@ -10,3 +10,9 @@ export const isValidExtension = (image: Express.Multer.File) => {
 export const isValidSize = (size: number) => {
   return size / (1024 * 1024) <= ALLOWED_FILE_SIZE_IN_MB;
 };
+
+export const formatImageUrl = (url: string) => {
+  const search = 'ipfs/';
+  const index = url.indexOf(search);
+  return url.substring(index + search.length, url.length);
+};
