@@ -13,7 +13,12 @@ export class HistoryRepository extends Repository<History> {
 
   async findAll(): Promise<History[]> {
     return this.find({
-      relations: ['item', 'owner', 'item.image'],
+      relations: {
+        item: {
+          image: true,
+        },
+        owner: true,
+      },
       where: {
         item: {
           isHidden: false,

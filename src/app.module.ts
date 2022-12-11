@@ -8,11 +8,17 @@ import { ItemModule } from './items/item.module';
 import { AccountModule } from './account/account.module';
 import { PagerMiddleware } from './common/middlewares/pager.middleware';
 import { CollectionModule } from './collections/collection.module';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       load: [appConfig],
+    }),
+    ThrottlerModule.forRoot({
+      ttl: 60,
+      limit: 10,
     }),
     TypeOrmModule.forRootAsync({ ...dbProvider }),
     AuthModule,
@@ -21,7 +27,12 @@ import { CollectionModule } from './collections/collection.module';
     CollectionModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
