@@ -344,6 +344,7 @@ export class ItemRepository extends Repository<Item> {
     const item = this.create({
       name: itemRequest.name,
       description: itemRequest.description,
+      collectionAddress: itemRequest.collectionAddress,
       tags,
       itemProperties,
       royalty: itemRequest.royalty,
