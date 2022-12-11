@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { formatImageUrl } from '../../common/utils/image-utils';
 import {
   Between,
   DataSource,
@@ -373,7 +374,7 @@ export class ItemRepository extends Repository<Item> {
 
     item.tokenId = tokenId;
     item.status = ItemStatus.NotListed;
-    item.image = { url: image.url, cid: image.cid } as Image;
+    item.image = { url: formatImageUrl(image.url), cid: image.cid } as Image;
     item.collection = new Collection(collection.id);
 
     const history = {
@@ -396,7 +397,7 @@ export class ItemRepository extends Repository<Item> {
 
     item.status = ItemStatus.Listed;
     item.isLazy = true;
-    item.image = { url: image.url, cid: image.cid } as Image;
+    item.image = { url: formatImageUrl(image.url), cid: image.cid } as Image;
     item.collection = new Collection(collection.id);
 
     const history = {

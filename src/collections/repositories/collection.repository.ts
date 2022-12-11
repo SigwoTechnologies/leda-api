@@ -4,8 +4,9 @@ import { getAverage } from '../../common/utils/average-item-likes-utils';
 import { Account } from '../../config/entities.config';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
-import { CollectionImage } from '../entities/collection-image.entity';
 import { Collection } from '../entities/collection.entity';
+import { Image } from '../../items/entities/image.entity';
+import { formatImageUrl } from '../../common/utils/image-utils';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -182,20 +183,20 @@ export class CollectionRepository extends Repository<Collection> {
     });
 
     data.image = {
-      url: createCollectionDto.image.url,
+      url: formatImageUrl(createCollectionDto.image.url),
       cid: createCollectionDto.image.cid,
-    } as CollectionImage;
+    } as Image;
 
     await this.save(data);
 
     return data;
   }
 
-  async activate(collection: Collection, { url, cid }: CollectionImage): Promise<Collection> {
+  async activate(collection: Collection, { url, cid }: Image): Promise<Collection> {
     collection.image = {
-      url,
+      url: formatImageUrl(url),
       cid,
-    } as CollectionImage;
+    } as Image;
 
     await this.save(collection);
     return collection;
