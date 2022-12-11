@@ -41,6 +41,7 @@ export class ItemRepository extends Repository<Item> {
         'item.price',
         'item.royalty',
         'item.likes',
+        'item.isHidden',
         'item.status',
         'item.isLazy',
         'image.url',
@@ -98,6 +99,7 @@ export class ItemRepository extends Repository<Item> {
         {
           collection: new Collection(collectionId),
           isHidden: false,
+          status: Not(ItemStatus.Draft),
         },
       ] as FindOptionsWhere<Item>[],
       take: limit,
@@ -313,7 +315,7 @@ export class ItemRepository extends Repository<Item> {
     };
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
-
+    console.log(result);
     return {
       totalCount,
       page: paginationDto.page,
@@ -419,7 +421,12 @@ export class ItemRepository extends Repository<Item> {
       isHidden: false,
     } as FindOptionsWhere<Item>;
 
-    if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
+    // if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
+    if (priceFrom && priceTo)
+      condition1.price = Raw(
+        (alias) =>
+          `${alias} IS NULL OR ${alias} BETWEEN ${String(priceFrom)} AND ${String(priceTo)}}`
+      );
 
     const condition2 = { ...condition1 };
 
@@ -454,7 +461,13 @@ export class ItemRepository extends Repository<Item> {
       status: Not(ItemStatus.Draft),
     } as FindOptionsWhere<Item>;
 
-    if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
+    // where price IS NULL OR price BETWEEN '0,001' AND '8'
+    if (priceFrom && priceTo) {
+      condition1.price = Raw((alias) => {
+        console.log({ alias });
+        return `${alias} IS NULL OR ${alias} BETWEEN ${String(priceFrom)} AND ${String(priceTo)}`;
+      });
+    }
 
     const condition2 = { ...condition1 };
 
