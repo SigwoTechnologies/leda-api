@@ -36,7 +36,6 @@ export class DraftItemRequestDto {
 
   @Min(0)
   @Max(10)
-  @IsPositive()
   royalty: number;
 
   @IsArray()
