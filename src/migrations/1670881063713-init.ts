@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class init1670803488918 implements MigrationInterface {
-  name = 'init1670803488918';
+export class init1670881063713 implements MigrationInterface {
+  name = 'init1670881063713';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -27,7 +27,7 @@ export class init1670803488918 implements MigrationInterface {
     );
     await queryRunner.query(`CREATE TYPE "public"."item_status_enum" AS ENUM('0', '1', '2')`);
     await queryRunner.query(
-      `CREATE TABLE "item" ("itemId" uuid NOT NULL DEFAULT uuid_generate_v4(), "tokenId" integer, "listId" integer, "name" character varying NOT NULL, "description" character varying NOT NULL, "collectionAddress" character varying, "price" character varying, "isHidden" boolean DEFAULT false, "royalty" integer NOT NULL, "status" "public"."item_status_enum" NOT NULL DEFAULT '2', "likes" integer NOT NULL DEFAULT '0', "isLazy" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "authorId" uuid, "ownerId" uuid, "collectionId" uuid, "imageId" uuid, CONSTRAINT "UQ_cb48304c2201d378cfd270feebc" UNIQUE ("tokenId"), CONSTRAINT "UQ_7bd5f4d3ef52bfaa138ada4cf81" UNIQUE ("listId"), CONSTRAINT "REL_4e9b8917d85122b13f11939d7d" UNIQUE ("imageId"), CONSTRAINT "PK_51d980088ed0b9a65dc50c94e92" PRIMARY KEY ("itemId"))`
+      `CREATE TABLE "item" ("itemId" uuid NOT NULL DEFAULT uuid_generate_v4(), "tokenId" integer, "listId" integer, "name" character varying NOT NULL, "description" character varying NOT NULL, "collectionAddress" character varying, "price" character varying, "isHidden" boolean DEFAULT false, "royalty" integer NOT NULL, "status" "public"."item_status_enum" NOT NULL DEFAULT '2', "likes" integer NOT NULL DEFAULT '0', "isLazy" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "authorId" uuid, "ownerId" uuid, "collectionId" uuid, "imageId" uuid, CONSTRAINT "UQ_7bd5f4d3ef52bfaa138ada4cf81" UNIQUE ("listId"), CONSTRAINT "REL_4e9b8917d85122b13f11939d7d" UNIQUE ("imageId"), CONSTRAINT "PK_51d980088ed0b9a65dc50c94e92" PRIMARY KEY ("itemId"))`
     );
     await queryRunner.query(
       `CREATE TABLE "account" ("accountId" uuid NOT NULL DEFAULT uuid_generate_v4(), "address" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL, "updatedAt" TIMESTAMP NOT NULL, CONSTRAINT "UQ_83603c168bc00b20544539fbea6" UNIQUE ("address"), CONSTRAINT "PK_b1a9fdd281787a66a213f5b725b" PRIMARY KEY ("accountId"))`
