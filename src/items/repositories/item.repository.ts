@@ -204,6 +204,15 @@ export class ItemRepository extends Repository<Item> {
       .andWhere('item.price IS NOT NULL')
       .andWhere('collection.id = :collectionId', { collectionId });
 
+    const collectionItems = await this.find({
+      where: { collection: new Collection(collectionId) },
+    });
+
+    const itemsWithPrice = collectionItems.filter((item) => item.price !== null);
+
+    if (!itemsWithPrice.length) {
+      return { from: -1, to: -1 };
+    }
     const cheapestQuery = query.clone().orderBy('CAST(item.price AS DOUBLE PRECISION)', 'ASC');
     const expensiveQuery = query.clone().orderBy('CAST(item.price AS DOUBLE PRECISION)', 'DESC');
 
