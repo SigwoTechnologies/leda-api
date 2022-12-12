@@ -168,6 +168,7 @@ export class ItemRepository extends Repository<Item> {
     return this.getItemQueryBuilder()
       .where('item.itemId = :itemId', { itemId })
       .andWhere('item.status != :status', { status: ItemStatus.Draft })
+      .andWhere('item.isHidden = :isHidden', { isHidden: false })
       .getOne();
   }
 
@@ -202,8 +203,8 @@ export class ItemRepository extends Repository<Item> {
       .andWhere('item.price IS NOT NULL')
       .andWhere('collection.id = :collectionId', { collectionId });
 
-    const cheapestQuery = query.clone().orderBy('item.price', 'ASC');
-    const expensiveQuery = query.clone().orderBy('item.price', 'DESC');
+    const cheapestQuery = query.clone().orderBy('CAST(item.price AS DOUBLE PRECISION)', 'ASC');
+    const expensiveQuery = query.clone().orderBy('CAST(item.price AS DOUBLE PRECISION)', 'DESC');
 
     const { price: from } = await cheapestQuery.limit(1).getOneOrFail();
     const { price: to } = await expensiveQuery.limit(1).getOneOrFail();
