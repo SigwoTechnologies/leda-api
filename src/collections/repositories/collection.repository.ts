@@ -39,7 +39,7 @@ export class CollectionRepository extends Repository<Collection> {
   async pagination(
     paginationDto: CollectionPaginationDto
   ): Promise<CollectionResponseDto | undefined> {
-    const { limit, skip, creationOrder, mintType, popularityOrder } = paginationDto;
+    const { limit, skip, creationOrder, popularityOrder } = paginationDto;
 
     const queryOptions = {
       relations: {
@@ -69,15 +69,6 @@ export class CollectionRepository extends Repository<Collection> {
 
     queryOptions.where = conditions;
 
-    // TODO: Uncomment this code when the Lazy Minting feature is done
-    /* if (mintType) {
-      queryOptions.where = {
-        items: {
-          type: mintType,
-        },
-      };
-    } */
-
     if (creationOrder) {
       queryOptions.order = {
         createdAt: creationOrder,
@@ -106,6 +97,7 @@ export class CollectionRepository extends Repository<Collection> {
         if (popularityOrder === 'desc') return b.popularity - a.popularity;
       });
     }
+
     return {
       totalCount,
       page: paginationDto.page,

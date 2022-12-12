@@ -432,12 +432,7 @@ export class ItemRepository extends Repository<Item> {
       isHidden: false,
     } as FindOptionsWhere<Item>;
 
-    // if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
-    if (priceFrom && priceTo)
-      condition1.price = Raw(
-        (alias) =>
-          `${alias} IS NULL OR ${alias} BETWEEN ${String(priceFrom)} AND ${String(priceTo)}}`
-      );
+    if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
 
     const condition2 = { ...condition1 };
 
@@ -469,17 +464,15 @@ export class ItemRepository extends Repository<Item> {
     const condition1 = {
       collection: new Collection(collectionId),
       isHidden: false,
-      status: Not(ItemStatus.Draft),
     } as FindOptionsWhere<Item>;
 
-    // where price IS NULL OR price BETWEEN '0,001' AND '8'
-    if (priceFrom && priceTo) {
-      condition1.price = Raw((alias) => {
-        return `${alias} IS NULL OR ${alias} BETWEEN ${String(priceFrom)} AND ${String(priceTo)}`;
-      });
-    }
-
     const condition2 = { ...condition1 };
+
+    if (priceFrom && priceTo) {
+      condition1.status = ItemStatus.Listed;
+      condition1.price = Between(String(priceFrom), String(priceTo));
+    }
+    condition2.status = ItemStatus.NotListed;
 
     if (search) {
       condition1.name = Raw(
