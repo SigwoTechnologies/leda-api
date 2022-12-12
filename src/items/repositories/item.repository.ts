@@ -184,10 +184,11 @@ export class ItemRepository extends Repository<Item> {
       .where('item.status = :status', {
         status: ItemStatus.Listed,
       })
+      .andWhere('item.isHidden != :isHidden', { isHidden: true })
       .andWhere('item.price IS NOT NULL');
 
-    const cheapestQuery = query.clone().orderBy('item.price', 'ASC');
-    const expensiveQuery = query.clone().orderBy('item.price', 'DESC');
+    const cheapestQuery = query.clone().orderBy('CAST(item.price AS DOUBLE PRECISION)', 'ASC');
+    const expensiveQuery = query.clone().orderBy('CAST(item.price AS DOUBLE PRECISION)', 'DESC');
 
     const { price: from } = await cheapestQuery.limit(1).getOneOrFail();
     const { price: to } = await expensiveQuery.limit(1).getOneOrFail();
@@ -433,7 +434,13 @@ export class ItemRepository extends Repository<Item> {
       isHidden: false,
     } as FindOptionsWhere<Item>;
 
-    if (priceFrom && priceTo) condition1.price = Between(String(priceFrom), String(priceTo));
+    if (priceFrom && priceTo) {
+      condition1.status = ItemStatus.Listed;
+      condition1.price = Raw(
+        (alias) =>
+          `CAST(${alias} as DOUBLE PRECISION) >= ${priceFrom} and CAST(${alias} as DOUBLE PRECISION) <= ${priceTo}`
+      );
+    }
 
     const condition2 = { ...condition1 };
 
@@ -471,7 +478,10 @@ export class ItemRepository extends Repository<Item> {
 
     if (priceFrom && priceTo) {
       condition1.status = ItemStatus.Listed;
-      condition1.price = Between(String(priceFrom), String(priceTo));
+      condition1.price = Raw(
+        (alias) =>
+          `CAST(${alias} as DOUBLE PRECISION) >= ${priceFrom} and CAST(${alias} as DOUBLE PRECISION) <= ${priceTo}`
+      );
     }
     condition2.status = ItemStatus.NotListed;
 
