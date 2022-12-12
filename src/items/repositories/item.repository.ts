@@ -318,7 +318,6 @@ export class ItemRepository extends Repository<Item> {
     };
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
-    console.log(result);
     return {
       totalCount,
       page: paginationDto.page,
