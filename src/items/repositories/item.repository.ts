@@ -318,7 +318,6 @@ export class ItemRepository extends Repository<Item> {
     };
 
     const [result, totalCount] = await this.findAndCount(queryOptions);
-    console.log(result);
     return {
       totalCount,
       page: paginationDto.page,
@@ -476,7 +475,6 @@ export class ItemRepository extends Repository<Item> {
     // where price IS NULL OR price BETWEEN '0,001' AND '8'
     if (priceFrom && priceTo) {
       condition1.price = Raw((alias) => {
-        console.log({ alias });
         return `${alias} IS NULL OR ${alias} BETWEEN ${String(priceFrom)} AND ${String(priceTo)}`;
       });
     }

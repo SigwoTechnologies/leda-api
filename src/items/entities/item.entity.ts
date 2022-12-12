@@ -25,12 +25,10 @@ export class Item {
   @PrimaryGeneratedColumn('uuid')
   itemId: string;
 
-  // TODO: !IMPORTANT: MAKE THIS FIELD UNIQUE ONCE IN PROD
-  @Column({ unique: false, nullable: true })
+  @Column({ unique: true, nullable: true })
   tokenId: number;
 
-  // TODO: !IMPORTANT: MAKE THIS FIELD UNIQUE ONCE IN PROD
-  @Column({ unique: false, nullable: true })
+  @Column({ unique: true, nullable: true })
   listId: number;
 
   @OneToMany(() => Tag, (table) => table.item, { cascade: true })
