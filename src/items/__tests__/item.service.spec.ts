@@ -159,7 +159,7 @@ describe('ItemService', () => {
           itemLikes: [],
         };
 
-        itemRepository.findActiveById.mockResolvedValue({ ...expected });
+        itemRepository.findById.mockResolvedValue({ ...expected });
 
         const actual = await service.findById('123');
 
