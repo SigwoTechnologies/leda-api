@@ -25,7 +25,7 @@ export class Item {
   @PrimaryGeneratedColumn('uuid')
   itemId: string;
 
-  @Column({ unique: true, nullable: true })
+  @Column({ unique: false, nullable: true })
   tokenId: number;
 
   @Column({ unique: true, nullable: true })
