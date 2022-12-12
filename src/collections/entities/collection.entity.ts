@@ -20,7 +20,7 @@ export class Collection {
   id: string;
 
   @Column({ nullable: true })
-  @Max(255)
+  @Max(740)
   description: string;
 
   @Column({ unique: false, nullable: false })

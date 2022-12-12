@@ -9,7 +9,7 @@ export class CreateCollectionDto {
   name: string;
 
   @IsNotEmpty()
-  @Max(255)
+  @Max(740)
   description: string;
 
   image: ImageRequestDto;

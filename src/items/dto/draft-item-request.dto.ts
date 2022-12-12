@@ -28,7 +28,7 @@ export class DraftItemRequestDto {
 
   @IsNotEmpty()
   @MinLength(1)
-  @MaxLength(50)
+  @MaxLength(70)
   name: string;
 
   @IsNotEmpty()
@@ -41,8 +41,8 @@ export class DraftItemRequestDto {
   @IsArray()
   @ArrayNotEmpty()
   @ArrayMinSize(1)
-  @ArrayMaxSize(8)
-  @MaxLength(8, {
+  @ArrayMaxSize(20)
+  @MaxLength(14, {
     each: true,
   })
   tags: string[];
