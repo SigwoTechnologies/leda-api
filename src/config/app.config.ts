@@ -10,7 +10,7 @@ export const appConfig = () => ({
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     entities: getMetadataArgsStorage().tables.map((tbl) => tbl.target),
-    synchronize: process.env.POSTGRES_SYNC,
+    synchronize: process.env.POSTGRES_SYNC === 'true',
     timezone: 'Z',
     extra: {
       ssl: {
