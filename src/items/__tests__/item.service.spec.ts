@@ -116,6 +116,7 @@ describe('ItemService', () => {
         voucher: {} as Voucher,
         isLazy: false,
         isHidden: false,
+        stakingRewards: 0,
       },
     ];
   });
