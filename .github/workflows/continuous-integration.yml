@@ -22,7 +22,6 @@ jobs:
       - name: Lint
         run: yarn lint
 
-  # TODO we need to create some tests
   test:
     name: 🧪 Test
     runs-on: ubuntu-latest
@@ -54,3 +53,6 @@ jobs:
 
       - name: Install Dependencies
         run: yarn build
+
+      - name: Run database migrations
+        run: yarn run migration:run
