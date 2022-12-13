@@ -26,3 +26,7 @@ jobs:
         run: docker push registry.digitalocean.com/metis/ledaapi:latest
       - name: Launch image
         run: doctl apps create-deployment ${{ secrets.DIGITALOCEAN_APP_ID }} --wait
+      - name: Install dependencies
+        run: yarn install
+      - name: Run database migrations
+        run: yarn run migration:run
