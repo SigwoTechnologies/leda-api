@@ -71,6 +71,7 @@ describe('ItemsController', () => {
         isLazy: false,
         collectionAddress: '',
         isHidden: false,
+        stakingRewards: 0,
       },
     ];
   });

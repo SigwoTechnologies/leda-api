@@ -109,6 +109,9 @@ export class Item {
   @OneToOne(() => Voucher, (voucher) => voucher.item, { cascade: true })
   voucher: Voucher;
 
+  @Column({ default: 0 })
+  stakingRewards: number;
+
   @CreateDateColumn()
   createdAt: Date;
 
