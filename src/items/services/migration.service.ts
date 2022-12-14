@@ -47,7 +47,7 @@ Item: itemId: ${itemId}
 IPFS: cid: ${cid}
 Success: ${status}
 Exception: ${errorInfo}
-/****************************************************/
+/***********************************************************/
 `;
 
     writeFileSync(logsRoute, template, {
