@@ -40,10 +40,11 @@ export class MigrationService {
     const logsRoute = `${join(process.cwd())}/migration-logs.txt`;
 
     const template = `
-    JupApe #${name}:
-      name: JupApe ${name}
-      success: ${status}
-      errorInfo: ${errorInfo}
+JupApe #${name}:
+  name: JupApe ${name}
+  success: ${status}
+  errorInfo: 
+  ${errorInfo}
     `;
 
     writeFileSync(logsRoute, template, {
@@ -58,14 +59,11 @@ export class MigrationService {
     for (const [idx, item] of ITEMS.entries()) {
       const responsePromise = this.process(item);
       responses.push(responsePromise);
-      // this.saveLogs(idx, String(item.name), true);
       console.log(`Call for item ${idx}`);
     }
 
     const start = performance.now();
-    await Promise.allSettled(responses)
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+    await Promise.allSettled(responses);
     const end = performance.now();
     console.log(`Execution time: ${end - start} ms`);
     console.log(ITEMS.length);
@@ -164,51 +162,84 @@ export class MigrationService {
   }
 
   async storeIpfsObject(migrationItem: MigrationItem, itemId: string) {
-    const { name, rewards } = migrationItem;
-    const itemName = `JUP Ape N°${name}`;
+    try {
+      // if (migrationItem.name === 2) throw new Error('Wrong');
+      const { name, rewards } = migrationItem;
+      const itemName = `JUP Ape N°${name}`;
 
-    const { buffer, mime, extension } = await Jimp.read(`images/${name}.jpeg`).then(
-      async (image) => {
-        return {
-          mime: image.getMIME(),
-          extension: image.getExtension(),
-          buffer: await image.getBufferAsync(image.getMIME()),
-        };
-      }
-    );
+      const { buffer, mime, extension } = await Jimp.read(`images/${name}.jpeg`).then(
+        async (image) => {
+          return {
+            mime: image.getMIME(),
+            extension: image.getExtension(),
+            buffer: await image.getBufferAsync(image.getMIME()),
+          };
+        }
+      );
 
-    const attributes = {
-      'reserved::name': itemName,
-      'reserved::description': itemName,
-      'reserved::external_url': `http://localhost:3000/item/${itemId}`, // TODO: Pull prod environment here
-      rewards,
-      royalty: '5', // This value is fixed
-      tokenId: name,
-    };
+      const attributes = {
+        'reserved::name': itemName,
+        'reserved::description': itemName,
+        'reserved::external_url': `http://localhost:3000/item/${itemId}`, // TODO: Pull prod environment here
+        rewards,
+        royalty: '5', // This value is fixed
+        tokenId: name,
+      };
 
-    const pinataResponse = await this.pinataService.uploadRaw(
-      buffer,
-      `${name}.${extension}`,
-      mime,
-      attributes
-    );
+      const pinataResponse = await this.pinataService.uploadRaw(
+        buffer,
+        `${name}.${extension}`,
+        mime,
+        attributes
+      );
 
-    return pinataResponse;
+      this.saveLogs(String(migrationItem.name), true, '');
+      return pinataResponse;
+    } catch (error) {
+      console.log(error);
+      this.saveLogs(
+        String(migrationItem.name),
+        false,
+        `Error: item #${migrationItem.name}. Message: ${error.message}. Stack: ${error.stack} `
+      );
+    }
   }
 
   async getIpfsMetadata(cid: string) {
-    const { pinataGatewayUrl } = appConfig();
+    try {
+      // if (2 < 3) throw new Error('error ipfs meta');
+      const { pinataGatewayUrl } = appConfig();
 
-    const { data } = await firstValueFrom(
-      this.httpService.get<IpfsObjectResponse>(`${pinataGatewayUrl}/${cid}`)
-    );
+      const { data } = await firstValueFrom(
+        this.httpService.get<IpfsObjectResponse>(`${pinataGatewayUrl}/${cid}`)
+      );
 
-    return data.image;
+      this.saveLogs(cid, true, '');
+      return data.image;
+    } catch (error) {
+      this.saveLogs(
+        cid,
+        false,
+        `Error: item ${cid}. Message: ${error.message}. Stack: ${error.stack} `
+      );
+      console.log(error);
+    }
   }
 
   async activateItem(item: Item, lazyItemRequest: LazyItemRequestDto) {
-    const account = await this.accountRepository.findByAddress(address);
-    const collection = await this.collectionRepository.findByName('JupApeNFT', account);
-    this.itemRepository.activateLazyItem(item, lazyItemRequest, collection);
+    try {
+      if (item.name === 'JUP Ape N°2') throw new Error('Activate Error');
+      const account = await this.accountRepository.findByAddress(address);
+      const collection = await this.collectionRepository.findByName('JupApeNFT', account);
+      this.itemRepository.activateLazyItem(item, lazyItemRequest, collection);
+      this.saveLogs(item.name, true, '');
+    } catch (error) {
+      this.saveLogs(
+        item.name,
+        false,
+        `Error: item ${item.name}. Message: ${error.message}. Stack: ${error.stack} `
+      );
+      console.log(error);
+    }
   }
 }
