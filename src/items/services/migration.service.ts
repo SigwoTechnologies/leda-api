@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import * as fs from 'fs';
+import fs from 'fs';
+import Jimp from 'jimp';
 import { join } from 'path';
 import { CreateCollectionDto } from 'src/collections/dto/create-collection.dto';
-import * as jsonData from '../../jup-apes-migration/jups.json';
+import jsonData from '../../jup-apes-migration/jups.json';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemPropertyDto } from '../dto/item-property.dto';
 import { ItemProperty } from '../entities/item-property.entity';
@@ -31,19 +32,20 @@ export class MigrationService {
     // Get Json Object
 
     // Store draft
-    // const draftItem = this.storeDraftItem();
+
     // Store IPFS
     // Get IPFS Metadata
     // Generate vouchers
     // Activate draft items
 
     const fileName = '1188254.jpg';
-    const file = fs.readFileSync(join(process.cwd(), `./images/${fileName}`));
 
-    fs.readFile(file, function (err, data) {
-      console.log('Reading %s...', file);
-      console.log('Err...', err);
-      console.log('data...', data);
+    const { buffer, mime } = await Jimp.read(`images/${fileName}`).then(async (image) => {
+      return {
+        mime: image.getMIME(),
+        extension: image.getExtension(),
+        buffer: await image.getBufferAsync(image.getMIME()),
+      };
     });
 
     const attributes = {
@@ -55,14 +57,11 @@ export class MigrationService {
       tokenId: '1', // from json file
     };
 
-    const pinataResponse = await this.pinataService.uploadRaw(
-      file,
-      fileName,
-      'image/jpg',
-      attributes
-    );
+    const pinataResponse = await this.pinataService.uploadRaw(buffer, fileName, mime, attributes);
 
     console.log('pinataResponse', pinataResponse);
+
+    // const draftItem = this.storeDraftItem();
 
     return jsonData;
 

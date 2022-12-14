@@ -1,4 +1,4 @@
-import * as FormData from 'form-data';
+import FormData from 'form-data';
 import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { PinataRepository } from '../repositories/pinata.repository';
