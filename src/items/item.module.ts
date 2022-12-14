@@ -4,6 +4,7 @@ import { CollectionRepository } from '../collections/repositories/collection.rep
 import { AccountRepository } from '../account/repositories/account.repository';
 import { ImagesController } from './controllers/image.controller';
 import { ItemsController } from './controllers/item.controller';
+import { MigrationController } from './controllers/migration.controller';
 import { VouchersController } from './controllers/voucher.controller';
 import { HistoryRepository } from './repositories/history.repository';
 import { ItemLikeRepository } from './repositories/item-like.repository';
@@ -14,10 +15,11 @@ import { HistoryService } from './services/history.service';
 import { ItemService } from './services/item.service';
 import { PinataService } from './services/pinata.service';
 import { VoucherService } from './services/voucher.service';
+import { MigrationService } from './services/migration.service';
 
 @Module({
   imports: [HttpModule],
-  controllers: [ItemsController, ImagesController, VouchersController],
+  controllers: [ItemsController, ImagesController, VouchersController, MigrationController],
   providers: [
     AccountRepository,
     HistoryRepository,
@@ -27,6 +29,7 @@ import { VoucherService } from './services/voucher.service';
     ItemService,
     PinataRepository,
     PinataService,
+    MigrationService,
     VoucherRepository,
     VoucherService,
     CollectionRepository,

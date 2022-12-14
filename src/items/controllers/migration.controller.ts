@@ -4,6 +4,7 @@ import { ItemPropertyDto } from '../dto/item-property.dto';
 import { Item } from '../entities/item.entity';
 import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
+import { MigrationService } from '../services/migration.service';
 
 type JupApeType = {
   name: string;
@@ -24,11 +25,11 @@ type MigrationRequest = {
 
 @Controller('migration')
 export class MigrationController {
-  constructor(private itemService: ItemService, private historyService: HistoryService) {}
+  constructor(private migrationService: MigrationService) {}
 
   @Public()
   @Post()
-  start(): Promise<Item[]> {
-    return this.itemService.findAll();
+  start() {
+    return this.migrationService.process();
   }
 }
