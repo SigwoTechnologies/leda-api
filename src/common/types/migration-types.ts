@@ -27,3 +27,29 @@ export type IpfsObjectResponse = {
   attributes: ItemProperty;
   image: string;
 };
+
+export type Voucher = {
+  minPrice: string;
+  uri: string;
+  royalties: number;
+  signature: string;
+  tokenId: number;
+  stakingRewards: number;
+};
+
+export type Domain = {
+  name: string;
+  version: string;
+  verifyingContract: string;
+  chainId: number;
+};
+
+export const types = {
+  NFTVoucher: [
+    { name: 'tokenId', type: 'uint256' },
+    { name: 'minPrice', type: 'uint256' },
+    { name: 'uri', type: 'string' },
+    { name: 'royalties', type: 'uint256' },
+    { name: 'stakingRewards', type: 'uint256' },
+  ],
+};

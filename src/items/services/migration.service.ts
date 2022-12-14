@@ -4,37 +4,42 @@ import { writeFileSync } from 'fs';
 import Jimp from 'jimp';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
-import { AccountRepository } from 'src/account/repositories/account.repository';
-import { CollectionRepository } from 'src/collections/repositories/collection.repository';
 import { appConfig } from 'src/config/app.config';
-import { ITEMS } from '../../jup-apes-migration/jup';
+import { items } from '../../jup-apes-migration/jups';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
+  Domain,
   IpfsObjectResponse,
   LogType,
   MigrationDraftItem,
   MigrationItem,
+  types,
+  Voucher,
 } from '../../common/types/migration-types';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemPropertyDto } from '../dto/item-property.dto';
 import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 import { Item } from '../entities/item.entity';
-import { ItemRepository } from '../repositories/item.repository';
 import { ItemService } from './item.service';
 import { PinataService } from './pinata.service';
-
-const address = '0x9b7920fb94533b0bfbf12914c09b8b22230b6041';
-const collectionAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
+import { ethers } from 'ethers';
+import { Account } from 'src/account/entities/account.entity';
 
 @Injectable()
 export class MigrationService {
+  ADDRESS = process.env.MIGRATION_ADDRESS;
+  ACCOUNT_ID = process.env.MIGRATION_ACCOUNT_ID;
+  COLLECTION_ADDRESS = process.env.MIGRATION_COLLECTION_ADDRESS;
+  PRIVATE_KEY = process.env.MIGRATION_PRIVATE_KEY;
+  CHAIN_ID = +process.env.MIGRATION_CHAIN_ID;
+  SIGNING_DOMAIN_NAME = 'LazyJups-Voucher';
+  SIGNING_DOMAIN_VERSION = '1';
+  ROYALTIES = 5;
+
   constructor(
     private pinataService: PinataService,
     private itemService: ItemService,
-    private itemRepository: ItemRepository,
-    private httpService: HttpService,
-    private collectionRepository: CollectionRepository,
-    private accountRepository: AccountRepository
+    private httpService: HttpService
   ) {}
 
   async saveLogs(log: LogType) {
@@ -59,7 +64,7 @@ Exception: ${errorInfo}
   async init() {
     const responses = [];
 
-    for (const [idx, item] of ITEMS.entries()) {
+    for (const [idx, item] of items.entries()) {
       const responsePromise = this.process(item);
       responses.push(responsePromise);
       console.log(`Call for item ${idx + 1}`);
@@ -173,9 +178,9 @@ Exception: ${errorInfo}
     ] as ItemPropertyDto[];
 
     const request = {
-      address,
+      address: this.ADDRESS,
       collection,
-      collectionAddress,
+      collectionAddress: this.COLLECTION_ADDRESS,
       name: draft.name,
       description: draft.description,
       price: draft.price,
@@ -231,8 +236,38 @@ Exception: ${errorInfo}
   }
 
   async activateItem(item: Item, lazyItemRequest: LazyItemRequestDto) {
-    const account = await this.accountRepository.findByAddress(address);
-    const collection = await this.collectionRepository.findByName('JupApeNFT', account);
-    this.itemRepository.activateLazyItem(item, lazyItemRequest, collection);
+    const response = await this.itemService.processLazyActivation(item, lazyItemRequest, {
+      accountId: this.ACCOUNT_ID,
+      address: this.ADDRESS,
+    } as Account);
+  }
+
+  async createVoucher(
+    uri: string,
+    minPrice: string,
+    stakingRewards: number,
+    tokenId: number,
+    royalties: number
+  ): Promise<Voucher> {
+    try {
+      const signer = new ethers.Wallet(this.PRIVATE_KEY);
+      console.log('signer|address', signer.address);
+      const domain = await this.signingDomain();
+      const voucher = { tokenId, minPrice, uri, royalties, stakingRewards };
+      const signature = await signer._signTypedData(domain, types, voucher);
+
+      return { ...voucher, signature } as Voucher;
+    } catch (err) {
+      console.log('createVoucher|exception', err);
+    }
+  }
+
+  private async signingDomain(): Promise<Domain> {
+    return {
+      name: this.SIGNING_DOMAIN_NAME,
+      version: this.SIGNING_DOMAIN_VERSION,
+      verifyingContract: this.COLLECTION_ADDRESS,
+      chainId: +this.CHAIN_ID,
+    };
   }
 }
