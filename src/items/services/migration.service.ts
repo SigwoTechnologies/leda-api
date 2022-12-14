@@ -2,68 +2,49 @@ import { Injectable } from '@nestjs/common';
 import fs from 'fs';
 import Jimp from 'jimp';
 import { join } from 'path';
-import { CreateCollectionDto } from 'src/collections/dto/create-collection.dto';
-import jsonData from '../../jup-apes-migration/jups.json';
+import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
+import { MigrationDraftItem, MigrationItem } from '../../common/types/migration-types';
+import { items } from 'src/jup-apes-migration/jups';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemPropertyDto } from '../dto/item-property.dto';
 import { ItemProperty } from '../entities/item-property.entity';
 import { ItemService } from './item.service';
 import { PinataService } from './pinata.service';
 
-const address = '0x123';
-const collectionAddress = '0x456';
-
-type MigrationDraftItem = {
-  name: string;
-  description: string;
-  royalty: number;
-  price: string;
-  rewards: number;
-  tokenId: number;
-};
+const address = '0x9b7920fb94533b0bfbf12914c09b8b22230b6041';
+const collectionAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 @Injectable()
 export class MigrationService {
   constructor(private pinataService: PinataService, private itemService: ItemService) {}
 
   async process() {
-    const { JUP_APES_DIRECTORY, JUP_APES_TO_UPLOAD } = process.env;
+    const { JUP_APES_TO_UPLOAD } = process.env;
+
+    // Go inside
+    const { name, rewards, price } = items[0];
+
+    const itemName = `JUP Ape N°${name}`;
+
+    const draft = await this.storeDraftItem({
+      name: itemName,
+      description: itemName,
+      royalty: 5,
+      price,
+      rewards,
+      tokenId: name,
+    });
+
+    console.log('draftItem', draft);
+
+    // Store IPFS
+    const pinataResponse = await this.storeIpfsObject(items[1], draft.itemId);
 
     // Get Json Object
 
-    // Store draft
-
-    // Store IPFS
     // Get IPFS Metadata
     // Generate vouchers
     // Activate draft items
-
-    const fileName = '1188254.jpg';
-
-    const { buffer, mime } = await Jimp.read(`images/${fileName}`).then(async (image) => {
-      return {
-        mime: image.getMIME(),
-        extension: image.getExtension(),
-        buffer: await image.getBufferAsync(image.getMIME()),
-      };
-    });
-
-    const attributes = {
-      'reserved::name': fileName,
-      'reserved::description': fileName,
-      'reserved::external_url': 'http://localhost:3000/item/3b432cdf-08c4-4d5e-80d8-7ce25abda336',
-      rewards: '124', // from json file
-      royalty: '5', // from json file
-      tokenId: '1', // from json file
-    };
-
-    const pinataResponse = await this.pinataService.uploadRaw(buffer, fileName, mime, attributes);
-
-    console.log('pinataResponse', pinataResponse);
-
-    // const draftItem = this.storeDraftItem();
-
-    return jsonData;
 
     // TODO:
     // Get bonuses file
@@ -76,6 +57,8 @@ export class MigrationService {
     // Retry strategy
     // Exception handling
     // Parameterize number range?
+
+    return pinataResponse;
   }
 
   async storeDraftItem(draft: MigrationDraftItem) {
@@ -95,6 +78,7 @@ export class MigrationService {
       name: draft.name,
       description: draft.description,
       price: draft.price,
+      royalty: draft.royalty,
       tags,
       itemProperties,
     } as DraftItemRequestDto;
@@ -102,5 +86,38 @@ export class MigrationService {
     const draftItem = await this.itemService.create(request);
     console.log('draftItem', draftItem);
     return draftItem;
+  }
+
+  async storeIpfsObject(migrationItem: MigrationItem, itemId: string) {
+    const { name, rewards } = migrationItem;
+    const itemName = `JUP Ape N°${name}`;
+
+    const { buffer, mime, extension } = await Jimp.read(`images/${name}.jpeg`).then(
+      async (image) => {
+        return {
+          mime: image.getMIME(),
+          extension: image.getExtension(),
+          buffer: await image.getBufferAsync(image.getMIME()),
+        };
+      }
+    );
+
+    const attributes = {
+      'reserved::name': itemName,
+      'reserved::description': itemName,
+      'reserved::external_url': `http://localhost:3000/item/${itemId}`, // TODO: Pull prod environment here
+      rewards,
+      royalty: '5', // This value is fixed
+      tokenId: name,
+    };
+
+    const pinataResponse = await this.pinataService.uploadRaw(
+      buffer,
+      `${name}.${extension}`,
+      mime,
+      attributes
+    );
+
+    return pinataResponse;
   }
 }
