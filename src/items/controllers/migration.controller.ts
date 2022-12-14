@@ -30,6 +30,6 @@ export class MigrationController {
   @Public()
   @Post()
   start() {
-    return this.migrationService.process();
+    return this.migrationService.init();
   }
 }

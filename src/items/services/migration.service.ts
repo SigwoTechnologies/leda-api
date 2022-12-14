@@ -1,28 +1,24 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import fs from 'fs';
 import Jimp from 'jimp';
-import { join } from 'path';
+import { firstValueFrom } from 'rxjs';
+import { AccountRepository } from 'src/account/repositories/account.repository';
+import { CollectionRepository } from 'src/collections/repositories/collection.repository';
+import { appConfig } from 'src/config/app.config';
+import { ITEMS } from 'src/jup-apes-migration/jups';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
+  IpfsObjectResponse,
   MigrationDraftItem,
   MigrationItem,
-  IpfsObjectResponse,
 } from '../../common/types/migration-types';
-import { ITEMS } from 'src/jup-apes-migration/jups';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemPropertyDto } from '../dto/item-property.dto';
-import { ItemProperty } from '../entities/item-property.entity';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
+import { Item } from '../entities/item.entity';
+import { ItemRepository } from '../repositories/item.repository';
 import { ItemService } from './item.service';
 import { PinataService } from './pinata.service';
-import { HttpService } from '@nestjs/axios';
-import { appConfig } from 'src/config/app.config';
-import { firstValueFrom } from 'rxjs';
-import { ItemRepository } from '../repositories/item.repository';
-import { Item } from '../entities/item.entity';
-import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
-import { Collection } from 'src/config/entities.config';
-import { CollectionRepository } from 'src/collections/repositories/collection.repository';
-import { AccountRepository } from 'src/account/repositories/account.repository';
 
 const address = '0x9b7920fb94533b0bfbf12914c09b8b22230b6041';
 const collectionAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
@@ -38,11 +34,25 @@ export class MigrationService {
     private accountRepository: AccountRepository
   ) {}
 
-  async process() {
+  async init() {
+    const responses = [];
+
+    for (const item of ITEMS) {
+      const responsePromise = this.process(item);
+      responses.push(responsePromise);
+      console.log(`Call for item ${item.name}`);
+    }
+    const start = performance.now();
+    await Promise.all(responses);
+    const end = performance.now();
+    console.log(`Execution time: ${end - start} ms`);
+  }
+
+  async process(item: MigrationItem) {
     const { JUP_APES_TO_UPLOAD } = process.env;
 
     // Go inside
-    const { name, rewards, price } = ITEMS[0];
+    const { name, rewards, price } = item;
 
     const itemName = `JUP Ape N°${name}`;
 
@@ -80,7 +90,7 @@ export class MigrationService {
     // Parameterize number range?
 
     // console.log(pinataResponse);
-    // console.log({ metadata });
+    console.log({ url });
 
     await this.activateItem(draft, {
       image: {
