@@ -10,6 +10,7 @@ node_modules/
 packages/**/*.d.ts
 packages/**/*.js
 /dist
+jup-apes-migration
 
 # misc
 .DS_Store
