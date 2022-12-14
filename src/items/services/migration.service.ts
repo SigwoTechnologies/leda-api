@@ -5,7 +5,7 @@ import Jimp from 'jimp';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
 import { appConfig } from 'src/config/app.config';
-import { items } from '../../jup-apes-migration/jups';
+import { items } from '../../jup-apes-migration/jup';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
   Domain,
@@ -54,12 +54,12 @@ export class MigrationService {
     const logsRoute = `${join(process.cwd())}/migration-logs.txt`;
 
     const template = `
-/******************** ITEM: ${name} - (${status ? 'Success' : 'Failed'}) ********************/
+/*************** ITEM: ${name} - (${status ? 'Success' : 'Failed'}) **************/
 Item: itemId: ${itemId}
 IPFS: cid: ${cid}
 Success: ${status}
-Exception: ${errorInfo}
 Date: ${new Date()}
+Exception: ${errorInfo}
 /***********************************************************/
 `;
 
@@ -95,8 +95,8 @@ Date: ${new Date()}
         } as LogType;
       } else {
         const { reason } = prom;
-        const jsonReason = JSON.parse(reason.message);
 
+        const jsonReason = JSON.parse(reason.message);
         log = {
           name: `JUP Ape N°${jsonReason.name}`,
           itemId: jsonReason.itemId,
