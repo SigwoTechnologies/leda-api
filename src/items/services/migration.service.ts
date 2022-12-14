@@ -17,6 +17,12 @@ import { PinataService } from './pinata.service';
 import { HttpService } from '@nestjs/axios';
 import { appConfig } from 'src/config/app.config';
 import { firstValueFrom } from 'rxjs';
+import { ItemRepository } from '../repositories/item.repository';
+import { Item } from '../entities/item.entity';
+import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
+import { Collection } from 'src/config/entities.config';
+import { CollectionRepository } from 'src/collections/repositories/collection.repository';
+import { AccountRepository } from 'src/account/repositories/account.repository';
 
 const address = '0x9b7920fb94533b0bfbf12914c09b8b22230b6041';
 const collectionAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
@@ -26,7 +32,10 @@ export class MigrationService {
   constructor(
     private pinataService: PinataService,
     private itemService: ItemService,
-    private readonly httpService: HttpService
+    private itemRepository: ItemRepository,
+    private httpService: HttpService,
+    private collectionRepository: CollectionRepository,
+    private accountRepository: AccountRepository
   ) {}
 
   async process() {
@@ -51,7 +60,7 @@ export class MigrationService {
 
     const { IpfsHash: cid } = pinataResponse;
 
-    const imageFromPinata = await this.getIpfsMetadata(cid);
+    const url = await this.getIpfsMetadata(cid);
     // Get Json Object
 
     // Get IPFS Metadata
@@ -72,6 +81,13 @@ export class MigrationService {
 
     // console.log(pinataResponse);
     // console.log({ metadata });
+
+    await this.activateItem(draft, {
+      image: {
+        cid,
+        url,
+      },
+    } as LazyItemRequestDto);
 
     return pinataResponse;
   }
@@ -144,5 +160,11 @@ export class MigrationService {
     );
 
     return data.image;
+  }
+
+  async activateItem(item: Item, lazyItemRequest: LazyItemRequestDto) {
+    const account = await this.accountRepository.findByAddress(address);
+    const collection = await this.collectionRepository.findByName('JupApeNFT', account);
+    this.itemRepository.activateLazyItem(item, lazyItemRequest, collection);
   }
 }
