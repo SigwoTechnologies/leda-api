@@ -24,11 +24,16 @@ import { ItemService } from './item.service';
 import { PinataService } from './pinata.service';
 import { ethers } from 'ethers';
 import { Account } from 'src/account/entities/account.entity';
+import { LazyProcessType } from '../enums/lazy-process-type.enum';
+import { VoucherRepository } from '../repositories/voucher.repository';
+import { ItemRepository } from '../repositories/item.repository';
+import { Collection } from 'src/collections/entities/collection.entity';
 
 @Injectable()
 export class MigrationService {
   ADDRESS = process.env.MIGRATION_ADDRESS;
   ACCOUNT_ID = process.env.MIGRATION_ACCOUNT_ID;
+  JUP_APE_COLLECTION_ID = process.env.MIGRATION_JUP_APE_COLLECTION_ID;
   COLLECTION_ADDRESS = process.env.MIGRATION_COLLECTION_ADDRESS;
   PRIVATE_KEY = process.env.MIGRATION_PRIVATE_KEY;
   CHAIN_ID = +process.env.MIGRATION_CHAIN_ID;
@@ -39,7 +44,9 @@ export class MigrationService {
   constructor(
     private pinataService: PinataService,
     private itemService: ItemService,
-    private httpService: HttpService
+    private httpService: HttpService,
+    private voucherRepository: VoucherRepository,
+    private itemRepository: ItemRepository
   ) {}
 
   async saveLogs(log: LogType) {
@@ -107,13 +114,10 @@ Exception: ${errorInfo}
   async process(item: MigrationItem) {
     let draft: Item;
     try {
-      const { JUP_APES_TO_UPLOAD } = process.env;
-
-      // Go inside
       const { name, rewards, price } = item;
-
       const itemName = `JUP Ape N°${name}`;
 
+      // Store draft item
       draft = await this.storeDraftItem({
         name: itemName,
         description: itemName,
@@ -124,39 +128,25 @@ Exception: ${errorInfo}
       });
 
       // Store IPFS
-      const pinataResponse = await this.storeIpfsObject(item, draft.itemId);
-
-      const { IpfsHash: cid } = pinataResponse;
-
+      const { IpfsHash: cid } = await this.storeIpfsObject(item, draft.itemId);
       const url = await this.getIpfsMetadata(item.name, cid);
-      // Get Json Object
 
-      // Get IPFS Metadata
-      // Generate vouchers
-      // Activate draft items
-
-      // TODO:
-      // Get bonuses file
-      // Create jup ape schema
-      // Loop over jup apes
-      // Store on ipfs
       // Generate voucher
-      // Store voucher
-      // Things to take into account:
-      // Retry strategy
-      // Exception handling
-      // Parameterize number range?
+      const wei = ethers.utils.parseUnits(String(price), 'ether').toString();
+      const voucher = await this.createVoucher(url, wei, rewards, name, this.ROYALTIES * 10);
 
-      console.log({ url });
-
-      await this.activateItem(draft, {
-        image: {
-          cid,
-          url,
-        },
+      // Activate Draft item and store voucher
+      const activated = await this.activateItem(draft, {
+        minPrice: voucher.minPrice.toString(),
+        price,
+        royalties: voucher.royalties,
+        signature: voucher.signature,
+        image: { url: voucher.uri, cid: cid },
+        lazyProcessType: LazyProcessType.Activation,
+        tokenId: name.toString(),
       } as LazyItemRequestDto);
 
-      return draft;
+      return activated;
     } catch (error) {
       const errorBody = {
         name: item.name,
@@ -236,10 +226,13 @@ Exception: ${errorInfo}
   }
 
   async activateItem(item: Item, lazyItemRequest: LazyItemRequestDto) {
-    const response = await this.itemService.processLazyActivation(item, lazyItemRequest, {
+    await this.voucherRepository.createVoucher(item, lazyItemRequest, {
       accountId: this.ACCOUNT_ID,
       address: this.ADDRESS,
     } as Account);
+    return this.itemRepository.activateLazyItem(item, lazyItemRequest, {
+      id: this.JUP_APE_COLLECTION_ID,
+    } as Collection);
   }
 
   async createVoucher(

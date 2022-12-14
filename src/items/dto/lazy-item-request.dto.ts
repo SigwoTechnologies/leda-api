@@ -32,4 +32,6 @@ export class LazyItemRequestDto {
     description: string;
     image: ImageRequestDto;
   };
+
+  tokenId: string;
 }
