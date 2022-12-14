@@ -1,11 +1,13 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
+import { writeFileSync } from 'fs';
 import Jimp from 'jimp';
+import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
 import { AccountRepository } from 'src/account/repositories/account.repository';
 import { CollectionRepository } from 'src/collections/repositories/collection.repository';
 import { appConfig } from 'src/config/app.config';
-import { ITEMS } from 'src/jup-apes-migration/jups';
+import { ITEMS } from '../../jup-apes-migration/jup';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
   IpfsObjectResponse,
@@ -34,18 +36,39 @@ export class MigrationService {
     private accountRepository: AccountRepository
   ) {}
 
+  async saveLogs(name: string, status: boolean, errorInfo: unknown) {
+    const logsRoute = `${join(process.cwd())}/migration-logs.txt`;
+
+    const template = `
+    JupApe #${name}:
+      name: JupApe ${name}
+      success: ${status}
+      errorInfo: ${errorInfo}
+    `;
+
+    writeFileSync(logsRoute, template, {
+      encoding: 'utf-8',
+      flag: 'a',
+    });
+  }
+
   async init() {
     const responses = [];
 
-    for (const item of ITEMS) {
+    for (const [idx, item] of ITEMS.entries()) {
       const responsePromise = this.process(item);
       responses.push(responsePromise);
-      console.log(`Call for item ${item.name}`);
+      // this.saveLogs(idx, String(item.name), true);
+      console.log(`Call for item ${idx}`);
     }
+
     const start = performance.now();
-    await Promise.all(responses);
+    await Promise.allSettled(responses)
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
     const end = performance.now();
     console.log(`Execution time: ${end - start} ms`);
+    console.log(ITEMS.length);
   }
 
   async process(item: MigrationItem) {
@@ -66,7 +89,7 @@ export class MigrationService {
     });
 
     // Store IPFS
-    const pinataResponse = await this.storeIpfsObject(ITEMS[1], draft.itemId);
+    const pinataResponse = await this.storeIpfsObject(item, draft.itemId);
 
     const { IpfsHash: cid } = pinataResponse;
 
@@ -103,30 +126,41 @@ export class MigrationService {
   }
 
   async storeDraftItem(draft: MigrationDraftItem) {
-    const collection = { name: 'JupApeNFT' } as CreateCollectionDto;
-    const tags = ['JUP APE'];
+    try {
+      // if (draft.name === 'JUP Ape N°2') throw new Error('Wrong');
+      const collection = { name: 'JupApeNFT' } as CreateCollectionDto;
+      const tags = ['JUP APE'];
 
-    const itemProperties = [
-      { key: 'rewards', value: draft.rewards },
-      { key: 'royalty', value: draft.royalty },
-      { key: 'tokenId', value: draft.tokenId.toString() },
-    ] as ItemPropertyDto[];
+      const itemProperties = [
+        { key: 'rewards', value: draft.rewards },
+        { key: 'royalty', value: draft.royalty },
+        { key: 'tokenId', value: draft.tokenId.toString() },
+      ] as ItemPropertyDto[];
 
-    const request = {
-      address,
-      collection,
-      collectionAddress,
-      name: draft.name,
-      description: draft.description,
-      price: draft.price,
-      royalty: draft.royalty,
-      tags,
-      itemProperties,
-    } as DraftItemRequestDto;
+      const request = {
+        address,
+        collection,
+        collectionAddress,
+        name: draft.name,
+        description: draft.description,
+        price: draft.price,
+        royalty: draft.royalty,
+        tags,
+        itemProperties,
+      } as DraftItemRequestDto;
 
-    const draftItem = await this.itemService.create(request);
-    // console.log('draftItem', draftItem);
-    return draftItem;
+      const draftItem = await this.itemService.create(request);
+      // console.log('draftItem', draftItem);
+      this.saveLogs(draft.name, true, '');
+      return draftItem;
+    } catch (error) {
+      console.log(error);
+      this.saveLogs(
+        draft.name,
+        false,
+        `Error: item #${draft.name}. Message: ${error.message}. Stack: ${error.stack} `
+      );
+    }
   }
 
   async storeIpfsObject(migrationItem: MigrationItem, itemId: string) {
