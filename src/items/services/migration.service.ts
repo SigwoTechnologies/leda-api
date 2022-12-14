@@ -3,26 +3,37 @@ import fs from 'fs';
 import Jimp from 'jimp';
 import { join } from 'path';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
-import { MigrationDraftItem, MigrationItem } from '../../common/types/migration-types';
-import { items } from 'src/jup-apes-migration/jups';
+import {
+  MigrationDraftItem,
+  MigrationItem,
+  IpfsObjectResponse,
+} from '../../common/types/migration-types';
+import { ITEMS } from 'src/jup-apes-migration/jups';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemPropertyDto } from '../dto/item-property.dto';
 import { ItemProperty } from '../entities/item-property.entity';
 import { ItemService } from './item.service';
 import { PinataService } from './pinata.service';
+import { HttpService } from '@nestjs/axios';
+import { appConfig } from 'src/config/app.config';
+import { firstValueFrom } from 'rxjs';
 
 const address = '0x9b7920fb94533b0bfbf12914c09b8b22230b6041';
 const collectionAddress = '0x5FbDB2315678afecb367f032d93F642f64180aa3';
 
 @Injectable()
 export class MigrationService {
-  constructor(private pinataService: PinataService, private itemService: ItemService) {}
+  constructor(
+    private pinataService: PinataService,
+    private itemService: ItemService,
+    private readonly httpService: HttpService
+  ) {}
 
   async process() {
     const { JUP_APES_TO_UPLOAD } = process.env;
 
     // Go inside
-    const { name, rewards, price } = items[0];
+    const { name, rewards, price } = ITEMS[0];
 
     const itemName = `JUP Ape N°${name}`;
 
@@ -35,11 +46,12 @@ export class MigrationService {
       tokenId: name,
     });
 
-    console.log('draftItem', draft);
-
     // Store IPFS
-    const pinataResponse = await this.storeIpfsObject(items[1], draft.itemId);
+    const pinataResponse = await this.storeIpfsObject(ITEMS[1], draft.itemId);
 
+    const { IpfsHash: cid } = pinataResponse;
+
+    const imageFromPinata = await this.getIpfsMetadata(cid);
     // Get Json Object
 
     // Get IPFS Metadata
@@ -57,6 +69,9 @@ export class MigrationService {
     // Retry strategy
     // Exception handling
     // Parameterize number range?
+
+    // console.log(pinataResponse);
+    // console.log({ metadata });
 
     return pinataResponse;
   }
@@ -84,7 +99,7 @@ export class MigrationService {
     } as DraftItemRequestDto;
 
     const draftItem = await this.itemService.create(request);
-    console.log('draftItem', draftItem);
+    // console.log('draftItem', draftItem);
     return draftItem;
   }
 
@@ -119,5 +134,15 @@ export class MigrationService {
     );
 
     return pinataResponse;
+  }
+
+  async getIpfsMetadata(cid: string) {
+    const { pinataGatewayUrl } = appConfig();
+
+    const { data } = await firstValueFrom(
+      this.httpService.get<IpfsObjectResponse>(`${pinataGatewayUrl}/${cid}`)
+    );
+
+    return data.image;
   }
 }

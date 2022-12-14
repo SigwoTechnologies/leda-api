@@ -1,3 +1,5 @@
+import { ItemProperty } from 'src/config/entities.config';
+
 export type MigrationDraftItem = {
   name: string;
   description: string;
@@ -11,4 +13,9 @@ export type MigrationItem = {
   name: number;
   rewards: number;
   price: string;
+};
+
+export type IpfsObjectResponse = {
+  attributes: ItemProperty;
+  image: string;
 };
