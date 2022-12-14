@@ -2,28 +2,24 @@
   {
     "name": "Jup 1",
     "description": "Description 1",
-    "itemProperties": [{ "key": "awesome", "value": "true" }],
     "price": "2.18596",
     "royalty": 5
   },
   {
     "name": "Jup 2",
     "description": "Description 2",
-    "itemProperties": [{ "key": "wonderful", "value": "it is" }],
     "price": "1.08761",
     "royalty": 2
   },
   {
     "name": "Jup 3",
     "description": "Description 3",
-    "itemProperties": [{ "key": "amazing", "value": "earth" }],
     "price": "0.001251",
     "royalty": 8
   },
   {
     "name": "Jup 4",
     "description": "Description 4",
-    "itemProperties": [{ "key": "christmas", "value": "2022" }],
     "price": "7.08155",
     "royalty": 0
   }
