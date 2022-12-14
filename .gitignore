@@ -11,6 +11,7 @@ packages/**/*.d.ts
 packages/**/*.js
 /dist
 jup-apes-migration
+migration-logs.txt
 
 # misc
 .DS_Store

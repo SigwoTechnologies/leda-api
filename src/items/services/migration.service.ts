@@ -11,6 +11,7 @@ import { ITEMS } from '../../jup-apes-migration/jup';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
   IpfsObjectResponse,
+  LogType,
   MigrationDraftItem,
   MigrationItem,
 } from '../../common/types/migration-types';
@@ -36,16 +37,18 @@ export class MigrationService {
     private accountRepository: AccountRepository
   ) {}
 
-  async saveLogs(name: string, status: boolean, errorInfo: unknown) {
+  async saveLogs(log: LogType) {
+    const { name, status, errorInfo, cid, itemId } = log;
     const logsRoute = `${join(process.cwd())}/migration-logs.txt`;
 
     const template = `
-JupApe #${name}:
-  name: JupApe ${name}
-  success: ${status}
-  errorInfo: 
-  ${errorInfo}
-    `;
+/******************** ITEM: ${name} ********************/
+Item: itemId: ${itemId}
+IPFS: cid: ${cid}
+Success: ${status}
+Exception: ${errorInfo}
+/****************************************************/
+`;
 
     writeFileSync(logsRoute, template, {
       encoding: 'utf-8',
@@ -59,187 +62,177 @@ JupApe #${name}:
     for (const [idx, item] of ITEMS.entries()) {
       const responsePromise = this.process(item);
       responses.push(responsePromise);
-      console.log(`Call for item ${idx}`);
+      console.log(`Call for item ${idx + 1}`);
     }
 
     const start = performance.now();
-    await Promise.allSettled(responses);
+    const proccesedPromises = await Promise.allSettled(responses);
+
+    proccesedPromises.map((prom) => {
+      const { status } = prom;
+      let log: LogType;
+      if (status === 'fulfilled') {
+        const { value: item } = prom;
+        log = {
+          itemId: item.itemId,
+          cid: item.image.cid,
+          errorInfo: 'none',
+          name: item.name,
+          status: true,
+        } as LogType;
+      } else {
+        const { reason } = prom;
+        const jsonReason = JSON.parse(reason.message);
+
+        log = {
+          name: `JUP Ape N°${jsonReason.name}`,
+          itemId: jsonReason.itemId,
+          cid: 'none',
+          errorInfo: jsonReason.error,
+          status: false,
+        } as LogType;
+      }
+
+      this.saveLogs(log);
+    });
     const end = performance.now();
     console.log(`Execution time: ${end - start} ms`);
-    console.log(ITEMS.length);
   }
 
   async process(item: MigrationItem) {
-    const { JUP_APES_TO_UPLOAD } = process.env;
+    let draft: Item;
+    try {
+      const { JUP_APES_TO_UPLOAD } = process.env;
 
-    // Go inside
-    const { name, rewards, price } = item;
+      // Go inside
+      const { name, rewards, price } = item;
 
-    const itemName = `JUP Ape N°${name}`;
+      const itemName = `JUP Ape N°${name}`;
 
-    const draft = await this.storeDraftItem({
-      name: itemName,
-      description: itemName,
-      royalty: 5,
-      price,
-      rewards,
-      tokenId: name,
-    });
+      draft = await this.storeDraftItem({
+        name: itemName,
+        description: itemName,
+        royalty: 5,
+        price,
+        rewards,
+        tokenId: name,
+      });
 
-    // Store IPFS
-    const pinataResponse = await this.storeIpfsObject(item, draft.itemId);
+      // Store IPFS
+      const pinataResponse = await this.storeIpfsObject(item, draft.itemId);
 
-    const { IpfsHash: cid } = pinataResponse;
+      const { IpfsHash: cid } = pinataResponse;
 
-    const url = await this.getIpfsMetadata(cid);
-    // Get Json Object
+      const url = await this.getIpfsMetadata(item.name, cid);
+      // Get Json Object
 
-    // Get IPFS Metadata
-    // Generate vouchers
-    // Activate draft items
+      // Get IPFS Metadata
+      // Generate vouchers
+      // Activate draft items
 
-    // TODO:
-    // Get bonuses file
-    // Create jup ape schema
-    // Loop over jup apes
-    // Store on ipfs
-    // Generate voucher
-    // Store voucher
-    // Things to take into account:
-    // Retry strategy
-    // Exception handling
-    // Parameterize number range?
+      // TODO:
+      // Get bonuses file
+      // Create jup ape schema
+      // Loop over jup apes
+      // Store on ipfs
+      // Generate voucher
+      // Store voucher
+      // Things to take into account:
+      // Retry strategy
+      // Exception handling
+      // Parameterize number range?
 
-    // console.log(pinataResponse);
-    console.log({ url });
+      console.log({ url });
 
-    await this.activateItem(draft, {
-      image: {
-        cid,
-        url,
-      },
-    } as LazyItemRequestDto);
+      await this.activateItem(draft, {
+        image: {
+          cid,
+          url,
+        },
+      } as LazyItemRequestDto);
 
-    return pinataResponse;
+      return draft;
+    } catch (error) {
+      const errorBody = {
+        name: item.name,
+        error: `${error.message}. - ${error.stack}`,
+        itemId: draft.itemId,
+      };
+      throw new Error(JSON.stringify(errorBody));
+    }
   }
 
   async storeDraftItem(draft: MigrationDraftItem) {
-    try {
-      // if (draft.name === 'JUP Ape N°2') throw new Error('Wrong');
-      const collection = { name: 'JupApeNFT' } as CreateCollectionDto;
-      const tags = ['JUP APE'];
+    const collection = { name: 'JupApeNFT' } as CreateCollectionDto;
+    const tags = ['JUP APE'];
 
-      const itemProperties = [
-        { key: 'rewards', value: draft.rewards },
-        { key: 'royalty', value: draft.royalty },
-        { key: 'tokenId', value: draft.tokenId.toString() },
-      ] as ItemPropertyDto[];
+    const itemProperties = [
+      { key: 'rewards', value: draft.rewards },
+      { key: 'royalty', value: draft.royalty },
+      { key: 'tokenId', value: draft.tokenId.toString() },
+    ] as ItemPropertyDto[];
 
-      const request = {
-        address,
-        collection,
-        collectionAddress,
-        name: draft.name,
-        description: draft.description,
-        price: draft.price,
-        royalty: draft.royalty,
-        tags,
-        itemProperties,
-      } as DraftItemRequestDto;
+    const request = {
+      address,
+      collection,
+      collectionAddress,
+      name: draft.name,
+      description: draft.description,
+      price: draft.price,
+      royalty: draft.royalty,
+      tags,
+      itemProperties,
+    } as DraftItemRequestDto;
 
-      const draftItem = await this.itemService.create(request);
-      // console.log('draftItem', draftItem);
-      this.saveLogs(draft.name, true, '');
-      return draftItem;
-    } catch (error) {
-      console.log(error);
-      this.saveLogs(
-        draft.name,
-        false,
-        `Error: item #${draft.name}. Message: ${error.message}. Stack: ${error.stack} `
-      );
-    }
+    const draftItem = await this.itemService.create(request);
+
+    return draftItem;
   }
 
   async storeIpfsObject(migrationItem: MigrationItem, itemId: string) {
-    try {
-      // if (migrationItem.name === 2) throw new Error('Wrong');
-      const { name, rewards } = migrationItem;
-      const itemName = `JUP Ape N°${name}`;
+    const { name, rewards } = migrationItem;
+    const itemName = `JUP Ape N°${name}`;
 
-      const { buffer, mime, extension } = await Jimp.read(`images/${name}.jpeg`).then(
-        async (image) => {
-          return {
-            mime: image.getMIME(),
-            extension: image.getExtension(),
-            buffer: await image.getBufferAsync(image.getMIME()),
-          };
-        }
-      );
+    const { buffer, mime, extension } = await Jimp.read(`images/${name}.jpeg`).then(
+      async (image) => {
+        return {
+          mime: image.getMIME(),
+          extension: image.getExtension(),
+          buffer: await image.getBufferAsync(image.getMIME()),
+        };
+      }
+    );
 
-      const attributes = {
-        'reserved::name': itemName,
-        'reserved::description': itemName,
-        'reserved::external_url': `http://localhost:3000/item/${itemId}`, // TODO: Pull prod environment here
-        rewards,
-        royalty: '5', // This value is fixed
-        tokenId: name,
-      };
+    const attributes = {
+      'reserved::name': itemName,
+      'reserved::description': itemName,
+      'reserved::external_url': `http://localhost:3000/item/${itemId}`, // TODO: Pull prod environment here
+      rewards,
+      royalty: '5', // This value is fixed
+      tokenId: name,
+    };
 
-      const pinataResponse = await this.pinataService.uploadRaw(
-        buffer,
-        `${name}.${extension}`,
-        mime,
-        attributes
-      );
-
-      this.saveLogs(String(migrationItem.name), true, '');
-      return pinataResponse;
-    } catch (error) {
-      console.log(error);
-      this.saveLogs(
-        String(migrationItem.name),
-        false,
-        `Error: item #${migrationItem.name}. Message: ${error.message}. Stack: ${error.stack} `
-      );
-    }
+    const pinataResponse = await this.pinataService.uploadRaw(
+      buffer,
+      `${name}.${extension}`,
+      mime,
+      attributes
+    );
+    return pinataResponse;
   }
 
-  async getIpfsMetadata(cid: string) {
-    try {
-      // if (2 < 3) throw new Error('error ipfs meta');
-      const { pinataGatewayUrl } = appConfig();
+  async getIpfsMetadata(name: number, cid: string) {
+    const { pinataGatewayUrl } = appConfig();
 
-      const { data } = await firstValueFrom(
-        this.httpService.get<IpfsObjectResponse>(`${pinataGatewayUrl}/${cid}`)
-      );
-
-      this.saveLogs(cid, true, '');
-      return data.image;
-    } catch (error) {
-      this.saveLogs(
-        cid,
-        false,
-        `Error: item ${cid}. Message: ${error.message}. Stack: ${error.stack} `
-      );
-      console.log(error);
-    }
+    const { data } = await firstValueFrom(
+      this.httpService.get<IpfsObjectResponse>(`${pinataGatewayUrl}/${cid}`)
+    );
+    return data.image;
   }
 
   async activateItem(item: Item, lazyItemRequest: LazyItemRequestDto) {
-    try {
-      if (item.name === 'JUP Ape N°2') throw new Error('Activate Error');
-      const account = await this.accountRepository.findByAddress(address);
-      const collection = await this.collectionRepository.findByName('JupApeNFT', account);
-      this.itemRepository.activateLazyItem(item, lazyItemRequest, collection);
-      this.saveLogs(item.name, true, '');
-    } catch (error) {
-      this.saveLogs(
-        item.name,
-        false,
-        `Error: item ${item.name}. Message: ${error.message}. Stack: ${error.stack} `
-      );
-      console.log(error);
-    }
+    const account = await this.accountRepository.findByAddress(address);
+    const collection = await this.collectionRepository.findByName('JupApeNFT', account);
+    this.itemRepository.activateLazyItem(item, lazyItemRequest, collection);
   }
 }

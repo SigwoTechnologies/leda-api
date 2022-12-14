@@ -15,6 +15,14 @@ export type MigrationItem = {
   price: string;
 };
 
+export type LogType = {
+  name: string;
+  status: boolean;
+  errorInfo: unknown;
+  cid: string;
+  itemId: string;
+};
+
 export type IpfsObjectResponse = {
   attributes: ItemProperty;
   image: string;
