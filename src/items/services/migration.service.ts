@@ -54,11 +54,12 @@ export class MigrationService {
     const logsRoute = `${join(process.cwd())}/migration-logs.txt`;
 
     const template = `
-/******************** ITEM: ${name} ********************/
+/******************** ITEM: ${name} - (${status ? 'Success' : 'Failed'}) ********************/
 Item: itemId: ${itemId}
 IPFS: cid: ${cid}
 Success: ${status}
 Exception: ${errorInfo}
+Date: ${new Date()}
 /***********************************************************/
 `;
 
@@ -74,7 +75,7 @@ Exception: ${errorInfo}
     for (const [idx, item] of items.entries()) {
       const responsePromise = this.process(item);
       responses.push(responsePromise);
-      console.log(`Call for item ${idx + 1}`);
+      console.log(`JupApe #${idx + 1} is being processed...`);
     }
 
     const start = performance.now();
