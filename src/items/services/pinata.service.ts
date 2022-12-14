@@ -33,6 +33,24 @@ export class PinataService {
     return this.uploadMetadata(response.IpfsHash, attributes);
   }
 
+  async uploadRaw(
+    buffer: Buffer,
+    originalName: string,
+    mimetype: string,
+    attributes: IpfsAttribute
+  ): Promise<PinataResponse> {
+    const formData = new FormData();
+    const filename = originalName.replace(/\.[^/.]+$/, '');
+
+    formData.append('file', buffer, {
+      contentType: mimetype,
+      filename: filename + '-' + uuidv4(),
+    });
+
+    const response = await this.pinataRepository.uploadImage(formData);
+    return this.uploadMetadata(response.IpfsHash, attributes);
+  }
+
   async uploadMetadata(imageHash: string, attributes: IpfsAttribute): Promise<PinataResponse> {
     const name = attributes[ReservedAttribute.name];
     if (!name) throw new BusinessException(BusinessErrors.ipfs_name_required);
