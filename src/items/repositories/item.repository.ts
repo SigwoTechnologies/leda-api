@@ -47,6 +47,7 @@ export class ItemRepository extends Repository<Item> {
         'item.isLazy',
         'item.collectionAddress',
         'item.isHidden',
+        'item.stakingRewards',
         'image.url',
         'image.cid',
         'item.createdAt',
@@ -363,6 +364,8 @@ export class ItemRepository extends Repository<Item> {
       author: new Account(account.accountId),
       owner: new Account(account.accountId),
       price: itemRequest.price || null,
+      tokenId: itemRequest.tokenId,
+      stakingRewards: itemRequest.stakingRewards,
     });
 
     await this.save(item);
