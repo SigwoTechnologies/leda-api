@@ -5,7 +5,7 @@ import Jimp from 'jimp';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
 import { appConfig } from '../../config/app.config';
-import { items } from '../../jup-apes-migration/jups';
+import { items } from '../../jup-apes-migration/jup';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
   Domain,
@@ -50,16 +50,19 @@ export class MigrationService {
     private itemRepository: ItemRepository
   ) {}
 
-  async saveLogs(log: LogType) {
+  async saveLogs(log: LogType, type: 'success' | 'failed') {
     const { name, status, errorInfo, cid, itemId } = log;
-    const logsRoute = `${join(process.cwd())}/migration-logs.txt`;
+    // const logsRoute = `${join(process.cwd())}/migration-logs.txt`;
+    const successLogsRoute = `${join(process.cwd())}/migration-logs/success-logs.txt`;
+    const failedLogsRoute = `${join(process.cwd())}/migration-logs/failed-logs.txt`;
+    const logsRoute = type === 'success' ? successLogsRoute : failedLogsRoute;
 
     const template = `
 /*************** ITEM: ${name} - (${status ? 'Success' : 'Failed'}) **************/
 Item: itemId: ${itemId}
 IPFS: cid: ${cid}
 Success: ${status}
-Date: ${new Date()}
+Date: ${new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' })} (San Diego)
 Exception: ${errorInfo}
 /***********************************************************/
 `;
@@ -84,30 +87,31 @@ Exception: ${errorInfo}
 
     proccesedPromises.map((prom) => {
       const { status } = prom;
-      let log: LogType;
+
       if (status === 'fulfilled') {
         const { value: item } = prom;
-        log = {
+
+        const log = {
           itemId: item.itemId,
           cid: item.image.cid,
           errorInfo: 'none',
           name: item.name,
           status: true,
         } as LogType;
+        this.saveLogs(log, 'success');
       } else {
         const { reason } = prom;
 
         const jsonReason = JSON.parse(reason.message);
-        log = {
+        const log = {
           name: `JUP Ape N°${jsonReason.name}`,
           itemId: jsonReason.itemId,
           cid: 'none',
           errorInfo: jsonReason.error,
           status: false,
         } as LogType;
+        this.saveLogs(log, 'failed');
       }
-
-      this.saveLogs(log);
     });
     const end = performance.now();
     console.log(`Execution time: ${end - start} ms`);
