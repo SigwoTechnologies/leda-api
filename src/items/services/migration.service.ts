@@ -190,6 +190,8 @@ Exception: ${errorInfo}
       royalty: draft.royalty,
       tags,
       itemProperties,
+      tokenId: draft.tokenId,
+      stakingRewards: draft.rewards,
     } as DraftItemRequestDto;
 
     const draftItem = await this.itemService.create(request);
@@ -264,7 +266,6 @@ Exception: ${errorInfo}
   ): Promise<Voucher> {
     try {
       const signer = new ethers.Wallet(this.PRIVATE_KEY);
-      console.log('signer|address', signer.address);
       const domain = await this.signingDomain();
       const voucher = { tokenId, minPrice, uri, royalties, stakingRewards };
       const signature = await signer._signTypedData(domain, types, voucher);
