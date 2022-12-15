@@ -4,7 +4,7 @@ import { writeFileSync } from 'fs';
 import Jimp from 'jimp';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
-import { appConfig } from 'src/config/app.config';
+import { appConfig } from '../../config/app.config';
 import { items } from '../../jup-apes-migration/jups';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
@@ -28,6 +28,7 @@ import { LazyProcessType } from '../enums/lazy-process-type.enum';
 import { VoucherRepository } from '../repositories/voucher.repository';
 import { ItemRepository } from '../repositories/item.repository';
 import { Collection } from 'src/collections/entities/collection.entity';
+import { formatImageUrl } from 'src/common/utils/image-utils';
 
 @Injectable()
 export class MigrationService {
@@ -134,7 +135,13 @@ Exception: ${errorInfo}
 
       // Generate voucher
       const wei = ethers.utils.parseUnits(String(price), 'ether').toString();
-      const voucher = await this.createVoucher(url, wei, rewards, name, this.ROYALTIES * 10);
+      const voucher = await this.createVoucher(
+        formatImageUrl(url),
+        wei,
+        rewards,
+        name,
+        this.ROYALTIES * 10
+      );
 
       // Activate Draft item and store voucher
       const activated = await this.activateItem(draft, {
@@ -142,7 +149,7 @@ Exception: ${errorInfo}
         price,
         royalties: voucher.royalties,
         signature: voucher.signature,
-        image: { url: voucher.uri, cid: cid },
+        image: { url, cid: cid },
         lazyProcessType: LazyProcessType.Activation,
         tokenId: name,
         stakingRewards: rewards,
@@ -228,10 +235,17 @@ Exception: ${errorInfo}
   }
 
   async activateItem(item: Item, lazyItemRequest: LazyItemRequestDto) {
-    await this.voucherRepository.createVoucher(item, lazyItemRequest, {
-      accountId: this.ACCOUNT_ID,
-      address: this.ADDRESS,
-    } as Account);
+    await this.voucherRepository.createVoucher(
+      item,
+      {
+        ...lazyItemRequest,
+        image: { ...lazyItemRequest.image, url: formatImageUrl(lazyItemRequest.image.url) },
+      },
+      {
+        accountId: this.ACCOUNT_ID,
+        address: this.ADDRESS,
+      } as Account
+    );
     return this.itemRepository.activateLazyItem(item, lazyItemRequest, {
       id: this.JUP_APE_COLLECTION_ID,
     } as Collection);
