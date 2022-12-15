@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEthereumAddress, Min, IsEnum } from 'class-validator';
+import { IsNotEmpty, IsEthereumAddress, Min, IsEnum, IsOptional } from 'class-validator';
 import { LazyProcessType } from '../enums/lazy-process-type.enum';
 import { ImageRequestDto } from './image-request.dto';
 
@@ -33,5 +33,9 @@ export class LazyItemRequestDto {
     image: ImageRequestDto;
   };
 
-  tokenId: string;
+  @IsOptional()
+  tokenId: number;
+
+  @IsOptional()
+  stakingRewards: number;
 }
