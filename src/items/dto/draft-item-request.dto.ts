@@ -54,4 +54,10 @@ export class DraftItemRequestDto {
 
   @IsOptional()
   price: string;
+
+  @IsOptional()
+  tokenId: number;
+
+  @IsOptional()
+  stakingRewards: number;
 }
