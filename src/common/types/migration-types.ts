@@ -13,6 +13,7 @@ export type MigrationItem = {
   name: number;
   rewards: number;
   price: string;
+  description: string;
 };
 
 export type LogType = {

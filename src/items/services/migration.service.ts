@@ -115,13 +115,13 @@ Exception: ${errorInfo}
   async process(item: MigrationItem) {
     let draft: Item;
     try {
-      const { name, rewards, price } = item;
+      const { name, rewards, price, description } = item;
       const itemName = `JUP Ape N°${name}`;
 
       // Store draft item
       draft = await this.storeDraftItem({
         name: itemName,
-        description: itemName,
+        description,
         royalty: 5,
         price,
         rewards,
