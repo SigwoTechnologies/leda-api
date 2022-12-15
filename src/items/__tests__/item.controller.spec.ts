@@ -151,6 +151,8 @@ describe('ItemsController', () => {
         itemProperties: [],
         price: '0',
         collection: {} as Collection,
+        tokenId: 0,
+        stakingRewards: 0,
       });
 
       expect(actual).toEqual(expected);
