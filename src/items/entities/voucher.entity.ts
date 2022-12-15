@@ -42,6 +42,12 @@ export class Voucher {
   @Column()
   signature: string;
 
+  @Column({ nullable: true })
+  tokenId: number;
+
+  @Column({ default: 0 })
+  stakingRewards: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

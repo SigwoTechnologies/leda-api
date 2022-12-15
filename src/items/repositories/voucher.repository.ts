@@ -31,6 +31,8 @@ export class VoucherRepository extends Repository<Voucher> {
       royalties: lazyItemRequest.royalties,
       signature: lazyItemRequest.signature,
       item,
+      tokenId: lazyItemRequest.tokenId,
+      stakingRewards: lazyItemRequest.stakingRewards,
     });
 
     await this.save(voucher);
