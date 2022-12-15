@@ -5,7 +5,7 @@ import Jimp from 'jimp';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
 import { appConfig } from 'src/config/app.config';
-import { items } from '../../jup-apes-migration/jup';
+import { items } from '../../jup-apes-migration/jups';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
   Domain,
@@ -37,7 +37,7 @@ export class MigrationService {
   COLLECTION_ADDRESS = process.env.MIGRATION_COLLECTION_ADDRESS;
   PRIVATE_KEY = process.env.MIGRATION_PRIVATE_KEY;
   CHAIN_ID = +process.env.MIGRATION_CHAIN_ID;
-  SIGNING_DOMAIN_NAME = 'LazyJups-Voucher';
+  SIGNING_DOMAIN_NAME = 'LazyNFT-Voucher';
   SIGNING_DOMAIN_VERSION = '1';
   ROYALTIES = 5;
 
@@ -144,7 +144,8 @@ Exception: ${errorInfo}
         signature: voucher.signature,
         image: { url: voucher.uri, cid: cid },
         lazyProcessType: LazyProcessType.Activation,
-        tokenId: name.toString(),
+        tokenId: name,
+        stakingRewards: rewards,
       } as LazyItemRequestDto);
 
       return activated;
