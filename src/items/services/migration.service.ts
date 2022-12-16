@@ -138,13 +138,7 @@ Exception: ${errorInfo}
 
       // Generate voucher
       const wei = ethers.utils.parseUnits(String(price), 'ether').toString();
-      const voucher = await this.createVoucher(
-        formatImageUrl(url),
-        wei,
-        rewards,
-        name,
-        this.ROYALTIES * 10
-      );
+      const voucher = await this.createVoucher(cid, wei, rewards, name, this.ROYALTIES * 10);
 
       // Activate Draft item and store voucher
       const activated = await this.activateItem(draft, {
