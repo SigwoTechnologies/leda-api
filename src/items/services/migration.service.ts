@@ -241,17 +241,10 @@ Exception: ${errorInfo}
   }
 
   async activateItem(item: Item, lazyItemRequest: LazyItemRequestDto) {
-    await this.voucherRepository.createVoucher(
-      item,
-      {
-        ...lazyItemRequest,
-        image: { ...lazyItemRequest.image, url: formatImageUrl(lazyItemRequest.image.url) },
-      },
-      {
-        accountId: this.ACCOUNT_ID,
-        address: this.ADDRESS,
-      } as Account
-    );
+    await this.voucherRepository.createVoucher(item, lazyItemRequest, {
+      accountId: this.ACCOUNT_ID,
+      address: this.ADDRESS,
+    } as Account);
     return this.itemRepository.activateLazyItem(item, lazyItemRequest, {
       id: this.JUP_APE_COLLECTION_ID,
     } as Collection);
