@@ -4,7 +4,6 @@ import { Injectable } from '@nestjs/common';
 import { Item } from '../entities/item.entity';
 import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
 import { Voucher } from '../entities/voucher.entity';
-import { formatImageUrl } from '../../common/utils/image-utils';
 
 @Injectable()
 export class VoucherRepository extends Repository<Voucher> {
@@ -27,7 +26,7 @@ export class VoucherRepository extends Repository<Voucher> {
   ): Promise<Voucher> {
     const voucher = this.create({
       minPrice: lazyItemRequest.minPrice,
-      uri: formatImageUrl(lazyItemRequest.image.url),
+      uri: lazyItemRequest.image.cid,
       author: new Account(account.accountId),
       royalties: lazyItemRequest.royalties,
       signature: lazyItemRequest.signature,
