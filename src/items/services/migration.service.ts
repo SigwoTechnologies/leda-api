@@ -5,7 +5,6 @@ import Jimp from 'jimp';
 import { join } from 'path';
 import { firstValueFrom } from 'rxjs';
 import { appConfig } from '../../config/app.config';
-import { items } from '../../jup-apes-migration/jup';
 import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import {
   Domain,
@@ -29,6 +28,7 @@ import { VoucherRepository } from '../repositories/voucher.repository';
 import { ItemRepository } from '../repositories/item.repository';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { formatImageUrl } from 'src/common/utils/image-utils';
+import { items } from 'src/jup-apes-migration/jup';
 
 @Injectable()
 export class MigrationService {
@@ -40,7 +40,7 @@ export class MigrationService {
   CHAIN_ID = +process.env.MIGRATION_CHAIN_ID;
   SIGNING_DOMAIN_NAME = 'LazyNFT-Voucher';
   SIGNING_DOMAIN_VERSION = '1';
-  ROYALTIES = 5;
+  ROYALTIES = 5; // TODO: shouldn't be fixed
 
   constructor(
     private pinataService: PinataService,
@@ -101,7 +101,6 @@ Exception: ${errorInfo}
         this.saveLogs(log, 'success');
       } else {
         const { reason } = prom;
-
         const jsonReason = JSON.parse(reason.message);
         const log = {
           name: `JUP Ape N°${jsonReason.name}`,
@@ -161,6 +160,7 @@ Exception: ${errorInfo}
 
       return activated;
     } catch (error) {
+      console.log('ex | process migration', error);
       const errorBody = {
         name: item.name,
         error: `${error.message}. - ${error.stack}`,
@@ -203,7 +203,7 @@ Exception: ${errorInfo}
     const { name, rewards } = migrationItem;
     const itemName = `JUP Ape N°${name}`;
 
-    const { buffer, mime, extension } = await Jimp.read(`images/${name}.jpeg`).then(
+    const { buffer, mime, extension } = await Jimp.read(`images/${name}.jpg`).then(
       async (image) => {
         return {
           mime: image.getMIME(),

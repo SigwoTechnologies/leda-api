@@ -12,7 +12,8 @@ packages/**/*.js
 /dist
 jup-apes-migration
 migration-logs.txt
-migration-logs
+success-logs.txt
+failed-logs.txt
 
 # misc
 .DS_Store
