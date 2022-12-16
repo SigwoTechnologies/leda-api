@@ -10,10 +10,11 @@ node_modules/
 packages/**/*.d.ts
 packages/**/*.js
 /dist
-jup-apes-migration
-migration-logs.txt
+
+# jup apes migrations
 success-logs.txt
 failed-logs.txt
+images/
 
 # misc
 .DS_Store

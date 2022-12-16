@@ -79,7 +79,7 @@ Exception: ${errorInfo}
     for (const [idx, item] of items.entries()) {
       const responsePromise = this.process(item);
       responses.push(responsePromise);
-      console.log(`JupApe #${idx + 1} is being processed...`);
+      console.log(`JupApe #${item.name} is being processed...`);
     }
 
     const start = performance.now();
