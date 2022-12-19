@@ -1,6 +1,7 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { Public } from '../../auth/decorators/public.decorator';
 import { ItemPropertyDto } from '../dto/item-property.dto';
+import { MigrationRequestDto } from '../dto/migration-request.dto';
 import { Item } from '../entities/item.entity';
 import { HistoryService } from '../services/history.service';
 import { ItemService } from '../services/item.service';
@@ -29,7 +30,10 @@ export class MigrationController {
 
   @Public()
   @Post()
-  start() {
-    return this.migrationService.init();
+  start(@Query() migrationQuery: MigrationRequestDto) {
+    return this.migrationService.init({
+      from: Number(migrationQuery.from),
+      to: Number(migrationQuery.to),
+    });
   }
 }
