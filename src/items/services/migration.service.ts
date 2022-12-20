@@ -28,9 +28,9 @@ import { VoucherRepository } from '../repositories/voucher.repository';
 import { ItemRepository } from '../repositories/item.repository';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { formatImageUrl } from 'src/common/utils/image-utils';
-import { items } from 'src/jup-apes-migration/jup';
 import { MigrationRequestDto } from '../dto/migration-request.dto';
 import { BusinessException } from 'src/common/exceptions/exception-types';
+import { items } from 'src/jup-apes-migration/jup';
 
 @Injectable()
 export class MigrationService {
@@ -93,6 +93,13 @@ Exception: ${errorInfo}
     const responses = [];
 
     const itemsToMap = items.filter((item) => item.name >= from && item.name <= to);
+    if (!itemsToMap.length) {
+      throw new BusinessException({
+        name: 'Migration Exception',
+        message: 'Not found items with those names',
+        code: 404,
+      });
+    }
 
     for (const item of itemsToMap) {
       const responsePromise = this.process(item);
