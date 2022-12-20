@@ -29,6 +29,8 @@ import { ItemRepository } from '../repositories/item.repository';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { formatImageUrl } from 'src/common/utils/image-utils';
 import { items } from 'src/jup-apes-migration/jup';
+import { MigrationRequestDto } from '../dto/migration-request.dto';
+import { BusinessException } from 'src/common/exceptions/exception-types';
 
 @Injectable()
 export class MigrationService {
@@ -73,10 +75,26 @@ Exception: ${errorInfo}
     });
   }
 
-  async init() {
+  async init({ from, to }: MigrationRequestDto) {
+    if (to < from) {
+      throw new BusinessException({
+        name: 'Migration Exception',
+        message: 'Please enter a valid interval.',
+        code: 500,
+      });
+    }
+    if (to - from > 100) {
+      throw new BusinessException({
+        name: 'Migration Exception',
+        message: 'Please enter an interval with less than 100 items inside',
+        code: 500,
+      });
+    }
     const responses = [];
 
-    for (const [idx, item] of items.entries()) {
+    const itemsToMap = items.filter((item) => item.name >= from && item.name <= to);
+
+    for (const item of itemsToMap) {
       const responsePromise = this.process(item);
       responses.push(responsePromise);
       console.log(`JupApe #${item.name} is being processed...`);
@@ -114,6 +132,7 @@ Exception: ${errorInfo}
     });
     const end = performance.now();
     console.log(`Execution time: ${end - start} ms`);
+    return 'The execution has finished successfully';
   }
 
   async process(item: MigrationItem) {
