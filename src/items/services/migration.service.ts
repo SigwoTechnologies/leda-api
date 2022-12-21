@@ -76,6 +76,7 @@ Exception: ${errorInfo}
   }
 
   async init({ from, to }: MigrationRequestDto) {
+    console.log('entered to init');
     if (to < from) {
       throw new BusinessException({
         name: 'Migration Exception',
@@ -93,6 +94,7 @@ Exception: ${errorInfo}
     const responses = [];
 
     const itemsToMap = items.filter((item) => item.name >= from && item.name <= to);
+    console.log('got items to map', itemsToMap);
     if (!itemsToMap.length) {
       throw new BusinessException({
         name: 'Migration Exception',
@@ -157,6 +159,7 @@ Exception: ${errorInfo}
         rewards,
         tokenId: name,
       });
+      console.log({ draft });
 
       // Store IPFS
       const { IpfsHash: cid } = await this.storeIpfsObject(item, draft.itemId);
@@ -177,7 +180,7 @@ Exception: ${errorInfo}
         tokenId: name,
         stakingRewards: rewards,
       } as LazyItemRequestDto);
-
+      console.log({ activated });
       return activated;
     } catch (error) {
       console.log('ex | process migration', error);

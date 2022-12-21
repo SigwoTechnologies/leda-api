@@ -31,6 +31,7 @@ export class MigrationController {
   @Public()
   @Post()
   start(@Query() migrationQuery: MigrationRequestDto) {
+    console.log('Executing controller: v4');
     return this.migrationService.init({
       from: Number(migrationQuery.from),
       to: Number(migrationQuery.to),
