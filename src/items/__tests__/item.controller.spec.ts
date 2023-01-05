@@ -20,7 +20,7 @@ const itemServiceMock = () => ({
 });
 
 const historyServiceMock = () => ({
-  findAll: jest.fn(),
+  pagination: jest.fn(),
   findAllByItemId: jest.fn(),
 });
 
@@ -163,9 +163,9 @@ describe('ItemsController', () => {
     it('should return history array', async () => {
       const expected = items;
 
-      historyService.findAll.mockResolvedValue(expected);
+      historyService.pagination.mockResolvedValue(expected);
 
-      const actual = await controller.findAllHistory();
+      const actual = await controller.findAllHistory({ limit: 3, page: 0 });
 
       expect(actual).toEqual(expected);
     });

@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { History } from '../entities/history.entity';
 import { HistoryRepository } from '../repositories/history.repository';
 
@@ -6,8 +7,8 @@ import { HistoryRepository } from '../repositories/history.repository';
 export class HistoryService {
   constructor(private historyRepository: HistoryRepository) {}
 
-  async findAll(): Promise<History[]> {
-    return this.historyRepository.findAll();
+  async pagination(paginationDto: PaginationDto) {
+    return this.historyRepository.pagination(paginationDto);
   }
 
   async findAllByItemId(itemId: string): Promise<History[]> {
