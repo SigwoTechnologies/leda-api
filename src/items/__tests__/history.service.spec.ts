@@ -7,7 +7,7 @@ import { HistoryRepository } from '../repositories/history.repository';
 import { HistoryService } from '../services/history.service';
 
 const historyRepositoryMock = () => ({
-  findAll: jest.fn(),
+  pagination: jest.fn(),
   findAllByItemId: jest.fn(),
   createHistory: jest.fn(),
 });
@@ -47,9 +47,9 @@ describe('HistoryService', () => {
       const expected = history;
 
       const mockedData = expected.map((prop) => ({ ...prop }));
-      historyRepository.findAll.mockResolvedValue(mockedData);
+      historyRepository.pagination.mockResolvedValue(mockedData);
 
-      const actual = await service.findAll();
+      const actual = await service.pagination({ limit: 3, skip: 0, page: 1 });
 
       expect(actual).toEqual(expected);
     });
