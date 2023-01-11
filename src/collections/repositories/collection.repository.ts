@@ -64,10 +64,12 @@ export class CollectionRepository extends Repository<Collection> {
       skip: skip,
     } as FindManyOptions<Collection>;
 
-    let conditions: FindOptionsWhere<Collection>[];
-    if (paginationDto.search) conditions = this.getPaginationConditions(paginationDto);
-
-    queryOptions.where = conditions;
+    if (paginationDto.search.length) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        ...this.getPaginationConditions(paginationDto),
+      };
+    }
 
     if (creationOrder) {
       queryOptions.order = {
