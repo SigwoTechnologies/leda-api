@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { getAverage } from '../../common/utils/average-item-likes-utils';
+import { formatImageUrl } from '../../common/utils/image-utils';
 import { Account } from '../../config/entities.config';
+import { Image } from '../../items/entities/image.entity';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
+import { EditCollectionDto } from '../dto/edit-collection.dto';
 import { Collection } from '../entities/collection.entity';
-import { Image } from '../../items/entities/image.entity';
-import { formatImageUrl } from '../../common/utils/image-utils';
-import { ImageRequestDto } from 'src/items/dto/image-request.dto';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -137,8 +137,17 @@ export class CollectionRepository extends Repository<Collection> {
 
     return data;
   }
-  async changePicture(collection: Collection, image: ImageRequestDto): Promise<Collection> {
-    collection.image = { url: formatImageUrl(image.url), cid: image.cid } as Image;
+  async changeInformation(
+    collection: Collection,
+    editCollectionDto: EditCollectionDto
+  ): Promise<Collection> {
+    collection.image = {
+      url: formatImageUrl(editCollectionDto.image.url),
+      cid: editCollectionDto.image.cid,
+    } as Image;
+
+    collection.name = editCollectionDto.name;
+    collection.description = editCollectionDto.description;
 
     return this.save(collection);
   }
