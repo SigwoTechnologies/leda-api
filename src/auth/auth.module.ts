@@ -9,6 +9,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CacheModule, Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
+import { AccountService } from 'src/account/services/account.service';
+import { CollectionRepository } from 'src/collections/repositories/collection.repository';
+import { ItemRepository } from 'src/items/repositories/item.repository';
 
 @Module({
   imports: [
@@ -38,6 +41,9 @@ import { PassportModule } from '@nestjs/passport';
       provide: APP_GUARD,
       useClass: AddressGuard,
     },
+    AccountService,
+    CollectionRepository,
+    ItemRepository,
   ],
   exports: [AuthService],
   controllers: [AuthController],

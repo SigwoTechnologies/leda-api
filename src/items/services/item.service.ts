@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCollectionDto } from 'src/collections/dto/create-collection.dto';
-import { Collection } from 'src/config/entities.config';
+import { Collection } from '../../collections/entities/collection.entity';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { CollectionRepository } from '../../collections/repositories/collection.repository';
@@ -24,6 +24,7 @@ import { HistoryRepository } from '../repositories/history.repository';
 import { ItemLikeRepository } from '../repositories/item-like.repository';
 import { ItemRepository } from '../repositories/item.repository';
 import { VoucherRepository } from '../repositories/voucher.repository';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 @Injectable()
 export class ItemService {
@@ -56,20 +57,20 @@ export class ItemService {
     return item;
   }
 
-  async findByAddress(address: string): Promise<Item[]> {
+  async findByAddress(address: string, paginationDto: PaginationDto): Promise<Item[]> {
     const account = await this.accountRepository.findByAddress(address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.findByAccount(account.accountId);
+    return this.itemRepository.findByAccount(account.accountId, paginationDto);
   }
 
-  async findLikedByAddress(address: string): Promise<Item[]> {
+  async findLikedByAddress(address: string, paginationDto: PaginationDto): Promise<Item[]> {
     const account = await this.accountRepository.findByAddress(address);
 
     if (!account) throw new BusinessException(BusinessErrors.address_not_associated);
 
-    return this.itemRepository.findLikedByAccount(account.accountId);
+    return this.itemRepository.findLikedByAccount(account.accountId, paginationDto);
   }
 
   async findPriceRange(): Promise<PriceRangeDto> {
@@ -202,7 +203,7 @@ export class ItemService {
   }
 
   async like(itemId: string, address: string): Promise<Item> {
-    const itemToLike = await this.itemRepository.findActiveById(itemId);
+    const itemToLike = await this.itemRepository.findById(itemId);
     const history = await this.historyRepository.findAllByItemId(itemId);
 
     if (!itemToLike) throw new NotFoundException(`The item with id ${itemId} does not exist`);

@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { formatImageUrl } from '../../common/utils/image-utils';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import {
-  Between,
   DataSource,
   FindManyOptions,
   FindOptionsWhere,
@@ -12,6 +11,7 @@ import {
 } from 'typeorm';
 import { Account } from '../../account/entities/account.entity';
 import { Collection } from '../../collections/entities/collection.entity';
+import { formatImageUrl } from '../../common/utils/image-utils';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
 import { LazyItemRequestDto } from '../dto/lazy-item-request.dto';
@@ -144,20 +144,27 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
-  async findByAccount(accountId: string): Promise<Item[]> {
+  async findByAccount(accountId: string, paginationDto: PaginationDto): Promise<Item[]> {
+    const { limit, skip } = paginationDto;
+
     return this.getItemQueryBuilder()
       .where('item.status != :status', { status: ItemStatus.Draft })
       .andWhere('(item.ownerId = :accountId OR item.authorId = :accountId)', { accountId })
       .orderBy('item.createdAt', 'DESC')
+      .limit(limit)
+      .skip(skip)
       .getMany();
   }
 
-  async findLikedByAccount(accountId: string): Promise<Item[]> {
+  async findLikedByAccount(accountId: string, paginationDto: PaginationDto): Promise<Item[]> {
+    const { limit, skip } = paginationDto;
     return this.getItemQueryBuilder()
       .innerJoin('item.itemLikes', 'itemLikes')
       .where('itemLikes.accountId = :accountId', { accountId })
       .andWhere('item.status != :status', { status: ItemStatus.Draft })
       .orderBy('item.createdAt', 'DESC')
+      .limit(limit)
+      .skip(skip)
       .getMany();
   }
 
