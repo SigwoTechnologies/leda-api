@@ -7,6 +7,7 @@ import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collec
 import { Collection } from '../entities/collection.entity';
 import { Image } from '../../items/entities/image.entity';
 import { formatImageUrl } from '../../common/utils/image-utils';
+import { ImageRequestDto } from 'src/items/dto/image-request.dto';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -135,6 +136,11 @@ export class CollectionRepository extends Repository<Collection> {
     if (!data) return;
 
     return data;
+  }
+  async changePicture(collection: Collection, image: ImageRequestDto): Promise<Collection> {
+    collection.image = { url: formatImageUrl(image.url), cid: image.cid } as Image;
+
+    return this.save(collection);
   }
   async getDefaultCollection(): Promise<Collection | undefined> {
     const data = await this.findOne({
