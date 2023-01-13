@@ -1,11 +1,11 @@
-import { Controller, Get, Query, Param, Body, Post } from '@nestjs/common';
-import { Collection, Image } from 'src/config/entities.config';
-import { ImageRequestDto } from 'src/items/dto/image-request.dto';
+import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import { Collection } from 'src/config/entities.config';
 import { NewestItemsRequestDto } from 'src/items/dto/newest-items-request.dto';
 import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
 import { PriceRangeDto } from 'src/items/dto/price-range.dto';
 import { Public } from '../../auth/decorators/public.decorator';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
+import { EditCollectionDto } from '../dto/edit-collection.dto';
 import { CollectionService } from '../services/collection.service';
 
 @Controller('collections')
@@ -46,11 +46,12 @@ export class CollectionsController {
   }
 
   @Public()
-  @Post('/:collectionId/change-picture')
-  changePicture(
+  @Patch('/:collectionId')
+  changeInformation(
     @Param('collectionId') collectionId: string,
-    @Body() image: ImageRequestDto
+    @Body() editCollectionDto: EditCollectionDto
   ): Promise<Collection> {
-    return this.collectionService.changePicture(collectionId, image);
+    console.log(editCollectionDto);
+    return this.collectionService.changeInformation(collectionId, editCollectionDto);
   }
 }
