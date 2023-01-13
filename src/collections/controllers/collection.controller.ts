@@ -1,4 +1,6 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import { Controller, Get, Query, Param, Body, Post } from '@nestjs/common';
+import { Collection, Image } from 'src/config/entities.config';
+import { ImageRequestDto } from 'src/items/dto/image-request.dto';
 import { NewestItemsRequestDto } from 'src/items/dto/newest-items-request.dto';
 import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
 import { PriceRangeDto } from 'src/items/dto/price-range.dto';
@@ -41,5 +43,14 @@ export class CollectionsController {
   @Get('/:collectionId/price-range')
   findPriceRange(@Param('collectionId') collectionId: string): Promise<PriceRangeDto> {
     return this.collectionService.findPriceRange(collectionId);
+  }
+
+  @Public()
+  @Post('/:collectionId/change-picture')
+  changePicture(
+    @Param('collectionId') collectionId: string,
+    @Body() image: ImageRequestDto
+  ): Promise<Collection> {
+    return this.collectionService.changePicture(collectionId, image);
   }
 }

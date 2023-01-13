@@ -8,6 +8,8 @@ import { CollectionRepository } from '../repositories/collection.repository';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
 import { PriceRangeDto } from 'src/items/dto/price-range.dto';
+import { Image } from 'src/config/entities.config';
+import { ImageRequestDto } from 'src/items/dto/image-request.dto';
 
 @Injectable()
 export class CollectionService {
@@ -62,5 +64,11 @@ export class CollectionService {
 
   async findPriceRange(collectionId: string): Promise<PriceRangeDto> {
     return this.itemsRepository.findPriceRangeCollectionItems(collectionId);
+  }
+
+  async changePicture(collectionId: string, image: ImageRequestDto): Promise<Collection> {
+    const collection = await this.collectionRepository.findById(collectionId);
+
+    return this.collectionRepository.changePicture(collection, image);
   }
 }
