@@ -194,7 +194,7 @@ describe('ItemService', () => {
         const mockedData = expected.map((prop) => ({ ...prop }));
         itemRepository.findByAccount.mockResolvedValue(mockedData);
 
-        const actual = await service.findByAddress('123');
+        const actual = await service.findByAddress('123', { limit: 15, page: 1 });
 
         expect(actual).toEqual(expected);
       });
@@ -206,7 +206,7 @@ describe('ItemService', () => {
 
         accountRepository.findByAddress.mockResolvedValue(null);
 
-        const exception = () => service.findByAddress(unexistingAddress);
+        const exception = () => service.findByAddress(unexistingAddress, { limit: 15, page: 1 });
 
         await expect(exception).rejects.toThrow(BusinessException);
         await expect(exception).rejects.toEqual(
@@ -288,7 +288,7 @@ describe('ItemService', () => {
 
         accountRepository.findByAddress.mockResolvedValue(null);
 
-        const exception = () => service.findByAddress(unexistingAddress);
+        const exception = () => service.findByAddress(unexistingAddress, { limit: 15, page: 1 });
 
         await expect(exception).rejects.toThrow(BusinessException);
         await expect(exception).rejects.toEqual(

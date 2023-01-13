@@ -2,8 +2,8 @@ import { Account } from '../entities/account.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { EditAccountDto } from '../dto/edit-account.dto';
-import { formatImageUrl } from 'src/common/utils/image-utils';
-import { Image } from 'src/config/entities.config';
+import { formatImageUrl } from '../../common/utils/image-utils';
+import { Image } from '../../items/entities/image.entity';
 
 @Injectable()
 export class AccountRepository extends Repository<Account> {

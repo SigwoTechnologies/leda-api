@@ -7,6 +7,7 @@ import { Collection, Image } from '../../config/entities.config';
 import { ItemService } from '../../items/services/item.service';
 import { Voucher } from '../../items/entities/voucher.entity';
 import { CollectionService } from '../../collections/services/collection.service';
+import { AccountService } from '../services/account.service';
 
 const itemServiceMock = () => ({
   findByAddress: jest.fn(),
@@ -16,6 +17,11 @@ const collectionServiceMock = () => ({
   create: jest.fn(),
   findPagination: jest.fn(),
   findByOwner: jest.fn(),
+});
+
+const accountServiceMock = () => ({
+  findByAddress: jest.fn(),
+  changeInformation: jest.fn(),
 });
 
 describe('AccountController', () => {
@@ -28,6 +34,7 @@ describe('AccountController', () => {
       providers: [
         { provide: ItemService, useFactory: itemServiceMock },
         { provide: CollectionService, useFactory: collectionServiceMock },
+        { provide: AccountService, useFactory: accountServiceMock },
       ],
     }).compile();
 
@@ -70,7 +77,7 @@ describe('AccountController', () => {
         const mockData = expected.map((prop) => ({ ...prop }));
         itemService.findByAddress.mockResolvedValue(mockData);
 
-        const actual = await controller.findItems('123');
+        const actual = await controller.findItems('123', { limit: 15, page: 1 });
 
         expect(actual[0].itemId).toEqual(expected[0].itemId);
       });
