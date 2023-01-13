@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
-import { Collection } from 'src/config/entities.config';
+import { Collection } from '../../collections/entities/collection.entity';
 import { NewestItemsRequestDto } from 'src/items/dto/newest-items-request.dto';
 import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
 import { PriceRangeDto } from 'src/items/dto/price-range.dto';
@@ -51,7 +51,6 @@ export class CollectionsController {
     @Param('collectionId') collectionId: string,
     @Body() editCollectionDto: EditCollectionDto
   ): Promise<Collection> {
-    console.log(editCollectionDto);
     return this.collectionService.changeInformation(collectionId, editCollectionDto);
   }
 }

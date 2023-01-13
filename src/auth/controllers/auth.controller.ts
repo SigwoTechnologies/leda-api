@@ -5,10 +5,12 @@ import { CredentialsResponseDto } from '../dto/credentials-response.dto';
 import { Public } from '../../auth/decorators/public.decorator';
 import { SigninRequestDto } from '../dto/signin-request.dto';
 import { IsAddressValid } from '../decorators/address.decorator';
+import { AccountService } from 'src/account/services/account.service';
+import { Account } from 'src/config/entities.config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService, private accountService: AccountService) {}
 
   @Public()
   @Post('/signin')
@@ -24,7 +26,7 @@ export class AuthController {
 
   @IsAddressValid()
   @Post('/authenticate')
-  authenticate(@Body() authCredentialsDto: CredentialsRequestDto): string {
-    return authCredentialsDto.address;
+  authenticate(@Body() authCredentialsDto: CredentialsRequestDto): Promise<Account> {
+    return this.accountService.findByAddress(authCredentialsDto.address);
   }
 }
