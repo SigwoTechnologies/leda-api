@@ -144,16 +144,108 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
-  async findByAccount(accountId: string, paginationDto: PaginationDto): Promise<Item[]> {
+  async findCreatedByAccount(accountId: string, paginationDto: PaginationDto) {
+    const { limit, skip } = paginationDto;
+    const [items, count] = await this.findAndCount({
+      relations: {
+        image: true,
+        owner: true,
+        author: true,
+        tags: true,
+        collection: true,
+      },
+      select: {
+        image: { url: true },
+        owner: { accountId: true, address: true },
+        author: { accountId: true, address: true },
+        tags: { name: true, id: true },
+        collection: { id: true },
+      },
+      where: {
+        status: Not(ItemStatus.Draft),
+        author: new Account(accountId),
+      },
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: skip,
+    });
+
+    return {
+      count,
+      items,
+    };
+  }
+
+  async findOwnedByAccount(accountId: string, paginationDto: PaginationDto) {
     const { limit, skip } = paginationDto;
 
-    return this.getItemQueryBuilder()
-      .where('item.status != :status', { status: ItemStatus.Draft })
-      .andWhere('(item.ownerId = :accountId OR item.authorId = :accountId)', { accountId })
-      .orderBy('item.createdAt', 'DESC')
-      .limit(limit)
-      .skip(skip)
-      .getMany();
+    const [items, count] = await this.findAndCount({
+      relations: {
+        image: true,
+        owner: true,
+        author: true,
+        tags: true,
+        collection: true,
+      },
+      select: {
+        image: { url: true },
+        owner: { accountId: true, address: true },
+        author: { accountId: true, address: true },
+        tags: { name: true, id: true },
+        collection: { id: true },
+      },
+      where: {
+        status: Not(ItemStatus.Draft),
+        author: new Account(accountId),
+      },
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: skip,
+    });
+
+    return {
+      count,
+      items,
+    };
+  }
+
+  async findOnSaleByAccount(accountId: string, paginationDto: PaginationDto) {
+    const { limit, skip } = paginationDto;
+
+    const [items, count] = await this.findAndCount({
+      relations: {
+        image: true,
+        owner: true,
+        author: true,
+        tags: true,
+        collection: true,
+      },
+      select: {
+        image: { url: true },
+        owner: { accountId: true, address: true },
+        author: { accountId: true, address: true },
+        tags: { name: true, id: true },
+        collection: { id: true },
+      },
+      where: [
+        {
+          author: new Account(accountId),
+          status: ItemStatus.NotListed,
+        },
+        {
+          owner: new Account(accountId),
+          status: ItemStatus.NotListed,
+        },
+      ],
+      order: { createdAt: 'DESC' },
+      take: limit,
+      skip: skip,
+    });
+
+    return {
+      count,
+      items,
+    };
   }
 
   async findLikedByAccount(accountId: string, paginationDto: PaginationDto): Promise<Item[]> {

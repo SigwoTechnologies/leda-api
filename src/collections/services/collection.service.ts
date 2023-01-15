@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
-import { PriceRangeDto } from 'src/items/dto/price-range.dto';
+import { ItemPaginationDto } from '../../items/dto/pagination-request.dto';
+import { PriceRangeDto } from '../../items/dto/price-range.dto';
 import { AccountRepository } from '../../account/repositories/account.repository';
 import { BusinessErrors } from '../../common/constants';
 import { BusinessException } from '../../common/exceptions/exception-types';

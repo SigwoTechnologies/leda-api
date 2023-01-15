@@ -12,19 +12,13 @@ export class AccountRepository extends Repository<Account> {
   }
 
   async findByAddress(address: string): Promise<Account | undefined> {
-    const account = await this.createQueryBuilder('account')
-      .select([
-        'account.accountId',
-        'account.address',
-        'account.username',
-        'account.createdAt',
-        'account.updatedAt',
-        'image.url',
-        'image.cid',
-      ])
-      .leftJoin('account.picture', 'image')
-      .where('account.address = :address', { address: address.toLocaleLowerCase() })
-      .getOne();
+    const account = await this.findOne({
+      select: { accountId: true, address: true, username: true },
+      relations: { picture: true, background: true },
+      where: {
+        address: address.toLocaleLowerCase(),
+      },
+    });
 
     if (!account) return;
 

@@ -16,12 +16,21 @@ export class AccountsController {
   ) {}
 
   @IsAddressValid()
-  @Get('/:address/items')
-  findItems(
-    @Param('address') address: string,
-    @Query() paginationDto: PaginationDto
-  ): Promise<Item[]> {
-    return this.itemService.findByAddress(address, paginationDto);
+  @Get('/:address/items/created')
+  findCreatedItems(@Param('address') address: string, @Query() paginationDto: PaginationDto) {
+    return this.accountService.findCreatedItemsByAddress(address, paginationDto);
+  }
+
+  @IsAddressValid()
+  @Get('/:address/items/owned')
+  ownedItems(@Param('address') address: string, @Query() paginationDto: PaginationDto) {
+    return this.accountService.findOwnedItemsByAddress(address, paginationDto);
+  }
+
+  @IsAddressValid()
+  @Get('/:address/items/on-sale')
+  onSaleItems(@Param('address') address: string, @Query() paginationDto: PaginationDto) {
+    return this.accountService.findOnSaleItemsByAddress(address, paginationDto);
   }
 
   @IsAddressValid()
@@ -42,7 +51,7 @@ export class AccountsController {
     @Param('address') address: string,
     @Query() paginationDto: PaginationDto
   ): Promise<Item[]> {
-    return this.itemService.findLikedByAddress(address, paginationDto);
+    return this.accountService.findLikedByAddress(address, paginationDto);
   }
 
   @IsAddressValid()

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { History } from '../entities/history.entity';
 import { HistoryRepository } from '../repositories/history.repository';
 

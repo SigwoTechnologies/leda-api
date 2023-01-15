@@ -20,13 +20,13 @@ const collectionServiceMock = () => ({
 });
 
 const accountServiceMock = () => ({
-  findByAddress: jest.fn(),
+  findCreatedItemsByAddress: jest.fn(),
   changeInformation: jest.fn(),
 });
 
 describe('AccountController', () => {
   let controller: AccountsController;
-  let itemService;
+  let accountService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -39,7 +39,7 @@ describe('AccountController', () => {
     }).compile();
 
     controller = await module.get(AccountsController);
-    itemService = await module.get(ItemService);
+    accountService = await module.get(AccountService);
   });
 
   describe('When calling findItems function', () => {
@@ -75,9 +75,9 @@ describe('AccountController', () => {
         ];
 
         const mockData = expected.map((prop) => ({ ...prop }));
-        itemService.findByAddress.mockResolvedValue(mockData);
+        accountService.findCreatedItemsByAddress.mockResolvedValue(mockData);
 
-        const actual = await controller.findItems('123', { limit: 15, page: 1 });
+        const actual = await controller.findCreatedItems('123', { limit: 15, page: 1 });
 
         expect(actual[0].itemId).toEqual(expected[0].itemId);
       });

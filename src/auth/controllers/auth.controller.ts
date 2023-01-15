@@ -5,8 +5,8 @@ import { CredentialsResponseDto } from '../dto/credentials-response.dto';
 import { Public } from '../../auth/decorators/public.decorator';
 import { SigninRequestDto } from '../dto/signin-request.dto';
 import { IsAddressValid } from '../decorators/address.decorator';
-import { AccountService } from 'src/account/services/account.service';
-import { Account } from 'src/config/entities.config';
+import { AccountService } from '../../account/services/account.service';
+import { Account } from '../../account/entities/account.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -27,6 +27,6 @@ export class AuthController {
   @IsAddressValid()
   @Post('/authenticate')
   authenticate(@Body() authCredentialsDto: CredentialsRequestDto): Promise<Account> {
-    return this.accountService.findByAddress(authCredentialsDto.address);
+    return this.accountService.findAccountByAddress(authCredentialsDto.address);
   }
 }
