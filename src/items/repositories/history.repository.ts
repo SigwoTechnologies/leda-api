@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { DataSource, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
 import { History } from '../entities/history.entity';

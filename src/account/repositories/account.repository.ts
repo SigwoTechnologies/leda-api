@@ -12,9 +12,13 @@ export class AccountRepository extends Repository<Account> {
   }
 
   async findByAddress(address: string): Promise<Account | undefined> {
-    const account = await this.createQueryBuilder('account')
-      .where('account.address = :address', { address: address.toLocaleLowerCase() })
-      .getOne();
+    const account = await this.findOne({
+      select: { accountId: true, address: true, username: true },
+      relations: { picture: true, background: true },
+      where: {
+        address: address.toLocaleLowerCase(),
+      },
+    });
 
     if (!account) return;
 
@@ -23,14 +27,14 @@ export class AccountRepository extends Repository<Account> {
 
   async changeInformation(account: Account, editAccountDto: EditAccountDto): Promise<Account> {
     account.background =
-      account.background &&
+      editAccountDto.background &&
       ({
         url: formatImageUrl(editAccountDto.background.url),
         cid: editAccountDto.background.cid,
       } as Image);
 
     account.picture =
-      account.background &&
+      editAccountDto.picture &&
       ({
         url: formatImageUrl(editAccountDto.picture.url),
         cid: editAccountDto.picture.cid,

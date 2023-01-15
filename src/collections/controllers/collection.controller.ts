@@ -1,8 +1,8 @@
 import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
 import { Collection } from '../../collections/entities/collection.entity';
-import { NewestItemsRequestDto } from 'src/items/dto/newest-items-request.dto';
-import { ItemPaginationDto } from 'src/items/dto/pagination-request.dto';
-import { PriceRangeDto } from 'src/items/dto/price-range.dto';
+import { NewestItemsRequestDto } from '../../items/dto/newest-items-request.dto';
+import { ItemPaginationDto } from '../../items/dto/pagination-request.dto';
+import { PriceRangeDto } from '../../items/dto/price-range.dto';
 import { Public } from '../../auth/decorators/public.decorator';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { EditCollectionDto } from '../dto/edit-collection.dto';
