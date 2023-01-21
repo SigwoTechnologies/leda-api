@@ -1,17 +1,36 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query, Patch, Body } from '@nestjs/common';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { IsAddressValid } from '../../auth/decorators/address.decorator';
 import { Collection } from '../../collections/entities/collection.entity';
 import { CollectionService } from '../../collections/services/collection.service';
 import { Item } from '../../items/entities/item.entity';
 import { ItemService } from '../../items/services/item.service';
+import { EditAccountDto } from '../dto/edit-account.dto';
+import { AccountService } from '../services/account.service';
 @Controller('accounts')
 export class AccountsController {
-  constructor(private itemService: ItemService, private collectionService: CollectionService) {}
+  constructor(
+    private itemService: ItemService,
+    private collectionService: CollectionService,
+    private accountService: AccountService
+  ) {}
 
   @IsAddressValid()
-  @Get('/:address/items')
-  findItems(@Param('address') address: string): Promise<Item[]> {
-    return this.itemService.findByAddress(address);
+  @Get('/:address/items/created')
+  findCreatedItems(@Param('address') address: string, @Query() paginationDto: PaginationDto) {
+    return this.accountService.findCreatedItemsByAddress(address, paginationDto);
+  }
+
+  @IsAddressValid()
+  @Get('/:address/items/owned')
+  ownedItems(@Param('address') address: string, @Query() paginationDto: PaginationDto) {
+    return this.accountService.findOwnedItemsByAddress(address, paginationDto);
+  }
+
+  @IsAddressValid()
+  @Get('/:address/items/on-sale')
+  onSaleItems(@Param('address') address: string, @Query() paginationDto: PaginationDto) {
+    return this.accountService.findOnSaleItemsByAddress(address, paginationDto);
   }
 
   @IsAddressValid()
@@ -28,7 +47,16 @@ export class AccountsController {
 
   @IsAddressValid()
   @Get('/:address/liked-items')
-  findLikedItems(@Param('address') address: string): Promise<Item[]> {
-    return this.itemService.findLikedByAddress(address);
+  findLikedItems(
+    @Param('address') address: string,
+    @Query() paginationDto: PaginationDto
+  ): Promise<Item[]> {
+    return this.accountService.findLikedByAddress(address, paginationDto);
+  }
+
+  @IsAddressValid()
+  @Patch('/:address')
+  changeInformation(@Param('address') address: string, @Body() editAccountDto: EditAccountDto) {
+    return this.accountService.changeInformation(address, editAccountDto);
   }
 }

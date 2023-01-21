@@ -1,12 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { DataSource, FindManyOptions, FindOptionsWhere, Raw, Repository } from 'typeorm';
 import { getAverage } from '../../common/utils/average-item-likes-utils';
+import { formatImageUrl } from '../../common/utils/image-utils';
 import { Account } from '../../config/entities.config';
+import { Image } from '../../items/entities/image.entity';
 import { CollectionPaginationDto } from '../dto/collection-pagination-request.dto';
 import { CollectionResponseDto, CreateCollectionDto } from '../dto/create-collection.dto';
+import { EditCollectionDto } from '../dto/edit-collection.dto';
 import { Collection } from '../entities/collection.entity';
-import { Image } from '../../items/entities/image.entity';
-import { formatImageUrl } from '../../common/utils/image-utils';
 
 @Injectable()
 export class CollectionRepository extends Repository<Collection> {
@@ -64,10 +65,12 @@ export class CollectionRepository extends Repository<Collection> {
       skip: skip,
     } as FindManyOptions<Collection>;
 
-    let conditions: FindOptionsWhere<Collection>[];
-    if (paginationDto.search) conditions = this.getPaginationConditions(paginationDto);
-
-    queryOptions.where = conditions;
+    if (paginationDto.search.length) {
+      queryOptions.where = {
+        ...queryOptions.where,
+        ...this.getPaginationConditions(paginationDto),
+      };
+    }
 
     if (creationOrder) {
       queryOptions.order = {
@@ -133,6 +136,20 @@ export class CollectionRepository extends Repository<Collection> {
     if (!data) return;
 
     return data;
+  }
+  async changeInformation(
+    collection: Collection,
+    editCollectionDto: EditCollectionDto
+  ): Promise<Collection> {
+    collection.image = {
+      url: formatImageUrl(editCollectionDto.image.url),
+      cid: editCollectionDto.image.cid,
+    } as Image;
+
+    collection.name = editCollectionDto.name;
+    collection.description = editCollectionDto.description;
+
+    return this.save(collection);
   }
   async getDefaultCollection(): Promise<Collection | undefined> {
     const data = await this.findOne({

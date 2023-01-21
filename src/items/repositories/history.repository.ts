@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { DataSource, Repository } from 'typeorm';
 import { Account } from '../../config/entities.config';
 import { History } from '../entities/history.entity';
@@ -11,8 +12,10 @@ export class HistoryRepository extends Repository<History> {
     super(History, dataSource.createEntityManager());
   }
 
-  async findAll(): Promise<History[]> {
-    return this.find({
+  async pagination(paginationDto: PaginationDto) {
+    const { limit, skip } = paginationDto;
+
+    const [history, count] = await this.findAndCount({
       relations: {
         item: {
           image: true,
@@ -27,7 +30,14 @@ export class HistoryRepository extends Repository<History> {
       order: {
         createdAt: 'DESC',
       },
+      take: limit,
+      skip,
     });
+
+    return {
+      count,
+      history,
+    };
   }
 
   async findAllByItemId(itemId: string): Promise<History[]> {
