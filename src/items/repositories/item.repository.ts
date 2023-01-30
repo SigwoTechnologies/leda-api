@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { PaginationDto } from '../../common/dto/pagination.dto';
 import {
   DataSource,
   FindManyOptions,
@@ -11,6 +10,7 @@ import {
 } from 'typeorm';
 import { Account } from '../../account/entities/account.entity';
 import { Collection } from '../../collections/entities/collection.entity';
+import { PaginationDto } from '../../common/dto/pagination.dto';
 import { formatImageUrl } from '../../common/utils/image-utils';
 import { DraftItemRequestDto } from '../dto/draft-item-request.dto';
 import { ItemRequestDto } from '../dto/item-request.dto';
@@ -46,6 +46,7 @@ export class ItemRepository extends Repository<Item> {
         'item.status',
         'item.isLazy',
         'item.collectionAddress',
+        'item.collectionId',
         'item.isHidden',
         'item.stakingRewards',
         'image.url',
@@ -63,12 +64,14 @@ export class ItemRepository extends Repository<Item> {
         'collection.id',
         'collection.name',
         'collection.description',
+        'voucher.voucherId',
       ])
       .innerJoin('item.owner', 'owner')
       .innerJoin('item.tags', 'tag')
       .innerJoin('item.author', 'author')
       .leftJoin('item.itemProperties', 'property')
       .leftJoin('item.collection', 'collection')
+      .leftJoin('item.voucher', 'voucher')
       .leftJoin('item.image', 'image');
   }
 
@@ -81,7 +84,7 @@ export class ItemRepository extends Repository<Item> {
       .getMany();
   }
 
-  async nftsCollectionPagination(collectionId: string, paginationDto: ItemPaginationDto) {
+  async collectionItems(collectionId: string, paginationDto: ItemPaginationDto) {
     const { limit, skip, likesOrder } = paginationDto;
 
     const queryOptions = {
@@ -91,6 +94,7 @@ export class ItemRepository extends Repository<Item> {
         author: true,
         collection: true,
         tags: true,
+        voucher: true,
       },
       select: {
         image: { url: true },
@@ -133,6 +137,26 @@ export class ItemRepository extends Repository<Item> {
       page: paginationDto.page,
       limit: paginationDto.limit,
       items: result,
+    };
+  }
+
+  async unsignedItems(paginationDto: PaginationDto) {
+    const { limit, skip } = paginationDto;
+
+    const query = this.getItemQueryBuilder()
+      .andWhere('item.isHidden = :isHidden', { isHidden: false })
+      .andWhere('item.status != :status', { status: ItemStatus.Draft })
+      .andWhere('voucher.voucherId IS NULL')
+      .take(limit)
+      .skip(skip)
+      .orderBy('item.createdAt', 'DESC');
+
+    const items = await query.getMany();
+    const totalCount = await query.getCount();
+
+    return {
+      totalCount,
+      items: items,
     };
   }
 

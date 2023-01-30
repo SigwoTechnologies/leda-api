@@ -30,12 +30,15 @@ export class VoucherRepository extends Repository<Voucher> {
       author: new Account(account.accountId),
       royalties: lazyItemRequest.royalties,
       signature: lazyItemRequest.signature,
-      item,
+      item: new Item(item.itemId),
       tokenId: lazyItemRequest.tokenId,
       stakingRewards: lazyItemRequest.stakingRewards,
     });
 
+    console.log();
+
     await this.save(voucher);
+
     voucher.author.address = account.address;
 
     return voucher;

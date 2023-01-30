@@ -53,6 +53,12 @@ export class ItemsController {
   }
 
   @Public()
+  @Get('/unsigned')
+  async unsignedItems(@Query() paginationDto: PaginationDto) {
+    return await this.itemService.findUnsignedItems(paginationDto);
+  }
+
+  @Public()
   @Get(':itemId/history')
   findAllByItemId(@Param('itemId') itemId: string): Promise<History[]> {
     return this.historyService.findAllByItemId(itemId);

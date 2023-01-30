@@ -31,12 +31,12 @@ export class CollectionsController {
   }
 
   @Public()
-  @Get('/:collectionId/paginate')
-  paginateNfts(
+  @Get('/:collectionId/items')
+  getCollectionItems(
     @Param('collectionId') collectionId: string,
     @Query() paginationDto: ItemPaginationDto
   ) {
-    return this.collectionService.findNftsOnCollection(collectionId, paginationDto);
+    return this.collectionService.findCollectionItems(collectionId, paginationDto);
   }
 
   @Public()

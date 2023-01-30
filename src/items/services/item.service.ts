@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
+import { PaginationDto } from 'src/common/dto/pagination.dto';
 import { Account } from '../../account/entities/account.entity';
 import { AccountRepository } from '../../account/repositories/account.repository';
+import { CreateCollectionDto } from '../../collections/dto/create-collection.dto';
 import { Collection } from '../../collections/entities/collection.entity';
 import { CollectionRepository } from '../../collections/repositories/collection.repository';
 import { BusinessErrors } from '../../common/constants';
@@ -54,6 +55,10 @@ export class ItemService {
     if (!item) throw new NotFoundException(`The item with id ${itemId} does not exist`);
 
     return item;
+  }
+
+  async findUnsignedItems(paginationDto: PaginationDto) {
+    return await this.itemRepository.unsignedItems(paginationDto);
   }
 
   async findPriceRange(): Promise<PriceRangeDto> {

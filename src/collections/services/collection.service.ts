@@ -53,8 +53,8 @@ export class CollectionService {
     return this.collectionRepository.findCollectionsListByOwner(account);
   }
 
-  async findNftsOnCollection(id: string, filters: ItemPaginationDto) {
-    const collection = await this.itemsRepository.nftsCollectionPagination(id, filters);
+  async findCollectionItems(id: string, filters: ItemPaginationDto) {
+    const collection = await this.itemsRepository.collectionItems(id, filters);
 
     if (!collection) throw new BusinessException(BusinessErrors.collection_not_associated);
 

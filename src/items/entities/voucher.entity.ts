@@ -22,7 +22,7 @@ export class Voucher {
   @Column()
   uri: string;
 
-  @OneToOne(() => Item, {
+  @OneToOne(() => Item, (table) => table.voucher, {
     onDelete: 'CASCADE',
     orphanedRowAction: 'delete',
   })
